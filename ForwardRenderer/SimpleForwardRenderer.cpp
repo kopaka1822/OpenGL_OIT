@@ -32,7 +32,6 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 
 	if(hasAlpha)
 	{
-		std::cerr << "drawing transparent" << std::endl;
 		// alpha blending + depth buffer read only
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

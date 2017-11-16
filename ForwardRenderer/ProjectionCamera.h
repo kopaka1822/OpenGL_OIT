@@ -8,14 +8,15 @@
 #include "Framework/IKeyReceiver.h"
 #include "Framework/ITickReveicer.h"
 #include <algorithm>
+#include "Framework/IWindowReceiver.h"
 
-class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver
+class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver, IWindowReceiver
 {
 public:
 	ProjectionCamera(float fov, float aspect)
 		:
 	m_fov(fov),
-	m_aspect(aspect)
+	m_aspect(float(Window::getWidth()) / float(Window::getHeight()))
 	{
 		calcProjection();
 	}
@@ -110,6 +111,12 @@ public:
 		if (m_shiftDown)
 			m_position -= dt * glm::vec3(0.0f, 1.0f, 0.0f);
 
+		calcProjection();
+	}
+
+	void onSizeChange(int width, int height) override
+	{
+		m_aspect = float(width) / float(height);
 		calcProjection();
 	}
 private:

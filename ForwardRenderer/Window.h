@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
+
 class IKeyReceiver;
 class IMouseReceiver;
+class IWindowReceiver;
 
 class Window
 {
@@ -12,10 +14,15 @@ public:
 	void handleEvents();
 	void swapBuffer() const;
 
+	static int getWidth();
+	static int getHeight();
+
 	static void registerKeyReceiver(IKeyReceiver* recv);
 	static void unregisterKeyReceiver(IKeyReceiver* recv);
 	static void registerMouseReceiver(IMouseReceiver* recv);
 	static void unregisterMouseReceiver(IMouseReceiver* recv);
+	static void registerWindowReceiver(IWindowReceiver* recv);
+	static void unregisterWindowReceiver(IWindowReceiver* recv);
 private:
 	struct GLFWwindow* m_handle = nullptr;
 	bool m_open = true;
