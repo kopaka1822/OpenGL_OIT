@@ -2,7 +2,8 @@
 
 VertexBuffer::~VertexBuffer()
 {
-	glDeleteBuffers(1, &m_id);
+	if(m_id)
+		glDeleteBuffers(1, &m_id);
 }
 
 void VertexBuffer::bind(GLuint bindingIndex) const

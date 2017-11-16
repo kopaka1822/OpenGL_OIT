@@ -10,6 +10,8 @@ std::unordered_map<std::string, std::shared_ptr<Texture2D>> s_cachedTextures;
 Texture2D::Texture2D(const glm::vec4& color)
 {
 	loadTexture(GL_RGBA, 1, 1, GL_RGBA, GL_FLOAT, &color);
+	if (color.a < 1.0f)
+		m_isTransparent = true;
 }
 
 static GLenum getFormatFromComponents(int numComponents)
@@ -26,15 +28,32 @@ static GLenum getFormatFromComponents(int numComponents)
 
 Texture2D::Texture2D(const std::string& filename)
 {
-	int width = 0, height = 0, numComonents = 0;
+	int width = 0, height = 0, numComponents = 0;
 	
 	stbi_set_flip_vertically_on_load(true);
-	auto data = stbi_load(filename.c_str(), &width, &height, &numComonents, 0);
+	auto data = stbi_load(filename.c_str(), &width, &height, &numComponents, 0);
 	if (!data)
 		throw std::runtime_error("cannot load texture " + filename);
 
-	auto format = getFormatFromComponents(numComonents);
+	auto format = getFormatFromComponents(numComponents);
 	loadTexture(format, width, height, format, GL_UNSIGNED_BYTE, data);
+
+	// determine if transparent
+	if(numComponents == 4)
+	{
+		auto bytes = reinterpret_cast<unsigned char*>(data);
+		auto end = bytes + width * height * numComponents;
+		while(bytes != end)
+		{
+			// alpha
+			if(bytes[3] != 255)
+			{
+				m_isTransparent = true;
+				break;
+			}
+			bytes += 4; // next pixel
+		}
+	}
 
 	stbi_image_free(data);
 }

@@ -2,8 +2,9 @@
 #include "Graphics/IModel.h"
 #include <memory>
 #include "Graphics/VertexArrayObject.h"
-#include "Graphics/IMaterial.h"
-#include "SimpleMaterial.h"
+#include "Graphics/ShaderStorageBuffer.h"
+
+class SimpleMaterial;
 
 class ObjModel : public IModel
 {
@@ -17,11 +18,11 @@ public:
 private:
 	static void tryAddingTexture(SimpleMaterial& material, const std::string& attrName, const std::string& textureName);
 private:
-	std::unique_ptr<VertexBuffer> m_vertices;
-	std::unique_ptr<VertexBuffer> m_normals;
-	std::unique_ptr<VertexBuffer> m_texcoords;
+	std::unique_ptr<ShaderStorageBuffer> m_vertices;
+	std::unique_ptr<ShaderStorageBuffer> m_normals;
+	std::unique_ptr<ShaderStorageBuffer> m_texcoords;
 	std::unique_ptr<VertexArrayObject> m_vao;
 	std::vector<std::unique_ptr<IShape>> m_shapes;
-	std::vector<std::unique_ptr<IMaterial>> m_material;
+	std::vector<std::unique_ptr<SimpleMaterial>> m_material;
 };
 

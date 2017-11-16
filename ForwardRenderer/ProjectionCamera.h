@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Framework/IKeyReceiver.h"
 #include "Framework/ITickReveicer.h"
+#include <algorithm>
 
 class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver
 {
@@ -59,6 +60,11 @@ public:
 
 	void onScroll(double x, double y) override
 	{
+		// for now mouse speed
+		if (y > 0.0)
+			m_speed *= static_cast<float>(std::pow(2, y));
+		else if (y < 0.0)
+			m_speed *= static_cast<float>(1.0 / std::pow(2, -y));
 	}
 
 	void onKeyDown(int key) override

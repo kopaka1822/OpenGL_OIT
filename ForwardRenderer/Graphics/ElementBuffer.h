@@ -33,14 +33,34 @@ public:
 	}
 	ElementBuffer(const ElementBuffer&) = delete;
 	ElementBuffer& operator=(const ElementBuffer&) = delete;
+	void swap(ElementBuffer& o) noexcept
+	{
+		std::swap(o.m_id, m_id);
+		std::swap(o.m_numElements, m_numElements);
+		std::swap(o.m_type, m_type);
+	}
+	ElementBuffer(ElementBuffer&& o) noexcept
+	{
+		swap(o);
+	}
+	ElementBuffer& operator=(ElementBuffer&& o) noexcept
+	{
+		swap(o);
+		return *this;
+	}
+	~ElementBuffer()
+	{
+		if (m_id)
+			glDeleteBuffers(1, &m_id);
+	}
 
 	void drawElements() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-		glDrawElements(GL_TRIANGLES, m_numElements, m_type, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_numElements), m_type, nullptr);
 	}
 private:
-	GLuint m_id;
+	GLuint m_id = 0;
 	size_t m_numElements;
 	GLenum m_type;
 };

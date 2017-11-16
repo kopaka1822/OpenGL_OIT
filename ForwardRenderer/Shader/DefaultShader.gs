@@ -21,20 +21,45 @@ layout(binding = 0) uniform ubo_transform
 
 void main()
 {
-	vec3 normal = normalize(cross(in_position[1] - in_position[0], in_position[2] - in_position[0]));
-	
-	// flip normal if facing away
-	vec3 midpoint = (in_position[0] + in_position[1] + in_position[2]) / 3.0;
-	vec3 viewDir = u_cameraPosition - midpoint;
-	if(dot(viewDir, normal) < 0)
-		normal = -normal;
-	
+	bool renormal = false;
 	for(int i = 0; i < 3; ++i)
+		if(length(in_normal[i]) < 0.001)
+			renormal = true;
+	
+	if(renormal)
 	{
-		out_position = in_position[i];
-		out_normal = normal;
-		out_texcoord = in_texcoord[i];
-		gl_Position = gl_in[i].gl_Position;
-		EmitVertex();
+		// calculate surface normal
+		vec3 normal = normalize(cross(in_position[1] - in_position[0], in_position[2] - in_position[0]));
+		
+		// flip normal if facing away
+		vec3 midpoint = (in_position[0] + in_position[1] + in_position[2]) / 3.0;
+		vec3 viewDir = u_cameraPosition - midpoint;
+		if(dot(viewDir, normal) < 0)
+			normal = -normal;
+		
+		for(int i = 0; i < 3; ++i)
+		{
+			out_position = in_position[i];
+			out_normal = normal;
+			out_texcoord = in_texcoord[i];
+			gl_Position = gl_in[i].gl_Position;
+			EmitVertex();
+		}
+	}
+	else
+	{
+		// pass through
+		for(int i = 0; i < 3; ++i)
+		{
+			out_position = in_position[i];
+			vec3 normal = in_normal[i];
+			if(dot(normal, /*view dir*/ u_cameraPosition - in_position[i]) < 0)
+				normal = -normal;
+				
+			out_normal = normal;
+			out_texcoord = in_texcoord[i];
+			gl_Position = gl_in[i].gl_Position;
+			EmitVertex();
+		}
 	}
 }

@@ -6,6 +6,7 @@
 #include "Graphics/ElementBuffer.h"
 #include "ObjShape.h"
 #include "SimpleMaterial.h"
+#include "SimpleMaterial.h"
 
 // attempts to retrieve the file directory
 static std::string GetDirectory(const std::string &filepath) {
@@ -56,20 +57,25 @@ ObjModel::ObjModel(const std::string& filename)
 	if (!attrib.vertices.size())
 		throw std::runtime_error("no vertices found");
 
-	// TODO make attrib binding more dynamic
 	m_vao = std::make_unique<VertexArrayObject>();
-	m_vertices.reset(new VertexBuffer(attrib.vertices, 3));
-	m_vao->addArray(0, 0, 3, GL_FLOAT);
+	m_vao->addArray(0, 0, 1, GL_INT, 0);
+	m_vao->addArray(1, 0, 1, GL_INT, sizeof(int));
+	m_vao->addArray(2, 0, 1, GL_INT, sizeof(int) * 2);
+
+	m_vertices.reset(
+		new ShaderStorageBuffer(attrib.vertices.size() * sizeof(attrib.vertices[0]), attrib.vertices.data(), 0));
 
 	if (attrib.normals.size())
 	{
-		m_normals.reset(new VertexBuffer(attrib.normals, 3));
-		m_vao->addArray(1, 1, 3, GL_FLOAT);
+		m_normals.reset(
+			new ShaderStorageBuffer(attrib.normals.size() * sizeof(attrib.normals[0]), attrib.normals.data(), 0));
+
 	}
 	if (attrib.texcoords.size())
 	{
-		m_texcoords.reset(new VertexBuffer(attrib.texcoords, 2));
-		m_vao->addArray(2, 2, 2, GL_FLOAT);
+		m_texcoords.reset(
+			new ShaderStorageBuffer(attrib.texcoords.size() * sizeof(attrib.texcoords[0]), attrib.texcoords.data(), 0));
+		
 	}
 	
 	std::cerr << "INF: creating material" << std::endl;
@@ -105,17 +111,13 @@ ObjModel::ObjModel(const std::string& filename)
 	m_shapes.reserve(shapes.size());
 	for (const auto& s : shapes)
 	{
-		std::vector<decltype(s.mesh.indices[0].normal_index)> indices;
-		indices.reserve(s.mesh.indices.size());
-		// convert the vertex, normal, texcoord indices into vertex only indices
-		for (const auto& idx : s.mesh.indices)
-			indices.push_back(idx.vertex_index);
-		
 		int materialId = materials.size() - 1;
 		if (s.mesh.material_ids.size() > 0)
 			materialId = s.mesh.material_ids[0];
 
-		m_shapes.push_back(std::make_unique<ObjShape>(indices, *m_material[materialId].get()));
+		m_shapes.push_back(std::make_unique<ObjShape>(
+			VertexBuffer(s.mesh.indices, 1), 
+			*m_material[materialId].get()));
 	}
 }
 

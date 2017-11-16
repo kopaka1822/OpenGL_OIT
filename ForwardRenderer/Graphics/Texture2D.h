@@ -28,6 +28,10 @@ public:
 	Texture2D& operator=(const Texture2D&) = delete;
 
 	void bind(GLuint index) const;
+	bool isTransparent() const
+	{
+		return m_isTransparent;
+	}
 
 	// load texture from file
 	static std::shared_ptr<Texture2D> loadFromFile(const std::string& filename);
@@ -41,4 +45,5 @@ public:
 	
 private:
 	GLuint m_id;
+	bool m_isTransparent = false;
 };

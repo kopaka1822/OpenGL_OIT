@@ -19,10 +19,29 @@ public:
 	}
 	VertexBuffer(const VertexBuffer&) = delete;
 	VertexBuffer& operator=(const VertexBuffer&) = delete;
+	void swap(VertexBuffer& o) noexcept
+	{
+		std::swap(o.m_id, m_id);
+		std::swap(o.m_size, m_size);
+		std::swap(o.m_stride, m_stride);
+	}
+	VertexBuffer(VertexBuffer&& o) noexcept
+	{
+		swap(o);
+	}
+	VertexBuffer& operator=(VertexBuffer&& o) noexcept
+	{
+		swap(o);
+		return *this;
+	}
 	~VertexBuffer();
 	void bind(GLuint bindingIndex) const;
+	size_t getNumVertices() const
+	{
+		return m_size / m_stride;
+	}
 private:
 	GLuint m_id = 0;
-	const size_t m_size;
-	const size_t m_stride;
+	size_t m_size;
+	size_t m_stride;
 };

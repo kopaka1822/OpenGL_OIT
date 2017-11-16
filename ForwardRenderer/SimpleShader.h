@@ -40,8 +40,8 @@ public:
 		// TODO only geometry if no normals
 		auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
 
-		//m_program.attach(vertex).attach(fragment).attach(geometry).link();
-		m_program.attach(vertex).attach(fragment).link();
+		m_program.attach(vertex).attach(fragment).attach(geometry).link();
+		//m_program.attach(vertex).attach(fragment).link();
 
 		m_uniformData.model = glm::mat4();
 		m_uniformData.viewProjection = glm::mat4();

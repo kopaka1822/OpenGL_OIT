@@ -20,6 +20,7 @@ Application::Application()
 	m_renderer = std::make_unique<SimpleForwardRenderer>();
 	//m_model = std::make_unique<ObjModel>("Scene/cornell_box.obj");
 	m_model = std::make_unique<ObjModel>("Scene/miguel/san-miguel-low-poly.obj");
+	//m_model = std::make_unique<ObjModel>("Scene/sponza/sponza.obj");
 	m_shader = std::make_unique<SimpleShader>();
 	m_camera = std::make_unique<ProjectionCamera>(40.0f, 1.0f);
 }
