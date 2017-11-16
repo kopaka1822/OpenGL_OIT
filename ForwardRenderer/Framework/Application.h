@@ -1,0 +1,27 @@
+#pragma once
+#include "Window.h"
+#include <memory>
+#include "Graphics/IRenderer.h"
+#include "Graphics/IModel.h"
+#include "Graphics/IShader.h"
+#include "Graphics/ICamera.h"
+
+class ITickReceiver;
+
+class Application
+{
+public:
+	Application();
+	void tick();
+
+	bool isRunning() const;
+
+	static void registerTickReceiver(ITickReceiver* recv);
+	static void unregisterTickReceiver(ITickReceiver* recv);
+private:
+	Window m_window;
+	std::unique_ptr<IRenderer> m_renderer;
+	std::unique_ptr<IModel> m_model;
+	std::unique_ptr<IShader> m_shader;
+	std::unique_ptr<ICamera> m_camera;
+};
