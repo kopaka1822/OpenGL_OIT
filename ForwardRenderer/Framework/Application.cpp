@@ -36,7 +36,7 @@ static std::unique_ptr<ICamera> makeCamera(const std::vector<Token>& args)
 	auto name = args[0].getString();
 
 	if (name == "projection")
-		return std::make_unique<ProjectionCamera>(40.0f);
+		return std::make_unique<ProjectionCamera>();
 
 	throw std::runtime_error("camera not found");
 }
@@ -72,6 +72,8 @@ Application::Application()
 
 		m_model = std::make_unique<ObjModel>(args[0].getString());
 	});
+
+	ICamera::initScripts();
 
 	m_shader = std::make_unique<SimpleShader>();
 }

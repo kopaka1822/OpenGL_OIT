@@ -13,9 +13,8 @@
 class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver, IWindowReceiver
 {
 public:
-	ProjectionCamera(float fov)
+	ProjectionCamera()
 		:
-	m_fov(fov),
 	m_aspect(float(Window::getWidth()) / float(Window::getHeight()))
 	{
 		calcProjection();
@@ -27,7 +26,7 @@ public:
 	}
 	const glm::vec3& getPosition() const override
 	{
-		return m_position;
+		return s_position;
 	}
 
 
@@ -38,11 +37,11 @@ public:
 		if(m_mouseDown)
 		{
 			// rotate
-			auto side = glm::normalize(glm::cross(m_direction, glm::vec3(0.0f, -1.0f, 0.0f)));
-			auto v = glm::rotate(glm::mat4(), float(dy) * 0.01f, side) * glm::vec4(m_direction, 0.0f);
+			auto side = glm::normalize(glm::cross(s_direction, glm::vec3(0.0f, -1.0f, 0.0f)));
+			auto v = glm::rotate(glm::mat4(), float(dy) * 0.01f, side) * glm::vec4(s_direction, 0.0f);
 			v = glm::rotate(glm::mat4(), float(dx) * 0.01f, glm::vec3(0.0f, -1.0f, 0.0f)) * v;
 
-			m_direction = glm::vec3(v.x, v.y, v.z);
+			s_direction = glm::vec3(v.x, v.y, v.z);
 			calcProjection();
 		}
 	}
@@ -99,17 +98,17 @@ public:
 	{
 		dt *= m_speed;
 		if (m_wDown)
-			m_position += dt * m_direction;
+			s_position += dt * s_direction;
 		if (m_sDown)
-			m_position -= dt * m_direction;
+			s_position -= dt * s_direction;
 		if(m_aDown)
-			m_position -= dt * glm::normalize(glm::cross(m_direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+			s_position -= dt * glm::normalize(glm::cross(s_direction, glm::vec3(0.0f, 1.0f, 0.0f)));
 		if (m_dDown)
-			m_position += dt * glm::normalize(glm::cross(m_direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+			s_position += dt * glm::normalize(glm::cross(s_direction, glm::vec3(0.0f, 1.0f, 0.0f)));
 		if(m_spaceDown)
-			m_position += dt * glm::vec3(0.0f, 1.0f, 0.0f);
+			s_position += dt * glm::vec3(0.0f, 1.0f, 0.0f);
 		if (m_shiftDown)
-			m_position -= dt * glm::vec3(0.0f, 1.0f, 0.0f);
+			s_position -= dt * glm::vec3(0.0f, 1.0f, 0.0f);
 
 		calcProjection();
 	}
@@ -122,14 +121,11 @@ public:
 private:
 	void calcProjection()
 	{
-		m_projection = glm::perspective(m_fov * 3.1415926f / 180.0f, m_aspect, 0.1f, 10000000.0f)
-			* glm::lookAt(m_position, m_position + m_direction, glm::vec3(0.0f, 1.0f, 0.0f));
+		m_projection = glm::perspective(s_fov * 3.1415926f / 180.0f, m_aspect, 0.1f, 10000000.0f)
+			* glm::lookAt(s_position, s_position + s_direction, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 private:
-	glm::vec3 m_position = glm::vec3(-1.0f,0.0f,0.0f);
-	glm::vec3 m_direction = glm::vec3(1.0f, 0.0f, 0.0f);
-	float m_fov;
 	float m_aspect = 1.0f;
 	glm::mat4 m_projection;
 

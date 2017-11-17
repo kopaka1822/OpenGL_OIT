@@ -160,6 +160,9 @@
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp">
       <Filter>Source Files\ScriptEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\ICamera.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DefaultShader.fs">

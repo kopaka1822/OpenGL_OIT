@@ -190,6 +190,7 @@
     <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="Framework\Application.cpp" />
     <ClCompile Include="Framework\DebugContext.cpp" />
+    <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\Program.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\Texture2D.cpp" />
