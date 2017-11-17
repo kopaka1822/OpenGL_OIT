@@ -13,7 +13,7 @@
 class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver, IWindowReceiver
 {
 public:
-	ProjectionCamera(float fov, float aspect)
+	ProjectionCamera(float fov)
 		:
 	m_fov(fov),
 	m_aspect(float(Window::getWidth()) / float(Window::getHeight()))

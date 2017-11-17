@@ -178,6 +178,8 @@
     <ClInclude Include="ObjModel.h" />
     <ClInclude Include="ObjShape.h" />
     <ClInclude Include="ProjectionCamera.h" />
+    <ClInclude Include="ScriptEngine\ScriptEngine.h" />
+    <ClInclude Include="ScriptEngine\Token.h" />
     <ClInclude Include="SimpleForwardRenderer.h" />
     <ClInclude Include="SimpleMaterial.h" />
     <ClInclude Include="SimpleShader.h" />
@@ -194,6 +196,7 @@
     <ClCompile Include="Graphics\VertexArrayObject.cpp" />
     <ClCompile Include="Graphics\VertexBuffer.cpp" />
     <ClCompile Include="ObjModel.cpp" />
+    <ClCompile Include="ScriptEngine\ScriptEngine.cpp" />
     <ClCompile Include="SimpleForwardRenderer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>

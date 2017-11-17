@@ -1,0 +1,6 @@
+renderer = forward
+camera = projection
+
+loadObj("Scene/cornell_box.obj")
+//loadObj("Scene/miguel/san-miguel-low-poly.obj")
+//loadObj("Scene/sponza/sponza.obj")

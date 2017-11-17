@@ -7,8 +7,39 @@
 #include "ITickReveicer.h"
 #include <algorithm>
 #include <chrono>
+#include "ScriptEngine/Token.h"
+#include "ScriptEngine/ScriptEngine.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
+
+static std::string s_rendererName;
+static std::string s_cameraName;
+
+static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
+{
+	if (args.size() == 0)
+		throw std::runtime_error("renderer name missing");
+
+	auto name = args[0].getString();
+
+	if(name == "forward")
+		return std::make_unique<SimpleForwardRenderer>();
+
+	throw std::runtime_error("renderer not found");
+}
+
+static std::unique_ptr<ICamera> makeCamera(const std::vector<Token>& args)
+{
+	if (args.size() == 0)
+		throw std::runtime_error("camera name missing");
+
+	auto name = args[0].getString();
+
+	if (name == "projection")
+		return std::make_unique<ProjectionCamera>(40.0f);
+
+	throw std::runtime_error("camera not found");
+}
 
 Application::Application()
 	:
@@ -16,13 +47,33 @@ Application::Application()
 {
 	DebugContext context;
 
-	// TODO set this via script
-	m_renderer = std::make_unique<SimpleForwardRenderer>();
-	//m_model = std::make_unique<ObjModel>("Scene/cornell_box.obj");
-	//m_model = std::make_unique<ObjModel>("Scene/miguel/san-miguel-low-poly.obj");
-	m_model = std::make_unique<ObjModel>("Scene/sponza/sponza.obj");
+	ScriptEngine::addProperty("renderer", []()
+	{
+		std::cout << "renderer: " << s_rendererName << std::endl;
+	}, [this](std::vector<Token>& args)
+	{
+		this->m_renderer = makeRenderer(args);
+		s_rendererName = args[0].getString();
+	});
+
+	ScriptEngine::addProperty("camera", []()
+	{
+		std::cout << "camera: " << s_cameraName << std::endl;
+	}, [this](std::vector<Token>& args)
+	{
+		this->m_camera = makeCamera(args);
+		s_cameraName = args[0].getString();
+	});
+
+	ScriptEngine::addFunction("loadObj", [this](std::vector<Token> args)
+	{
+		if (args.size() == 0)
+			throw std::runtime_error("filename missing");
+
+		m_model = std::make_unique<ObjModel>(args[0].getString());
+	});
+
 	m_shader = std::make_unique<SimpleShader>();
-	m_camera = std::make_unique<ProjectionCamera>(40.0f, 1.0f);
 }
 
 void Application::tick()
