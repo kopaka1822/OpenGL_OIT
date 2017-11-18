@@ -119,6 +119,9 @@
     <ClInclude Include="ScriptEngine\Token.h">
       <Filter>Source Files\ScriptEngine</Filter>
     </ClInclude>
+    <ClInclude Include="AdaptiveTransparencyRenderer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">
@@ -162,6 +165,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\ICamera.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AdaptiveTransparencyRenderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

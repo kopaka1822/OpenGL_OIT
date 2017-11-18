@@ -9,6 +9,7 @@
 #include <chrono>
 #include "ScriptEngine/Token.h"
 #include "ScriptEngine/ScriptEngine.h"
+#include "AdaptiveTransparencyRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -24,6 +25,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 
 	if(name == "forward")
 		return std::make_unique<SimpleForwardRenderer>();
+	if (name == "adaptive")
+		return std::make_unique<AdaptiveTransparencyRenderer>();
 
 	throw std::runtime_error("renderer not found");
 }
@@ -75,7 +78,7 @@ Application::Application()
 
 	ICamera::initScripts();
 
-	m_shader = std::make_unique<SimpleShader>();
+	m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
 }
 
 void Application::tick()

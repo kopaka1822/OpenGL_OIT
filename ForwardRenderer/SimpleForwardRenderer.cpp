@@ -29,7 +29,7 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 		if(!s->isTransparent())
 			s->draw(shader);
 		else hasAlpha = true;
-
+	
 	if(hasAlpha)
 	{
 		// alpha blending + depth buffer read only

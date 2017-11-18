@@ -30,19 +30,26 @@ class SimpleShader : public IShader
 		SPECULAR_BINDING = 3,
 	};
 public:
-	SimpleShader()
-		:
-	m_transformBuffer(sizeof(UniformData)),
-	m_materialBuffer(sizeof(MaterialData))
+	static Program getLinkedDefaultProgram()
 	{
 		auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
 		auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
-		// TODO only geometry if no normals
 		auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
 
-		m_program.attach(vertex).attach(fragment).attach(geometry).link();
-		//m_program.attach(vertex).attach(fragment).link();
-
+		Program p;
+		p.attach(vertex).attach(fragment).attach(geometry).link();
+		return p;
+	}
+	/**
+	 * \brief 
+	 * \param program compiled and linked shader program
+	 */
+	SimpleShader(Program program)
+		:
+	m_program(std::move(program)),
+	m_transformBuffer(sizeof(UniformData)),
+	m_materialBuffer(sizeof(MaterialData))
+	{
 		m_uniformData.model = glm::mat4();
 		m_uniformData.viewProjection = glm::mat4();
 		m_uniformData.cameraPosition = glm::vec4();
@@ -129,6 +136,7 @@ public:
 		m_materialBuffer.bind(1);
 	}
 private:
+	// TODO make uniform buffers static?
 	Program m_program;
 	UniformBuffer m_transformBuffer;
 	UniformBuffer m_materialBuffer;
