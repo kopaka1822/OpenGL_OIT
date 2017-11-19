@@ -122,6 +122,9 @@
     <ClInclude Include="AdaptiveTransparencyRenderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Texture3D.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

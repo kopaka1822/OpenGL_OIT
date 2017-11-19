@@ -1,9 +1,9 @@
-renderer = forward
+renderer = adaptive
 camera = projection
 
-camPos = 435.179, 419.801, -309.198
-camDir = -0.230138, -0.237703, 0.943681
-loadObj("Scene/cornell_box.obj")
+//camPos = 435.179, 419.801, -309.198
+//camDir = -0.230138, -0.237703, 0.943681
+//loadObj("Scene/cornell_box.obj")
 
 //camPos = 8.64316, 0.967475, 11.4518
 //camDir =   0.254568, 0.0399896, -0.96623
@@ -12,3 +12,5 @@ loadObj("Scene/cornell_box.obj")
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
+
+loadObj("Scene/test.obj")

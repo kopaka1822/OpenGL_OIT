@@ -23,7 +23,7 @@ public:
 	{}
 	float getFloat() const
 	{
-		return atof(m_value.c_str());
+		return static_cast<float>(atof(m_value.c_str()));
 	}
 	int getInt() const
 	{

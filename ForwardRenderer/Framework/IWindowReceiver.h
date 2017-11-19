@@ -1,4 +1,5 @@
 #pragma once
+#include "Window.h"
 
 // receives events about window properties
 class IWindowReceiver

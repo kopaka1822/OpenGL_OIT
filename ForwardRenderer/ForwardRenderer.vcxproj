@@ -173,6 +173,7 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\ShaderStorageBuffer.h" />
     <ClInclude Include="Graphics\Texture2D.h" />
+    <ClInclude Include="Graphics\Texture3D.h" />
     <ClInclude Include="Graphics\UniformBuffer.h" />
     <ClInclude Include="Graphics\VertexArrayObject.h" />
     <ClInclude Include="Graphics\VertexBuffer.h" />

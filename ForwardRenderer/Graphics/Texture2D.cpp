@@ -61,6 +61,11 @@ Texture2D::Texture2D(const std::string& filename)
 void Texture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, const void* data, GLsizei compressedSize)
 {
+	m_width = width;
+	m_height = height;
+	m_format = format;
+	m_type = type;
+
 	glGenTextures(1, &m_id);
 	glBindTexture(GL_TEXTURE_2D, m_id);
 
