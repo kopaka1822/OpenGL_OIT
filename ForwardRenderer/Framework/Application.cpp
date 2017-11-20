@@ -1,15 +1,15 @@
 #include "Application.h"
 #include "DebugContext.h"
-#include "SimpleForwardRenderer.h"
-#include "ObjModel.h"
-#include "SimpleShader.h"
-#include "ProjectionCamera.h"
+#include "../SimpleForwardRenderer.h"
+#include "../ObjModel.h"
+#include "../SimpleShader.h"
+#include "../ProjectionCamera.h"
 #include "ITickReveicer.h"
 #include <algorithm>
 #include <chrono>
-#include "ScriptEngine/Token.h"
-#include "ScriptEngine/ScriptEngine.h"
-#include "AdaptiveTransparencyRenderer.h"
+#include "../ScriptEngine/Token.h"
+#include "../ScriptEngine/ScriptEngine.h"
+#include "../AdaptiveTransparencyRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 

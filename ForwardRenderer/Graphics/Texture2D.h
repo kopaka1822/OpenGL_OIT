@@ -25,7 +25,7 @@ class Texture2D
 	 * \param compressedSize (for compressed) size of the compressed data. should be 0 if image is not compressed
 	 */
 	void loadTexture(GLenum internalFormat, GLsizei width, GLsizei height, GLenum format,
-		GLenum type, const void* data, GLsizei compressedSize = 0);
+		GLenum type, const void* data, bool mipmaps, GLsizei compressedSize = 0);
 public:
 	Texture2D(const Texture2D&) = delete;
 	Texture2D& operator=(const Texture2D&) = delete;
@@ -38,9 +38,9 @@ public:
 	* \param type texel type. e.g. GL_BYTE
 	* \param data image data
 	*/
-	Texture2D(GLenum format, size_t width, size_t height, GLenum type, const void* data = nullptr)
+	Texture2D(GLenum internalFormat, GLenum format, size_t width, size_t height, GLenum type, bool mipmaps, const void* data)
 	{
-		loadTexture(format, width, height, format, type, data);
+		loadTexture(internalFormat, width, height, format, type, data, mipmaps);
 	}
 
 	void update(const void* data)

@@ -4,6 +4,7 @@
 #include "SimpleShader.h"
 #include "Window.h"
 #include <iostream>
+#include <glad/glad.h>
 
 static const size_t NUM_SMAPLES = 16;
 
@@ -34,6 +35,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		return;
 
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_POLYGON_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -44,7 +46,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 
 	// opaque render pass
 
-	/*
+	
 	auto hasAlpha = false;
 	model->prepareDrawing();
 	for (const auto& s : model->getShapes())
@@ -56,25 +58,33 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 
 	if (!hasAlpha)
 		return;
-		*/
+		
 	// determine visibility function
 	
 	// reset visibility function data
-	//m_visibilityFunc->update(m_emptyVisibilityFuncData.data());
+	m_visibilityFunc->update(m_emptyVisibilityFuncData.data());
 	
 	// bind as image for building func
-	m_visibilityFunc->bindAsImage(4, GL_RG32F);
+	m_visibilityFunc->bindAsImage(0, GL_RG32F);
 	
 
-	m_mutexBuffer->update(m_mutexData.data());
+	//m_mutexBuffer->update(m_mutexData.data());
 	// bind the atomic counters
-	m_mutexBuffer->bind(5);
-	//m_mutexTexture->bindAsImage(6, GL_R32UI);
+	//m_mutexBuffer->bind(5);
+	m_mutexTexture->bindAsImage(1, GL_R32UI);
 
 	// disable depth write
 	glDepthMask(GL_FALSE);
 	// disable colors
-	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	/*auto data = m_visibilityFunc->getImageData<glm::vec2>();
+	std::cout << "before function:" << std::endl;
+	for (int i = 0; i < m_visibilityFunc->depth(); ++i)
+	{
+		int idx = i * m_visibilityFunc->depth();
+		std::cout << "depth: " << data[idx].x << " trans: " << data[idx].y << std::endl;
+	}*/
 
 	model->prepareDrawing();
 	int shapeCount = 0;
@@ -82,39 +92,33 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	{
 		if (s->isTransparent())
 		{
-			// check if image is correct
-			/*auto data = m_mutexTexture->getImageData<GLuint>();
-			for (auto d : data)
-			{
-				if (d != 0)
-					std::cerr << "one texel is not null!" << std::endl;
-			}*/
-
-			//std::cout << "s " << shapeCount << std::endl;
 			s->draw(m_shaderBuildVisz.get());
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
-			glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 			glFinish();
 			++shapeCount;
 			//auto data = m_mutexTexture->getImageData<GLuint>();
 			//auto data = m_mutexBuffer->getData<GLuint>();
-			size_t idx = 0;
 			/*for (auto d : data)
 			{
 				if (d != 0)
 					std::cout << "one texel is not one! " << idx << std::endl;
 				++idx;
 			}*/
-			GLint maxAtomics;
-			glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTERS, &maxAtomics);
-			break; // draw only one
+			/*auto data = m_visibilityFunc->getImageData<glm::vec2>();
+			std::cout << "function:" << std::endl;
+			for(int i = 0; i < m_visibilityFunc->depth(); ++i)
+			{
+				int idx = i * m_visibilityFunc->width() * m_visibilityFunc->height();
+				std::cout << "depth: " << data[idx].x << " trans: " << data[idx].y << std::endl;
+			}*/
 		}
 	}
 
+	
 	// enable colors
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
-	/*
+	
 	glDepthMask(GL_FALSE);
 	// apply visibility function
 	m_visibilityFunc->bind(5);
@@ -128,12 +132,11 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		if (s->isTransparent())
 		{
 			s->draw(m_shaderApplyVisz.get());
-			break;
 		}
 	}
 	
 	glDisable(GL_BLEND);
-	*/
+	
 	// enable depth write
 	glDepthMask(GL_TRUE);
 	//glFinish();
@@ -142,7 +145,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 {
 	// create visibility function storage
-	m_visibilityFunc.reset(new Texture3D(2, width, height, NUM_SMAPLES, GL_FLOAT, false));
+	m_visibilityFunc.reset(new Texture3D(GL_RG32F, GL_RG, width, height, NUM_SMAPLES, GL_FLOAT, false));
 	// create data for the empty function
 	m_emptyVisibilityFuncData.resize(0);
 	m_emptyVisibilityFuncData.assign(width * height * NUM_SMAPLES, glm::vec2(
@@ -152,18 +155,17 @@ void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 
 	// create buffer which ensures mutual exclusion
 	// 1 entry for each texel + 1 entry for current lock id
-	static const size_t maxAtomics = 1200;
-	size_t mutexSize = (maxAtomics + 1);
+	size_t mutexSize = width * height;
 
 	m_mutexData.resize(mutexSize);
 	memset(m_mutexData.data(), 0, mutexSize * sizeof(m_mutexData[0]));
-	m_mutexData[0] = width;
+	//m_mutexData[0] = width;
 
-	m_mutexBuffer.reset(new ShaderStorageBuffer(
-		mutexSize * sizeof(m_mutexData[0]), m_mutexData.data(), GL_DYNAMIC_STORAGE_BIT
-	));
+	//m_mutexBuffer.reset(new ShaderStorageBuffer(
+	//	mutexSize * sizeof(m_mutexData[0]), m_mutexData.data(), GL_DYNAMIC_STORAGE_BIT
+	//));
 
-	//m_mutexTexture.reset(new Texture2D(GL_RED, width, height, GL_UNSIGNED_INT,
-	//	mutexData.get()
-	//	));
+	m_mutexTexture.reset(new Texture2D(GL_R32UI, GL_RED_INTEGER,width, height, GL_UNSIGNED_INT, false,
+		m_mutexData.data()
+		));
 }

@@ -3,13 +3,14 @@
 #include "../Dependencies/stb_image.h"
 #include <unordered_map>
 #include <glm/gtx/hash.hpp>
+#include <glad/glad.h>
 
 std::unordered_map<glm::vec4, std::shared_ptr<Texture2D>> s_cachedConstantTextures;
 std::unordered_map<std::string, std::shared_ptr<Texture2D>> s_cachedTextures;
 
 Texture2D::Texture2D(const glm::vec4& color)
 {
-	loadTexture(GL_RGBA, 1, 1, GL_RGBA, GL_FLOAT, &color);
+	loadTexture(GL_RGBA, 1, 1, GL_RGBA, GL_FLOAT, &color, true);
 	if (color.a < 1.0f)
 		m_isTransparent = true;
 }
@@ -36,7 +37,7 @@ Texture2D::Texture2D(const std::string& filename)
 		throw std::runtime_error("cannot load texture " + filename);
 
 	auto format = getFormatFromComponents(numComponents);
-	loadTexture(format, width, height, format, GL_UNSIGNED_BYTE, data);
+	loadTexture(format, width, height, format, GL_UNSIGNED_BYTE, data, true);
 
 	// determine if transparent
 	if(numComponents == 4)
@@ -59,7 +60,7 @@ Texture2D::Texture2D(const std::string& filename)
 }
 
 void Texture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height,
-	GLenum format, GLenum type, const void* data, GLsizei compressedSize)
+	GLenum format, GLenum type, const void* data, bool mipmaps, GLsizei compressedSize)
 {
 	m_width = width;
 	m_height = height;
@@ -80,9 +81,14 @@ void Texture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height
 			format, type, data);
 	}
 
-	glGenerateMipmap(GL_TEXTURE_2D);
+	if(mipmaps)
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	if (mipmaps)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	else
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

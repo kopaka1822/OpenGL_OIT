@@ -1,5 +1,5 @@
 #include "ICamera.h"
-#include "ScriptEngine/ScriptEngine.h"
+#include "../ScriptEngine/ScriptEngine.h"
 #include <iostream>
 
 glm::vec3 ICamera::s_position = glm::vec3(-1.0f, 0.0f, 0.0f);

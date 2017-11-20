@@ -1,10 +1,10 @@
 #pragma once
-#include "Window.h"
+#include "../Window.h"
 #include <memory>
-#include "Graphics/IRenderer.h"
-#include "Graphics/IModel.h"
-#include "Graphics/IShader.h"
-#include "Graphics/ICamera.h"
+#include "../Graphics/IRenderer.h"
+#include "../Graphics/IModel.h"
+#include "../Graphics/IShader.h"
+#include "../Graphics/ICamera.h"
 
 class ITickReceiver;
 

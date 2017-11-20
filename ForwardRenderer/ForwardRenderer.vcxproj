@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -23,7 +23,7 @@
     <ProjectGuid>{054AD84D-075E-48CE-A1F3-21470AEC90B1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ForwardRenderer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glm;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glad\include;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glfw\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glfw\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>Dependencies\glm;Dependencies\glad\include;Dependencies\glfw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>Dependencies\glfw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -87,8 +87,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glfw\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glm;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glad\include;C:\Users\felix\Documents\Visual Studio 2017\Projects\ForwardRenderer\ForwardRenderer\Dependencies\glfw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>Dependencies\glfw\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>Dependencies\glm;Dependencies\glad\include;Dependencies\glfw\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
