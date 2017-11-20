@@ -231,7 +231,12 @@ static void openScriptFile(const std::string& filename)
 
 			// commented out?
 			if(!(line.size() >= 2 && line[0] == '/' && line[1] == '/'))
+			{
+				if (line.length() > 1) // assume it is some kind of command
+					std::cout << linecount << ": " << line << std::endl;
 				ScriptEngine::executeCommand(line);
+			}
+
 
 			linecount++;
 		}

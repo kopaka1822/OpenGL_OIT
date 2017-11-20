@@ -44,15 +44,6 @@ ObjModel::ObjModel(const std::string& filename)
 	// Append `default` material
 	materials.push_back(tinyobj::material_t());
 
-	// printing material information
-	for (size_t i = 0; i < materials.size(); i++) {
-		
-		if (materials[i].diffuse_texname.length())
-			printf("material[%d].diffuse_texname = %s\n", int(i), materials[i].diffuse_texname.c_str());
-		else
-			printf("material[%d].diffuse = %f %f %f\n", int(i), materials[i].diffuse[0], materials[i].diffuse[1], materials[i].diffuse[2]);
-	}
-
 	// make attribute buffer
 	if (!attrib.vertices.size())
 		throw std::runtime_error("no vertices found");
