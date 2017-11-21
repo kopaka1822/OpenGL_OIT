@@ -86,6 +86,17 @@ public:
 	{
 		return m_depth;
 	}
+
+	/**
+	 * \brief clears the texture with a constant color
+	 * \tparam T must be the size of one texel
+	 * \param texel clear color
+	 */
+	template<class T>
+	void clear(const T& texel)
+	{
+		glClearTexImage(m_id, 0, m_format, m_type, &texel);
+	}
 private:
 	static GLenum getFormatFromComponents(int numComponents)
 	{

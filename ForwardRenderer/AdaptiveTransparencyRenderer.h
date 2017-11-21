@@ -18,9 +18,7 @@ private:
 	std::unique_ptr<IShader> m_shaderBuildVisz;
 	std::unique_ptr<IShader> m_shaderApplyVisz;
 	std::unique_ptr<Texture3D> m_visibilityFunc;
-	std::vector<glm::vec2> m_emptyVisibilityFuncData;
-	std::unique_ptr<ShaderStorageBuffer> m_mutexBuffer;
 	std::unique_ptr<Texture2D> m_mutexTexture;
-	std::vector<GLuint> m_mutexData;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
+	const glm::vec2 m_visibilityClearColor;
 };

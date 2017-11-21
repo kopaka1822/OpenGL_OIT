@@ -8,9 +8,14 @@
 #include <glad/glad.h>
 #include <glad/glad.h>
 
-static const size_t NUM_SMAPLES = 16;
+static const size_t NUM_SMAPLES = 8;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
+	:
+m_visibilityClearColor(glm::vec2(
+	std::numeric_limits<float>::max(), // super far away
+	1.0f // visibility is still 1
+))
 {
 	// build the shaders
 	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
@@ -66,19 +71,17 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	// determine visibility function
 	
 	// reset visibility function data
-	m_visibilityFunc->update(m_emptyVisibilityFuncData.data());
-	
+	//m_visibilityFunc->update(m_emptyVisibilityFuncData.data());
+	m_visibilityFunc->clear(m_visibilityClearColor);
+
 	// bind as image for building func
 	m_visibilityFunc->bindAsImage(0, GL_RG32F);
-
 	// bind the atomic counters
 	m_mutexTexture->bindAsImage(1, GL_R32UI);
 
-	// disable depth write
-	//
-
 	// disable colors
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	// disable depth write
 	glDepthMask(GL_FALSE);
 
 	model->prepareDrawing();
@@ -98,12 +101,10 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	
 	// apply visibility function
 	m_visibilityFunc->bind(5);
-	// alpha blending + depth buffer read only
-	glEnable(GL_BLEND);
 
 	// darken the background
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-	
 	m_shaderAdjustBackground->draw();
 
 	
@@ -122,7 +123,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	
 	// enable depth write
 	glDepthMask(GL_TRUE);
-	//glFinish();
 }
 
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
@@ -130,25 +130,21 @@ void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 	// create visibility function storage
 	m_visibilityFunc.reset(new Texture3D(GL_RG32F, GL_RG, width, height, NUM_SMAPLES, GL_FLOAT, false));
 	// create data for the empty function
-	m_emptyVisibilityFuncData.resize(0);
+	/*m_emptyVisibilityFuncData.resize(0);
 	m_emptyVisibilityFuncData.assign(width * height * NUM_SMAPLES, glm::vec2(
 		std::numeric_limits<float>::max(), // super far away
 		1.0f // visibility is still 1
-	));
+	));*/
 
 	// create buffer which ensures mutual exclusion
 	// 1 entry for each texel + 1 entry for current lock id
 	size_t mutexSize = width * height;
 
-	m_mutexData.resize(mutexSize);
-	memset(m_mutexData.data(), 0, mutexSize * sizeof(m_mutexData[0]));
-	//m_mutexData[0] = width;
-
-	//m_mutexBuffer.reset(new ShaderStorageBuffer(
-	//	mutexSize * sizeof(m_mutexData[0]), m_mutexData.data(), GL_DYNAMIC_STORAGE_BIT
-	//));
+	std::vector<uint32_t> mutexData;
+	mutexData.resize(mutexSize);
+	memset(mutexData.data(), 0, mutexSize * sizeof(mutexData[0]));
 
 	m_mutexTexture.reset(new Texture2D(GL_R32UI, GL_RED_INTEGER,width, height, GL_UNSIGNED_INT, false,
-		m_mutexData.data()
+		mutexData.data()
 		));
 }
