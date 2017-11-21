@@ -5,6 +5,7 @@
 #include "Window.h"
 #include <iostream>
 #include <glad/glad.h>
+#include <glad/glad.h>
 
 static const size_t NUM_SMAPLES = 16;
 
@@ -95,7 +96,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 			s->draw(m_shaderBuildVisz.get());
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			glFinish();
-			++shapeCount;
+			//++shapeCount;
 			//auto data = m_mutexTexture->getImageData<GLuint>();
 			//auto data = m_mutexBuffer->getData<GLuint>();
 			/*for (auto d : data)
@@ -104,13 +105,16 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 					std::cout << "one texel is not one! " << idx << std::endl;
 				++idx;
 			}*/
+			
 			/*auto data = m_visibilityFunc->getImageData<glm::vec2>();
 			std::cout << "function:" << std::endl;
+			int midpoint = m_visibilityFunc->height() / 2 * m_visibilityFunc->width() + m_visibilityFunc->width() / 2;
 			for(int i = 0; i < m_visibilityFunc->depth(); ++i)
 			{
-				int idx = i * m_visibilityFunc->width() * m_visibilityFunc->height();
+				int idx = i * m_visibilityFunc->width() * m_visibilityFunc->height() + midpoint;
 				std::cout << "depth: " << data[idx].x << " trans: " << data[idx].y << std::endl;
 			}*/
+			continue;
 		}
 	}
 

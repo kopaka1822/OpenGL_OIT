@@ -1,5 +1,7 @@
 #version 450
 
+#define MAX_SAMPLES 16
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_texcoord;
@@ -39,6 +41,7 @@ layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 float g_insertedDepth;
 float g_insertedValue;
 int g_insertPos;
+vec2 g_oldFunction[MAX_SAMPLES];
 
 void lock()
 {
@@ -57,16 +60,16 @@ void unlock()
 
 float getViszDepthValue(int position)
 {
-	return imageLoad(tex_visz, ivec3(gl_FragCoord.xy, position)).x;
+	return g_oldFunction[position].x;
 }
 
 vec2 getNewViszValue(int position)
 {
 	if(position < g_insertPos)
-		return imageLoad(tex_visz, ivec3(gl_FragCoord.xy, position)).xy;
+		return g_oldFunction[position];
 	if(position == g_insertPos)
 		return vec2(g_insertedDepth, g_insertedValue);
-	return imageLoad(tex_visz, ivec3(gl_FragCoord.xy, position - 1)).xy;
+	return g_oldFunction[max(position - 1,0)];
 }
 
 float getRectArea(vec2 pos1, vec2 pos2)
@@ -74,11 +77,21 @@ float getRectArea(vec2 pos1, vec2 pos2)
 	return abs(pos2.x - pos1.x) * abs(pos1.y - pos2.y);
 }
 
+void loadFunction(int maxZ)
+{
+	for(int i = 0; i < maxZ; ++i)
+	{
+		g_oldFunction[i] = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+	}
+}
+
 void insertAlpha(float one_minus_alpha, float depth)
 {
 	g_insertedDepth = depth;
 	
 	int maxZ = imageSize(tex_visz).z;
+	// get all values from the texture
+	loadFunction(maxZ);
 	// find point to insert the fragment
 	g_insertPos = 0;
 	while(g_insertPos != maxZ && getViszDepthValue(g_insertPos) < depth)
@@ -90,16 +103,14 @@ void insertAlpha(float one_minus_alpha, float depth)
 	// value at g_insertPos ?
 	g_insertedValue = 1.0;
 	if(g_insertPos >= 1)
-		g_insertedValue = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, g_insertPos - 1)).y;
+		g_insertedValue = g_oldFunction[g_insertPos - 1].y;
 		
 	g_insertedValue *= one_minus_alpha;
 		
 	// recalculate function for bigger indices
 	for(int i = g_insertPos; i < maxZ; ++i)
 	{
-		vec4 value = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i));
-		value.y *= one_minus_alpha;
-		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), value);
+		g_oldFunction[i].y *= one_minus_alpha;
 	}
 	
 	// find smallest rectangle to insert
@@ -140,6 +151,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 		vec2 value = getNewViszValue(i + 1);
 		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(value, 0.0, 0.0));
 	}
+	
 }
 
 void main()

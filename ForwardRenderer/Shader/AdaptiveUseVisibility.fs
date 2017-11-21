@@ -36,7 +36,7 @@ float visz(float depth)
 	for(int i = 0; i < maxZ; ++i)
 	{
 		vec2 val = texelFetch(tex_visz, ivec3(gl_FragCoord.xy, i), 0).xy;
-		if ( val.x >= depth)
+		if ( depth <= val.x )
 			return previousTransmittance;
 		
 		previousTransmittance = val.y;

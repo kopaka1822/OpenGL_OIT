@@ -13,4 +13,10 @@ loadObj("Scene/miguel/san-miguel-low-poly.obj")
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
 
+//camPos = 6, 0, 0
+//camDir = -1, 0, 0
 //loadObj("Scene/test.obj")
+
+//camPos = 1470.99, 1555.5, -955.55
+//camDir = -0.752404, -0.434966, 0.494666
+//loadObj("Scene/lowpolydeer/deer.obj")
