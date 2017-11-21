@@ -162,6 +162,7 @@
     <ClInclude Include="Framework\IMouseReceiver.h" />
     <ClInclude Include="Framework\ITickReveicer.h" />
     <ClInclude Include="Framework\IWindowReceiver.h" />
+    <ClInclude Include="FullscreenQuadShader.h" />
     <ClInclude Include="Graphics\ElementBuffer.h" />
     <ClInclude Include="Graphics\ICamera.h" />
     <ClInclude Include="Graphics\IMaterial.h" />

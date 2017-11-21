@@ -4,6 +4,7 @@
 #include "Graphics/Texture3D.h"
 #include "Framework/IWindowReceiver.h"
 #include "Graphics/ShaderStorageBuffer.h"
+#include "FullscreenQuadShader.h"
 
 class AdaptiveTransparencyRenderer : public IRenderer, public IWindowReceiver
 {
@@ -21,4 +22,5 @@ private:
 	std::unique_ptr<ShaderStorageBuffer> m_mutexBuffer;
 	std::unique_ptr<Texture2D> m_mutexTexture;
 	std::vector<GLuint> m_mutexData;
+	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
 };

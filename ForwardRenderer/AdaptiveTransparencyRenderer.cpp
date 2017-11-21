@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <glad/glad.h>
+#include <glad/glad.h>
 
 static const size_t NUM_SMAPLES = 16;
 
@@ -18,14 +19,16 @@ AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
 	auto buildVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveBuildVisibility.fs");
 	auto useVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveUseVisibility.fs");
 
+	auto adjustBg = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveDarkenBackground.fs");
+
 	Program buildProgram;
 	buildProgram.attach(vertex).attach(buildVisz).link();
 	Program useProgram;
 	useProgram.attach(vertex).attach(geometry).attach(useVisz).link();
 
 	m_shaderBuildVisz = std::make_unique<SimpleShader>(std::move(buildProgram));
-
 	m_shaderApplyVisz = std::make_unique<SimpleShader>(std::move(useProgram));
+	m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
 
 	AdaptiveTransparencyRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
 }
@@ -67,25 +70,16 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	
 	// bind as image for building func
 	m_visibilityFunc->bindAsImage(0, GL_RG32F);
-	
 
-	//m_mutexBuffer->update(m_mutexData.data());
 	// bind the atomic counters
-	//m_mutexBuffer->bind(5);
 	m_mutexTexture->bindAsImage(1, GL_R32UI);
 
 	// disable depth write
-	glDepthMask(GL_FALSE);
+	//
+
 	// disable colors
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	/*auto data = m_visibilityFunc->getImageData<glm::vec2>();
-	std::cout << "before function:" << std::endl;
-	for (int i = 0; i < m_visibilityFunc->depth(); ++i)
-	{
-		int idx = i * m_visibilityFunc->depth();
-		std::cout << "depth: " << data[idx].x << " trans: " << data[idx].y << std::endl;
-	}*/
+	glDepthMask(GL_FALSE);
 
 	model->prepareDrawing();
 	int shapeCount = 0;
@@ -94,27 +88,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		if (s->isTransparent())
 		{
 			s->draw(m_shaderBuildVisz.get());
-			glMemoryBarrier(GL_ALL_BARRIER_BITS);
-			glFinish();
-			//++shapeCount;
-			//auto data = m_mutexTexture->getImageData<GLuint>();
-			//auto data = m_mutexBuffer->getData<GLuint>();
-			/*for (auto d : data)
-			{
-				if (d != 0)
-					std::cout << "one texel is not one! " << idx << std::endl;
-				++idx;
-			}*/
-			
-			/*auto data = m_visibilityFunc->getImageData<glm::vec2>();
-			std::cout << "function:" << std::endl;
-			int midpoint = m_visibilityFunc->height() / 2 * m_visibilityFunc->width() + m_visibilityFunc->width() / 2;
-			for(int i = 0; i < m_visibilityFunc->depth(); ++i)
-			{
-				int idx = i * m_visibilityFunc->width() * m_visibilityFunc->height() + midpoint;
-				std::cout << "depth: " << data[idx].x << " trans: " << data[idx].y << std::endl;
-			}*/
-			continue;
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
 	}
 
@@ -122,12 +96,17 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	// enable colors
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
-	
-	glDepthMask(GL_FALSE);
 	// apply visibility function
 	m_visibilityFunc->bind(5);
 	// alpha blending + depth buffer read only
 	glEnable(GL_BLEND);
+
+	// darken the background
+	glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+	
+	m_shaderAdjustBackground->draw();
+
+	
 	// add all values
 	glBlendFunc(GL_ONE, GL_ONE);
 	model->prepareDrawing();

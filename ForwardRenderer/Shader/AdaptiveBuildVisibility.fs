@@ -2,6 +2,8 @@
 
 #define MAX_SAMPLES 16
 
+layout(early_fragment_tests) in;
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_texcoord;
@@ -27,36 +29,15 @@ layout(binding = 1) uniform ubo_material
 layout(binding = 1) uniform sampler2D tex_dissolve;
 layout(binding = 2) uniform sampler2D tex_diffuse;
 
-// visibility function (xy = fragment xy)
-//layout(binding = 4) uniform sampler3D tex_visz; .x = depth, .y = transmittance
-layout(binding = 0, rg32f) coherent uniform image3D tex_visz;
+// visibility function (xy = fragment xy, z = depth index)
+layout(binding = 0, rg32f) coherent uniform image3D tex_visz; // .x = depth, .y = transmittance
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
-
-/*layout(binding = 5, std430) buffer ubo_atomics
-{
-	uint b_atomics[];
-};*/
 
 // globals to avoid passing arguments every time
 float g_insertedDepth;
 float g_insertedValue;
 int g_insertPos;
 vec2 g_oldFunction[MAX_SAMPLES];
-
-void lock()
-{
-	// try to write a 1 into the atomic, if it returns 0 you changed from 0 to 1, 
-	// if it returns 1 another one changed the value
-	while(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) != 0);
-}
-
-void unlock()
-{
-	// set buffer to zero
-	//memoryBarrierImage();
-	memoryBarrier();
-	imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
-}
 
 float getViszDepthValue(int position)
 {
@@ -156,32 +137,31 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 void main()
 {
-	if(gl_HelperInvocation)
-	//if(gl_SampleID != 0)
-		discard;
-		
-	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
-	
-	// take the diffuse texture alpha since its sometimes meant to be the alpha
-	dissolve *= texture(tex_diffuse, in_texcoord).a;
-	float dist = distance(u_cameraPosition, in_position);
-	if(dissolve <= 0.0)
-		discard;
-
-	bool keepWaiting = true;
-	while(keepWaiting)
+	if(!gl_HelperInvocation)
 	{
-		// aqcuire lock
-		if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
-		//if(imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 1u) == 0u)
+		float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
+		
+		// take the diffuse texture alpha since its sometimes meant to be the alpha
+		dissolve *= texture(tex_diffuse, in_texcoord).a;
+		float dist = distance(u_cameraPosition, in_position);
+		if(dissolve >= 0.0) // is it event visible?
 		{
-			insertAlpha(1.0 - dissolve, dist); 
 			
-			memoryBarrier();
-			imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
-			keepWaiting = false;
+			bool keepWaiting = true;
+			while(keepWaiting)
+			{
+				// acquire lock
+				if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
+				//if(imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 1u) == 0u)
+				{
+					insertAlpha(1.0 - dissolve, dist); 
+					
+					memoryBarrier();
+					imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
+					keepWaiting = false;
+				}
+			}
 		}
 	}
-	
 	out_fragColor = vec4(0.0);
 }
