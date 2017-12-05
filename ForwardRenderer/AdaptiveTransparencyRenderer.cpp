@@ -8,7 +8,7 @@
 #include <glad/glad.h>
 #include <glad/glad.h>
 
-static const size_t NUM_SMAPLES = 4;
+static const size_t NUM_SMAPLES = 8;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
 	:

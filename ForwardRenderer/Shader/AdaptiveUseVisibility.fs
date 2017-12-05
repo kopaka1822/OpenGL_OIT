@@ -69,7 +69,7 @@ void main()
 	vec3 color = 
 		max(vec3(0.0), ambient_col) + // ambient color
 		max(vec3(0.0), diffuse_col * cosTheta) + // diffuse color
-		max(vec3(0.0), specular_col * pow(max(0.0, HdotN), 6.0)) +
+		max(vec3(0.0), specular_col * pow(max(0.0, -HdotN), m_specular.a)) +
 		diffuse_col * 0.01;
 	
 	// determine the occlusion
