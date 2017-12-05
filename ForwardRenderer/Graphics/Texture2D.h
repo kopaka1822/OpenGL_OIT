@@ -82,6 +82,11 @@ public:
 		return res;
 	}
 
+	GLuint getId() const
+	{
+		return m_id;
+	}
+
 	// load texture from file
 	static std::shared_ptr<Texture2D> loadFromFile(const std::string& filename);
 	// create texture with a single color
@@ -89,6 +94,17 @@ public:
 
 	// empties the cache. note: textures will only be deleted if no shared pointers use them
 	static void clearCache();
+
+	/**
+	* \brief clears the texture with a constant color
+	* \tparam T must be the size of one texel
+	* \param texel clear color
+	*/
+	template<class T>
+	void clear(const T& texel)
+	{
+		glClearTexImage(m_id, 0, m_format, m_type, &texel);
+	}
 
 	~Texture2D();
 	

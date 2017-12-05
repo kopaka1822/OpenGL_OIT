@@ -128,6 +128,12 @@
     <ClInclude Include="FullscreenQuadShader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="WeightedTransparency.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Framebuffer.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">
@@ -173,6 +179,9 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="AdaptiveTransparencyRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WeightedTransparency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
