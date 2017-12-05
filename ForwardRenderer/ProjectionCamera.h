@@ -62,9 +62,9 @@ public:
 	{
 		// for now mouse speed
 		if (y > 0.0)
-			m_speed *= static_cast<float>(std::pow(2, y));
+			s_speed *= static_cast<float>(std::pow(2, y));
 		else if (y < 0.0)
-			m_speed *= static_cast<float>(1.0 / std::pow(2, -y));
+			s_speed *= static_cast<float>(1.0 / std::pow(2, -y));
 	}
 
 	void onKeyDown(int key) override
@@ -96,7 +96,7 @@ public:
 
 	void tick(float dt) override
 	{
-		dt *= m_speed;
+		dt *= s_speed;
 		if (m_wDown)
 			s_position += dt * s_direction;
 		if (m_sDown)
@@ -136,5 +136,4 @@ private:
 	bool m_dDown = false;
 	bool m_spaceDown = false;
 	bool m_shiftDown = false;
-	float m_speed = 0.1f;
 };

@@ -5,12 +5,25 @@
 glm::vec3 ICamera::s_position = glm::vec3(-1.0f, 0.0f, 0.0f);
 glm::vec3 ICamera::s_direction = glm::vec3(1.0f, 0.0f, 0.0f);
 float ICamera::s_fov = 40.0f;
+float ICamera::s_speed = 0.1f;
 
 void ICamera::initScripts()
 {
 	static bool bInit = false;
 	if (bInit) return;
 	bInit = true;
+
+	ScriptEngine::addProperty("camSpeed", []()
+	{
+		std::cout << "speed: " << s_speed << std::endl;
+	}, [](std::vector<Token> args)
+	{
+		if (args.size() == 0)
+			throw std::runtime_error("please provide speed");
+		if (args[0].getType() != Token::Type::Number)
+			throw std::runtime_error("please provide speed as number");
+		s_speed = args[0].getFloat();
+	});
 
 	ScriptEngine::addProperty("camFov", []()
 	{
