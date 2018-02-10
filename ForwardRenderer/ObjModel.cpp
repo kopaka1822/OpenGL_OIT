@@ -104,7 +104,12 @@ ObjModel::ObjModel(const std::string& filename)
 	{
 		int materialId = materials.size() - 1;
 		if (s.mesh.material_ids.size() > 0)
+		{
 			materialId = s.mesh.material_ids[0];
+			if(materialId < 0)
+				materialId = materials.size() - 1;
+		}
+
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
 			VertexBuffer(s.mesh.indices, 1), 
