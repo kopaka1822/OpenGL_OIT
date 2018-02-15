@@ -5,10 +5,8 @@
 #include "Window.h"
 #include <iostream>
 #include <glad/glad.h>
-#include <glad/glad.h>
-#include <glad/glad.h>
 
-static const size_t NUM_SMAPLES = 8;
+static const size_t NUM_SMAPLES = 16;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
 	:
@@ -129,12 +127,6 @@ void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 {
 	// create visibility function storage
 	m_visibilityFunc.reset(new Texture3D(GL_RG32F, GL_RG, width, height, NUM_SMAPLES, GL_FLOAT, false));
-	// create data for the empty function
-	/*m_emptyVisibilityFuncData.resize(0);
-	m_emptyVisibilityFuncData.assign(width * height * NUM_SMAPLES, glm::vec2(
-		std::numeric_limits<float>::max(), // super far away
-		1.0f // visibility is still 1
-	));*/
 
 	// create buffer which ensures mutual exclusion
 	// 1 entry for each texel + 1 entry for current lock id

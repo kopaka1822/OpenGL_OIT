@@ -10,6 +10,7 @@
 #include "../ScriptEngine/Token.h"
 #include "../ScriptEngine/ScriptEngine.h"
 #include "../AdaptiveTransparencyRenderer.h"
+#include "../WeightedTransparency.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -27,6 +28,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<SimpleForwardRenderer>();
 	if (name == "adaptive")
 		return std::make_unique<AdaptiveTransparencyRenderer>();
+	if (name == "weighted_oit")
+		return std::make_unique<WeightedTransparency>();
 
 	throw std::runtime_error("renderer not found");
 }

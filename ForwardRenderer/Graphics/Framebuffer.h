@@ -27,6 +27,20 @@ public:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
 	}
 
+	void attachDepthTarget(const Texture2D& depth)
+	{
+		assert(!m_hasDepth);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth.getId(), 0);
+
+		m_hasDepth = true;
+	}
+
+	static void unbind()
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+
 	void validate()
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
@@ -39,6 +53,7 @@ public:
 	}
 
 private:
-	GLuint m_id;
+	GLuint m_id = 0;
 	std::vector<GLenum> m_drawBuffers;
+	bool m_hasDepth = false;
 };
