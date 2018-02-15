@@ -45,6 +45,7 @@ float clampZ(float z)
 float weight(float z, float alpha)
 {
 	return alpha * max(10e-2, min(3e3, 0.03 / (10e-5 + pow(abs(z) / 200.0, 4.0))));
+	//return alpha * pow(z, -4.0);
 }
 
 void main()
@@ -76,6 +77,6 @@ void main()
 	float dist = distance(in_position, u_cameraPosition);
 	float w = weight(dist, dissolve);
 	
-	out_fragColor0 = vec4(color * w, dissolve);
-	out_fragColor1 = dissolve * w;
+	out_fragColor0 = vec4(color * dissolve * w, dissolve);
+	out_fragColor1 = w * dissolve;
 }

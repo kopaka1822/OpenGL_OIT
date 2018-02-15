@@ -4,7 +4,7 @@ camera = projection
 //camPos = 8.64316, 0.967475, 11.4518
 //camDir =   0.254568, 0.0399896, -0.96623
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//camSpeed = 0.01
+//camSpeed = 0.001
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637
@@ -12,18 +12,18 @@ camera = projection
 
 //loadObj("Scene/test.obj")
 
-//camPos = 1862.61, 1201.44, -1416
-//camDir = -0.830251, -0.247404, 0.499476
-//loadObj("Scene/lowpolydeer/deer.obj")
+camPos = 1862.61, 1201.44, -1416
+camDir = -0.830251, -0.247404, 0.499476
+loadObj("Scene/lowpolydeer/deer.obj")
 
 //loadObj("Scene/medival_village_colored.obj")
 //camPos = 45.3821, 11.8453, -69.1258
 //camDir = 0.770862, -0.276354, 0.573937
 
-loadObj("Scene/KingsTreasure.obj")
-camPos = 0.178053, 0.066108, 0.389488
-camDir = 0.0688572, -0.0914645, -0.993427
-camSpeed =  0.0015625
+//loadObj("Scene/KingsTreasure.obj")
+//camPos = 0.178053, 0.066108, 0.389488
+//camDir = 0.0688572, -0.0914645, -0.993427
+//camSpeed =  0.0015625
 
 //loadObj("Scene/avent/avent.obj")
 //camPos = -5.36067, 1.70059, -1.34476
