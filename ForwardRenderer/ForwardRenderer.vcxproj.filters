@@ -134,6 +134,10 @@
     <ClInclude Include="Graphics\Framebuffer.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="LinkedVisibility.h" />
+    <ClInclude Include="Framework\AtomicCounterBuffer.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">
@@ -182,6 +186,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WeightedTransparency.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedVisibility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

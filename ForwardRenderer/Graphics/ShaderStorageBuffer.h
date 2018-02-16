@@ -53,6 +53,6 @@ public:
 	}
 
 private:
-	GLuint m_id;
+	GLuint m_id = 0;
 	size_t m_size;
 };

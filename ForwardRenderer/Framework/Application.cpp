@@ -11,6 +11,7 @@
 #include "../ScriptEngine/ScriptEngine.h"
 #include "../AdaptiveTransparencyRenderer.h"
 #include "../WeightedTransparency.h"
+#include "../LinkedVisibility.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -19,10 +20,10 @@ static std::string s_cameraName;
 
 static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 {
-	if (args.size() == 0)
+	if (args.empty())
 		throw std::runtime_error("renderer name missing");
 
-	auto name = args[0].getString();
+	const auto name = args[0].getString();
 
 	if(name == "forward")
 		return std::make_unique<SimpleForwardRenderer>();
@@ -30,16 +31,18 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<AdaptiveTransparencyRenderer>();
 	if (name == "weighted_oit")
 		return std::make_unique<WeightedTransparency>();
+	if (name == "linked")
+		return std::make_unique<LinkedVisibility>();
 
 	throw std::runtime_error("renderer not found");
 }
 
 static std::unique_ptr<ICamera> makeCamera(const std::vector<Token>& args)
 {
-	if (args.size() == 0)
+	if (args.empty())
 		throw std::runtime_error("camera name missing");
 
-	auto name = args[0].getString();
+	const auto name = args[0].getString();
 
 	if (name == "projection")
 		return std::make_unique<ProjectionCamera>();
