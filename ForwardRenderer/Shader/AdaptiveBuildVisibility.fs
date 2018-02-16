@@ -137,7 +137,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 void main()
 {
-	if(!gl_HelperInvocation)
+	//if(!gl_HelperInvocation)
 	{
 		float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
 		
