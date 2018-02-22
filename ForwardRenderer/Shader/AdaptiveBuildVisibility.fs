@@ -137,29 +137,27 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 void main()
 {
-	//if(!gl_HelperInvocation)
+
+	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
+	
+	// take the diffuse texture alpha since its sometimes meant to be the alpha
+	dissolve *= texture(tex_diffuse, in_texcoord).a;
+	float dist = distance(u_cameraPosition, in_position);
+	if(dissolve >= 0.0 && !gl_HelperInvocation) // is it event visible?
 	{
-		float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
 		
-		// take the diffuse texture alpha since its sometimes meant to be the alpha
-		dissolve *= texture(tex_diffuse, in_texcoord).a;
-		float dist = distance(u_cameraPosition, in_position);
-		if(dissolve >= 0.0) // is it event visible?
+		bool keepWaiting = true;
+		while(keepWaiting)
 		{
-			
-			bool keepWaiting = true;
-			while(keepWaiting)
+			// acquire lock
+			if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
+			//if(imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 1u) == 0u)
 			{
-				// acquire lock
-				if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
-				//if(imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 1u) == 0u)
-				{
-					insertAlpha(1.0 - dissolve, dist); 
-					
-					memoryBarrier();
-					imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
-					keepWaiting = false;
-				}
+				insertAlpha(1.0 - dissolve, dist); 
+				
+				memoryBarrier();
+				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
+				keepWaiting = false;
 			}
 		}
 	}
