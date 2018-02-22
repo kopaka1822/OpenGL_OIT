@@ -1,4 +1,4 @@
-#version 450
+#version 450 core
 
 #define MAX_SAMPLES 32
 

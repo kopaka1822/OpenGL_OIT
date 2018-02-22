@@ -1,6 +1,4 @@
-#version 450
-
-#define MAX_SAMPLES 32
+#version 440 core
 
 layout(early_fragment_tests) in;
 
@@ -55,23 +53,10 @@ void main()
 	float dist = distance(u_cameraPosition, in_position);
 	if(dissolve >= 0.0) // is it even visible?
 	{
-		if(gl_HelperInvocation) return;
-		
 		uint index = atomicCounterIncrement(atomic_counter) + 1u;
 		visz_data[index-1].invAlpha = 1.0 - dissolve;
 		visz_data[index-1].depth = dist;
-		uint next = 0;
-		uint prev = 1;
-		
-		
-		do
-		{
-			// get current pointer
-			next = imageAtomicAdd(tex_atomics, ivec2(gl_FragCoord.xy), 0);
-			visz_data[index-1].next = next;
-			prev = imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), next, index);
-			
-		} while(next != prev);
+		visz_data[index-1].next = imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), index);
 	}
 	
 	out_fragColor = vec4(0.0);
