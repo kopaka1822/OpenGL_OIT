@@ -3,9 +3,13 @@
 #include <iostream>
 #include <regex>
 #include <fstream>
+#include <queue>
 
 std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
 std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
+static size_t s_curIteration = 0;
+static size_t s_waitIterations = 0;
+std::queue<std::string> s_commandQueue;
 
 void ScriptEngine::addFunction(const std::string& name, SetterT callback)
 {
@@ -170,17 +174,25 @@ void ScriptEngine::executeCommand(const std::string& command)
 	auto tokens = getTokens(command);
 
 	// determine which kind of command
-	if (tokens.size() == 0)
+	if (tokens.empty())
 		return;
 
 	if (tokens[0].getType() != Token::Type::Identifier)
-		throw std::runtime_error("expected idetifier");
+		throw std::runtime_error("expected identifier");
+
+	if (s_waitIterations)
+	{
+		// just enqueue command
+		std::cout << "script: queued " << command << '\n';
+		s_commandQueue.push(command);
+		return;
+	}
 
 	// function, get or set?
 	if(tokens.size() == 1)
 	{
 		// this is a getter
-		auto it = s_properties.find(tokens[0].getString());
+		const auto it = s_properties.find(tokens[0].getString());
 		if (it == s_properties.end())
 			throw std::runtime_error("cannot find property " + tokens[0].getString());
 		it->second.first();
@@ -200,7 +212,7 @@ void ScriptEngine::executeCommand(const std::string& command)
 	if(tokens[1].getType() == Token::Type::BracketOpen)
 	{
 		// this is a function
-		auto it = s_functions.find(tokens[0].getString());
+		const auto it = s_functions.find(tokens[0].getString());
 		if (it == s_functions.end())
 			throw std::runtime_error("cannot find property " + tokens[0].getString());
 
@@ -210,6 +222,31 @@ void ScriptEngine::executeCommand(const std::string& command)
 	}
 	
 	throw std::runtime_error("expected '=' or '(' but found: " + tokens[1].getString());
+}
+
+void ScriptEngine::iteration()
+{
+	// execute enqueued commands
+	while (!s_commandQueue.empty() && !s_waitIterations)
+	{
+		try
+		{
+			const auto cmd = s_commandQueue.front();
+			s_commandQueue.pop();
+			std::cout << "script: dequeued " << cmd << '\n';
+			executeCommand(cmd);
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << "ERR script: " << e.what() << '\n';
+		}
+	}
+	
+
+	++s_curIteration;
+
+	if (s_waitIterations)
+		--s_waitIterations;
 }
 
 static void openScriptFile(const std::string& filename)
@@ -255,6 +292,14 @@ void ScriptEngine::init()
 	{
 		for (const auto& t : tokens)
 			openScriptFile(t.getString());
+	});
+
+	addFunction("waitIterations", [](const std::vector<Token> tokens)
+	{
+		if (tokens.empty())
+			throw std::runtime_error("expected iterations");
+
+		s_waitIterations = size_t(tokens.at(0).getInt());
 	});
 
 	addProperty("help", []()

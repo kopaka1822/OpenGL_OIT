@@ -27,4 +27,6 @@ public:
 
 	// executes a single command
 	static void executeCommand(const std::string& command);
+	// increases the iteration count
+	static void iteration();
 };

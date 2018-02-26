@@ -1,8 +1,15 @@
 renderer=forward
+waitIterations(100)
 execute(profile.script)
+
 renderer=adaptive
+waitIterations(100)
 execute(profile.script)
+
 renderer=weighted_oit
+waitIterations(100)
 execute(profile.script)
+
 renderer=linked
+waitIterations(100)
 execute(profile.script)
