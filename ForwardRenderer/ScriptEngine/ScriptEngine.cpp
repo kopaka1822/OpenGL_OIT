@@ -9,7 +9,7 @@ std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
 std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
 static size_t s_curIteration = 0;
 static size_t s_waitIterations = 0;
-std::queue<std::string> s_commandQueue;
+std::queue<std::pair<std::string, std::string>> s_commandQueue;
 
 void ScriptEngine::addFunction(const std::string& name, SetterT callback)
 {
@@ -131,7 +131,7 @@ std::vector<Token> getTokens(const std::string& command)
  * undefined if no end type is required (property)
  * \return 
  */
-std::vector<Token> getArgumentList(const std::vector<Token>& tokens, int start, Token::Type endType)
+std::vector<Token> getArgumentList(const std::vector<Token>& tokens, size_t start, Token::Type endType)
 {
 	std::vector<Token> args;
 	
@@ -169,7 +169,7 @@ std::vector<Token> getArgumentList(const std::vector<Token>& tokens, int start, 
 	return args;
 }
 
-void ScriptEngine::executeCommand(const std::string& command)
+static void s_executeCommand(const std::string& command, const std::string* const prefix)
 {
 	auto tokens = getTokens(command);
 
@@ -183,13 +183,15 @@ void ScriptEngine::executeCommand(const std::string& command)
 	if (s_waitIterations)
 	{
 		// just enqueue command
-		std::cout << "script: queued " << command << '\n';
-		s_commandQueue.push(command);
+		//std::cout << "script: queued " << command << '\n';
+		s_commandQueue.push(std::make_pair(prefix?(*prefix):("script "), command));
 		return;
 	}
+	if (prefix)
+		std::cout << *prefix << " " << command << '\n';
 
 	// function, get or set?
-	if(tokens.size() == 1)
+	if (tokens.size() == 1)
 	{
 		// this is a getter
 		const auto it = s_properties.find(tokens[0].getString());
@@ -198,7 +200,7 @@ void ScriptEngine::executeCommand(const std::string& command)
 		it->second.first();
 		return;
 	}
-	if(tokens[1].getType() == Token::Type::Assign)
+	if (tokens[1].getType() == Token::Type::Assign)
 	{
 		// this is a property
 		auto it = s_properties.find(tokens[0].getString());
@@ -209,7 +211,7 @@ void ScriptEngine::executeCommand(const std::string& command)
 
 		return;
 	}
-	if(tokens[1].getType() == Token::Type::BracketOpen)
+	if (tokens[1].getType() == Token::Type::BracketOpen)
 	{
 		// this is a function
 		const auto it = s_functions.find(tokens[0].getString());
@@ -220,9 +222,20 @@ void ScriptEngine::executeCommand(const std::string& command)
 
 		return;
 	}
-	
+
 	throw std::runtime_error("expected '=' or '(' but found: " + tokens[1].getString());
 }
+
+void ScriptEngine::executeCommand(const std::string& command)
+{
+	s_executeCommand(command, nullptr);
+}
+
+void ScriptEngine::executeCommand(const std::string& prefix, const std::string& command)
+{
+	s_executeCommand(command, &prefix);
+}
+
 
 void ScriptEngine::iteration()
 {
@@ -233,8 +246,8 @@ void ScriptEngine::iteration()
 		{
 			const auto cmd = s_commandQueue.front();
 			s_commandQueue.pop();
-			std::cout << "script: dequeued " << cmd << '\n';
-			executeCommand(cmd);
+			std::cout << cmd.first << " " << cmd.second << '\n';
+			executeCommand(cmd.second);
 		}
 		catch (const std::exception& e)
 		{
@@ -269,9 +282,7 @@ static void openScriptFile(const std::string& filename)
 			// commented out?
 			if(!(line.size() >= 2 && line[0] == '/' && line[1] == '/'))
 			{
-				if (line.length() > 1) // assume it is some kind of command
-					std::cout << linecount << ": " << line << std::endl;
-				ScriptEngine::executeCommand(line);
+				ScriptEngine::executeCommand(filename + " " + std::to_string(linecount) + ":" , line);
 			}
 
 
