@@ -102,18 +102,18 @@ ObjModel::ObjModel(const std::string& filename)
 	m_shapes.reserve(shapes.size());
 	for (const auto& s : shapes)
 	{
-		int materialId = materials.size() - 1;
-		if (s.mesh.material_ids.size() > 0)
+		int materialId = int(materials.size()) - 1;
+		if (!s.mesh.material_ids.empty())
 		{
 			materialId = s.mesh.material_ids[0];
 			if(materialId < 0)
-				materialId = materials.size() - 1;
+				materialId = int(materials.size()) - 1;
 		}
 
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
 			VertexBuffer(s.mesh.indices, 1), 
-			*m_material[materialId].get()));
+			*m_material[materialId]));
 	}
 }
 

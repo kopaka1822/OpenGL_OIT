@@ -18,10 +18,15 @@ public:
 
 	static void registerTickReceiver(ITickReceiver* recv);
 	static void unregisterTickReceiver(ITickReceiver* recv);
+
+private:
+	static void makeScreenshot(const std::string& filename);
+
 private:
 	Window m_window;
 	std::unique_ptr<IRenderer> m_renderer;
 	std::unique_ptr<IModel> m_model;
 	std::unique_ptr<IShader> m_shader;
 	std::unique_ptr<ICamera> m_camera;
+	std::string m_screenshotDestination;
 };

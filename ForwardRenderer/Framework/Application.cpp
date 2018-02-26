@@ -14,6 +14,9 @@
 #include "../LinkedVisibility.h"
 #include "Profiler.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../Dependencies/stb_image_write.h"
+
 std::vector<ITickReceiver*> s_tickReceiver;
 
 static std::string s_rendererName;
@@ -75,12 +78,20 @@ Application::Application()
 		s_cameraName = args[0].getString();
 	});
 
-	ScriptEngine::addFunction("loadObj", [this](const std::vector<Token> args)
+	ScriptEngine::addFunction("loadObj", [this](const std::vector<Token>& args)
 	{
 		if (args.empty())
 			throw std::runtime_error("filename missing");
 
 		m_model = std::make_unique<ObjModel>(args[0].getString());
+	});
+
+	ScriptEngine::addFunction("makeScreenshot",[this](const std::vector<Token>& args)
+	{
+		if (args.empty())
+			throw std::runtime_error("filename missing");
+
+		m_screenshotDestination = args.at(0).getString();
 	});
 
 	ICamera::initScripts();
@@ -104,6 +115,12 @@ void Application::tick()
 	if (m_renderer)
 		m_renderer->render(m_model.get(), m_shader.get(), m_camera.get());
 	
+	if(!m_screenshotDestination.empty())
+	{
+		makeScreenshot(m_screenshotDestination);
+		m_screenshotDestination.clear();
+	}
+
 	m_window.swapBuffer();
 
 	// adjust window title
@@ -128,4 +145,22 @@ void Application::unregisterTickReceiver(ITickReceiver* recv)
 		return (i == recv);
 	});
 	s_tickReceiver.erase(end, s_tickReceiver.end());
+}
+
+void Application::makeScreenshot(const std::string& filename)
+{
+	const auto width = Window::getWidth();
+	const auto height = Window::getHeight();
+	std::vector<uint8_t> data;
+	data.resize(width * height * 3);
+	
+	// obtain data from backbuffer
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+
+	stbi_flip_vertically_on_write(1);
+	const auto res = stbi_write_png(filename.c_str(), width, height, 3, data.data(), 0);
+	if(!res)
+		std::cerr << "could not save screenshot\n";
+	else
+		std::cout << "saved " << filename << '\n';
 }

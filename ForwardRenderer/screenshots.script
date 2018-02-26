@@ -1,0 +1,15 @@
+renderer=forward
+makeScreenshot("screenshots/forward.png")
+waitIterations(1)
+
+renderer=adaptive
+makeScreenshot("screenshots/adaptive.png")
+waitIterations(1)
+
+renderer=linked
+makeScreenshot("screenshots/linked.png")
+waitIterations(1)
+
+renderer=weighted_oit
+makeScreenshot("screenshots/weighted.png")
+waitIterations(1)

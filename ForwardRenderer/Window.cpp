@@ -77,8 +77,8 @@ Window::Window(size_t width, size_t height, const std::string& title)
 	glfwWindowHint(GLFW_DEPTH_BITS, 32);
 	glfwWindowHint(GLFW_STENCIL_BITS, 0);
 	m_handle = glfwCreateWindow(static_cast<int>(width), static_cast<int>(height), title.c_str(), nullptr, nullptr);
-	s_windowWidth = width;
-	s_windowHeight = height;
+	s_windowWidth = int(width);
+	s_windowHeight = int(height);
 	if (!m_handle) throw std::runtime_error("Window creation failed!");
 
 	glfwMakeContextCurrent(m_handle);
