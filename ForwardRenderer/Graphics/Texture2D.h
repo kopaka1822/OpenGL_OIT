@@ -32,13 +32,14 @@ public:
 
 	/**
 	* \brief 
+	* \param internalFormat
 	* \param format format of pixel data. e.g. GL_RGBA
 	* \param width width in texel
 	* \param height height in texel
 	* \param type texel type. e.g. GL_BYTE
 	* \param data image data
 	*/
-	Texture2D(GLenum internalFormat, GLenum format, size_t width, size_t height, GLenum type, bool mipmaps, const void* data)
+	Texture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, GLenum type, bool mipmaps, const void* data)
 	{
 		loadTexture(internalFormat, width, height, format, type, data, mipmaps);
 	}
@@ -109,8 +110,8 @@ public:
 	~Texture2D();
 	
 private:
-	GLuint m_id;
+	GLuint m_id = 0;
 	bool m_isTransparent = false;
-	size_t m_width, m_height;
-	GLenum m_format, m_type;
+	GLsizei m_width = 0, m_height = 0;
+	GLenum m_format = 0, m_type = 0;
 };

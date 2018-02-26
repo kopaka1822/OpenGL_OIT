@@ -9,7 +9,7 @@ class GpuTimer
 {
 public:
 	// generate some queries
-	GpuTimer(size_t capacity = 5)
+	GpuTimer(GLsizei capacity = 5)
 	{
 		m_freeQueries.resize(5);
 		glGenQueries(capacity, m_freeQueries.data());
@@ -26,7 +26,7 @@ public:
 			m_freeQueries.push_back(m_currentQuery);
 			m_currentQuery = 0;
 		}
-		glDeleteQueries(m_freeQueries.size(), m_freeQueries.data());
+		glDeleteQueries(GLsizei(m_freeQueries.size()), m_freeQueries.data());
 		m_freeQueries.clear();
 	}
 	void begin()

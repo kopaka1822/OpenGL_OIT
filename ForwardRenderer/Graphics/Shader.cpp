@@ -7,7 +7,7 @@ Shader::Shader(GLenum type, const std::string& source)
 	m_type = type;
 
 	// load source
-	const char const* src = source.c_str();
+	const char* const src = source.c_str();
 	glShaderSource(m_id, 1, &src, nullptr);
 
 	// compile

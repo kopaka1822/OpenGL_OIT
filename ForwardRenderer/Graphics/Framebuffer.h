@@ -17,9 +17,9 @@ public:
 	void attachColorTarget(const Texture2D& texture, size_t index)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture.getId(), 0);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GLenum(GL_COLOR_ATTACHMENT0 + index), texture.getId(), 0);
 
-		m_drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
+		m_drawBuffers.push_back(GLenum(GL_COLOR_ATTACHMENT0 + index));
 	}
 
 	void bind()
