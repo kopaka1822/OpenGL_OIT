@@ -8,7 +8,7 @@
 #include "Framework/Profiler.h"
 #include <numeric>
 
-static const size_t NUM_SMAPLES = 4;
+static const size_t NUM_SMAPLES = 16;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
 	:
@@ -90,9 +90,10 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 			if (s->isTransparent())
 			{
 				s->draw(m_shaderBuildVisz.get());
-				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+				//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			}
 		}
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 	m_timer[T_BUILD_VIS].end();
 	

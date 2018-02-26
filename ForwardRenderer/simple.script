@@ -1,4 +1,4 @@
-renderer = linked
+renderer = adaptive
 camera = projection
 
 //camPos = 8.64316, 0.967475, 11.4518
@@ -30,3 +30,8 @@ loadObj("Scene/avent/avent.obj")
 camPos = -5.36067, 1.70059, -1.34476
 camDir = 0.920325, -0.257081, 0.294805
 camSpeed = 0.02
+
+//execute(profile_all.script)
+//profileType = average
+//waitIterations(1000)
+//execute(profile.script)

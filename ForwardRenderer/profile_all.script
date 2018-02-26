@@ -1,4 +1,4 @@
-profileType = min
+profileType = average
 
 renderer=forward
 waitIterations(1000)

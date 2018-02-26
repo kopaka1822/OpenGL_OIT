@@ -1,6 +1,6 @@
 #version 450 core
 
-#define MAX_SAMPLES 32
+#define MAX_SAMPLES 16
 
 layout(early_fragment_tests) in;
 
@@ -30,7 +30,7 @@ layout(binding = 1) uniform sampler2D tex_dissolve;
 layout(binding = 2) uniform sampler2D tex_diffuse;
 
 // visibility function (xy = fragment xy, z = depth index)
-layout(binding = 0, rg32f) coherent uniform image3D tex_visz; // .x = depth, .y = transmittance
+layout(binding = 0, rg32f) volatile uniform image3D tex_visz; // .x = depth, .y = transmittance
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 
 // globals to avoid passing arguments every time
