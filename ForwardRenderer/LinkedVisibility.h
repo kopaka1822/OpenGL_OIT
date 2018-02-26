@@ -5,6 +5,7 @@
 #include "Graphics/ShaderStorageBuffer.h"
 #include "FullscreenQuadShader.h"
 #include "Framework/AtomicCounterBuffer.h"
+#include "Graphics/GpuTimer.h"
 
 class LinkedVisibility : public IRenderer, public IWindowReceiver
 {
@@ -21,4 +22,5 @@ private:
 	std::unique_ptr<ShaderStorageBuffer> m_buffer;
 	std::unique_ptr<Texture2D> m_mutexTexture;
 	std::unique_ptr<AtomicCounterBuffer> m_counter;
+	GpuTimer m_timer;
 };

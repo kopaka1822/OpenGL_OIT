@@ -248,7 +248,7 @@ static void openScriptFile(const std::string& filename)
 	}
 }
 
-void ScriptEngine::Init()
+void ScriptEngine::init()
 {
 	addFunction("execute", 
 		[](std::vector<Token> tokens)
@@ -260,11 +260,11 @@ void ScriptEngine::Init()
 	addProperty("help", []()
 	{
 		// list everything
-		std::cout << "functions: " << std::endl;
+		std::cout << "functions: " << '\n';
 		for (const auto& f : s_functions)
-			std::cout << f.first << "(...)" << std::endl;
-		std::cout << "properties: " << std::endl;
+			std::cout << "   " << f.first << "(...)" << '\n';
+		std::cout << "properties: " << '\n';
 		for (const auto& p : s_properties)
-			std::cout << p.first << std::endl;
+			std::cout << "   " << p.first << '\n';
 	});
 }

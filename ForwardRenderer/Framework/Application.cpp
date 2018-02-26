@@ -12,6 +12,7 @@
 #include "../AdaptiveTransparencyRenderer.h"
 #include "../WeightedTransparency.h"
 #include "../LinkedVisibility.h"
+#include "Profiler.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -74,9 +75,9 @@ Application::Application()
 		s_cameraName = args[0].getString();
 	});
 
-	ScriptEngine::addFunction("loadObj", [this](std::vector<Token> args)
+	ScriptEngine::addFunction("loadObj", [this](const std::vector<Token> args)
 	{
-		if (args.size() == 0)
+		if (args.empty())
 			throw std::runtime_error("filename missing");
 
 		m_model = std::make_unique<ObjModel>(args[0].getString());
@@ -104,6 +105,10 @@ void Application::tick()
 		m_renderer->render(m_model.get(), m_shader.get(), m_camera.get());
 	
 	m_window.swapBuffer();
+
+	// adjust window title
+	auto profile = Profiler::getActive();
+	m_window.setTitle("ForwardRenderer " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile)));
 }
 
 bool Application::isRunning() const

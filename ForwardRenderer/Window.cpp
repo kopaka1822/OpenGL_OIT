@@ -112,6 +112,11 @@ void Window::swapBuffer() const
 	glfwSwapBuffers(m_handle);
 }
 
+void Window::setTitle(const std::string& title)
+{
+	glfwSetWindowTitle(m_handle, title.c_str());
+}
+
 int Window::getWidth()
 {
 	return s_windowWidth;

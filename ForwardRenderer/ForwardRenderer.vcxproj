@@ -163,6 +163,7 @@
     <ClInclude Include="Framework\IMouseReceiver.h" />
     <ClInclude Include="Framework\ITickReveicer.h" />
     <ClInclude Include="Framework\IWindowReceiver.h" />
+    <ClInclude Include="Framework\Profiler.h" />
     <ClInclude Include="FullscreenQuadShader.h" />
     <ClInclude Include="Graphics\ElementBuffer.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="Framework\Application.cpp" />
     <ClCompile Include="Framework\DebugContext.cpp" />
+    <ClCompile Include="Framework\Profiler.cpp" />
     <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\Program.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />

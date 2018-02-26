@@ -2,6 +2,7 @@
 #include "Graphics/Shader.h"
 #include "Graphics/Program.h"
 #include "SimpleShader.h"
+#include "Framework/Profiler.h"
 
 static const size_t NODES_PER_PIXEL = 16;
 
@@ -35,6 +36,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 	if (!model || !shader || !camera)
 		return;
 	
+	m_timer.begin();
 	m_mutexTexture->clear(uint32_t(0));
 	m_counter->clear();
 
@@ -108,6 +110,10 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 
 	// enable depth write
 	glDepthMask(GL_TRUE);
+	m_timer.end();
+	m_timer.receive();
+
+	Profiler::set("time", m_timer.latest());
 }
 
 void LinkedVisibility::onSizeChange(int width, int height)

@@ -9,7 +9,7 @@ public:
 	using SetterT = std::function<void(std::vector<Token>)>;
 	using GetterT = std::function<void(void)>;
 
-	static void Init();
+	static void init();
 
 	static void addFunction(
 		const std::string& name,

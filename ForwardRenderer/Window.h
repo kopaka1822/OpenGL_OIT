@@ -13,6 +13,7 @@ public:
 	bool isOpen() const { return m_open; }
 	void handleEvents();
 	void swapBuffer() const;
+	void setTitle(const std::string& title);
 
 	static int getWidth();
 	static int getHeight();

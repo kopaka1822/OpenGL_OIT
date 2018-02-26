@@ -1,6 +1,7 @@
 #include "SimpleForwardRenderer.h"
 #include <glad/glad.h>
 #include <iostream>
+#include "Framework/Profiler.h"
 
 SimpleForwardRenderer::SimpleForwardRenderer()
 {
@@ -49,5 +50,5 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 
 	m_timer.end();
 	m_timer.receive();
-	//std::cout << m_timer.latest() << '\n';
+	Profiler::set("time", m_timer.latest());
 }
