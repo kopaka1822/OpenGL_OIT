@@ -1,5 +1,6 @@
 renderer = adaptive
 camera = projection
+debugOutput = false
 
 //camPos = 8.64316, 0.967475, 11.4518
 //camDir =   0.254568, 0.0399896, -0.96623

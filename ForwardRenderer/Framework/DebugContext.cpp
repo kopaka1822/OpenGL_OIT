@@ -3,6 +3,9 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <string>
+#include "../ScriptEngine/ScriptEngine.h"
+
+static bool s_detailedOutput = true;
 
 static void glDebugOutput(GLenum _source, GLenum _type, GLuint _id, GLenum _severity, GLsizei _length, const GLchar* _message, const void* _userParam)
 {
@@ -46,7 +49,11 @@ static void glDebugOutput(GLenum _source, GLenum _type, GLuint _id, GLenum _seve
 	std::string logMessage = debSource + ": " + debType + "(" + debSev + ") " + std::to_string(_id) + ": " + _message;
 	if (_type == GL_DEBUG_TYPE_ERROR || _type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
 		throw std::exception(logMessage.c_str());
-	else if (_type == GL_DEBUG_TYPE_PERFORMANCE)
+	
+	if (!s_detailedOutput)
+		return;
+
+	if (_type == GL_DEBUG_TYPE_PERFORMANCE)
 		std::cerr << "INF: " << logMessage.c_str() << '\n';
 	else
 		std::cerr << "WAR: " << logMessage.c_str() << '\n';
@@ -65,4 +72,13 @@ DebugContext::DebugContext()
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(glDebugOutput, nullptr);
+
+	ScriptEngine::addProperty("debugOutput", []()
+	{
+		std::cout << "debugOutput: " << (s_detailedOutput?"true":"false") << '\n';
+	}, [](const std::vector<Token>& args)
+	{
+		s_detailedOutput = args.at(0).getString() != "false";
+		std::cout << (s_detailedOutput ? "enabled" : "disabled") << " debug output\n";
+	});
 }
