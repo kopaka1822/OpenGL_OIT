@@ -128,14 +128,14 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	}
 	m_timer[T_USE_VIS].end();
 
-	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), 0.0, [](auto time, const GpuTimer& timer)
+	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
 	{
-		return time + timer.latest();
+		return time + timer.get();
 	}));
-	Profiler::set("clear", m_timer[T_CLEAR].latest());
-	Profiler::set("opaque", m_timer[T_OPAQUE].latest());
-	Profiler::set("build_vis", m_timer[T_BUILD_VIS].latest());
-	Profiler::set("use_vis", m_timer[T_USE_VIS].latest());
+	Profiler::set("clear", m_timer[T_CLEAR].get());
+	Profiler::set("opaque", m_timer[T_OPAQUE].get());
+	Profiler::set("build_vis", m_timer[T_BUILD_VIS].get());
+	Profiler::set("use_vis", m_timer[T_USE_VIS].get());
 }
 
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)

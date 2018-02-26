@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <cassert>
 #include <queue>
+#include "../Framework/Profiler.h"
 
 class GpuTimer
 {
@@ -54,6 +55,12 @@ public:
 		m_currentQuery = 0;
 		curTimer() = nullptr;
 		receive();
+	}
+	Profiler::Profile get() const
+	{
+		return {
+			min(), max(), latest(), average()
+		};
 	}
 	double average() const
 	{

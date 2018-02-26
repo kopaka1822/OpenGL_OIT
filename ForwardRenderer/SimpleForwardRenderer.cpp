@@ -50,5 +50,5 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 
 	m_timer.end();
 	m_timer.receive();
-	Profiler::set("time", m_timer.latest());
+	Profiler::set("time", m_timer.get());
 }
