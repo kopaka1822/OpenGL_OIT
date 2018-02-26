@@ -16,6 +16,8 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 	if (!model || !shader || !camera)
 		return;
 	
+	m_timer.begin();
+
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -44,4 +46,8 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 		glDisable(GL_BLEND);
 		glDepthMask(GL_TRUE);
 	}
+
+	m_timer.end();
+	m_timer.receive();
+	//std::cout << m_timer.latest() << '\n';
 }

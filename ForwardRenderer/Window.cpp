@@ -143,7 +143,7 @@ void Window::registerMouseReceiver(IMouseReceiver* recv)
 
 void Window::unregisterMouseReceiver(IMouseReceiver* recv)
 {
-	auto end = std::remove_if(s_mouseReceiver.begin(), s_mouseReceiver.end(), [recv](const IMouseReceiver* i)
+	const auto end = std::remove_if(s_mouseReceiver.begin(), s_mouseReceiver.end(), [recv](const IMouseReceiver* i)
 	{
 		return (i == recv);
 	});
@@ -157,7 +157,7 @@ void Window::registerWindowReceiver(IWindowReceiver* recv)
 
 void Window::unregisterWindowReceiver(IWindowReceiver* recv)
 {
-	auto end = std::remove_if(s_windowReceiver.begin(), s_windowReceiver.end(), [recv](const IWindowReceiver* i)
+	const auto end = std::remove_if(s_windowReceiver.begin(), s_windowReceiver.end(), [recv](const IWindowReceiver* i)
 	{
 		return (i == recv);
 	});
