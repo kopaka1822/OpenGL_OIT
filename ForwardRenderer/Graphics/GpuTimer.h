@@ -30,7 +30,7 @@ public:
 		glDeleteQueries(GLsizei(m_freeQueries.size()), m_freeQueries.data());
 		m_freeQueries.clear();
 	}
-	void begin()
+	void lock()
 	{
 		assert(m_currentQuery == 0);
 		// no other timer may run
@@ -44,7 +44,7 @@ public:
 			curTimer() = this;
 		}
 	}
-	void end()
+	void unlock()
 	{
 		assert(m_currentQuery != 0);
 		// timer should have been started

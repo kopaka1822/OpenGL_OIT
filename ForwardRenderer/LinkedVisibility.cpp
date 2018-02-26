@@ -5,6 +5,7 @@
 #include "Framework/Profiler.h"
 #include <numeric>
 #include <functional>
+#include <mutex>
 
 static const size_t NODES_PER_PIXEL = 16;
 
@@ -42,15 +43,16 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
 
-	m_timer[T_CLEAR].begin();
+	
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
 		m_mutexTexture->clear(uint32_t(0));
 		m_counter->clear();
 	}
-	m_timer[T_CLEAR].end();
-
-	m_timer[T_OPAQUE].begin();
+	
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
+
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -62,10 +64,9 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 				s->draw(shader);
 		}
 	}
-	m_timer[T_OPAQUE].end();
 
-	m_timer[T_BUILD_VIS].begin();
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
 		// disable colors
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 		// disable depth write
@@ -88,10 +89,10 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 		// sync shader storage
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
-	m_timer[T_BUILD_VIS].end();
 	
-	m_timer[T_USE_VIS].begin();
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
+
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		// darken the background
@@ -115,7 +116,6 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 		// enable depth write
 		glDepthMask(GL_TRUE);
 	}
-	m_timer[T_USE_VIS].end();
 	
 	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
 	{

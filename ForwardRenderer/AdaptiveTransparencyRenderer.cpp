@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include "Framework/Profiler.h"
 #include <numeric>
+#include <mutex>
 
 static const size_t NUM_SMAPLES = 16;
 
@@ -47,8 +48,9 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
 
-	m_timer[T_OPAQUE].begin();
+	
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 		// opaque render pass
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_POLYGON_SMOOTH);
@@ -62,17 +64,18 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 				s->draw(shader);
 		}
 	}
-	m_timer[T_OPAQUE].end();
 		
 	// determine visibility function
 	
 	// reset visibility function data
-	m_timer[T_CLEAR].begin();
-	m_visibilityFunc->clear(m_visibilityClearColor);
-	m_timer[T_CLEAR].end();
-
-	m_timer[T_BUILD_VIS].begin();
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
+		m_visibilityFunc->clear(m_visibilityClearColor);
+	}
+
+	{
+		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
+
 		// bind as image for building func
 		m_visibilityFunc->bindAsImage(0, GL_RG32F);
 		// bind the atomic counters
@@ -95,10 +98,10 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		}
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
-	m_timer[T_BUILD_VIS].end();
 	
-	m_timer[T_USE_VIS].begin();
 	{
+		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
+
 		// enable colors
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
@@ -127,7 +130,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		// enable depth write
 		glDepthMask(GL_TRUE);
 	}
-	m_timer[T_USE_VIS].end();
 
 	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
 	{
