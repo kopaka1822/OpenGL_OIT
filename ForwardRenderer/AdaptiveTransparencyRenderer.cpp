@@ -5,6 +5,8 @@
 #include "Window.h"
 #include <iostream>
 #include <glad/glad.h>
+#include "Framework/Profiler.h"
+#include <numeric>
 
 static const size_t NUM_SMAPLES = 4;
 
@@ -41,86 +43,99 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	if (!model || !shader || !camera)
 		return;
 
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_POLYGON_SMOOTH);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 	shader->applyCamera(*camera);
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
 
-	// opaque render pass
-
-	
-	auto hasAlpha = false;
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
+	m_timer[T_OPAQUE].begin();
 	{
-		if (!s->isTransparent())
-			s->draw(shader);
-		else hasAlpha = true;
-	}
+		// opaque render pass
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_POLYGON_SMOOTH);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (!hasAlpha)
-		return;
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
+		{
+			if (!s->isTransparent())
+				s->draw(shader);
+		}
+	}
+	m_timer[T_OPAQUE].end();
 		
 	// determine visibility function
 	
 	// reset visibility function data
-	//m_visibilityFunc->update(m_emptyVisibilityFuncData.data());
+	m_timer[T_CLEAR].begin();
 	m_visibilityFunc->clear(m_visibilityClearColor);
+	m_timer[T_CLEAR].end();
 
-	// bind as image for building func
-	m_visibilityFunc->bindAsImage(0, GL_RG32F);
-	// bind the atomic counters
-	m_mutexTexture->bindAsImage(1, GL_R32UI);
-
-	// disable colors
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	// disable depth write
-	glDepthMask(GL_FALSE);
-
-	model->prepareDrawing();
-	int shapeCount = 0;
-	for (const auto& s : model->getShapes())
+	m_timer[T_BUILD_VIS].begin();
 	{
-		if (s->isTransparent())
+		// bind as image for building func
+		m_visibilityFunc->bindAsImage(0, GL_RG32F);
+		// bind the atomic counters
+		m_mutexTexture->bindAsImage(1, GL_R32UI);
+
+		// disable colors
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		// disable depth write
+		glDepthMask(GL_FALSE);
+
+		model->prepareDrawing();
+		int shapeCount = 0;
+		for (const auto& s : model->getShapes())
 		{
-			s->draw(m_shaderBuildVisz.get());
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			if (s->isTransparent())
+			{
+				s->draw(m_shaderBuildVisz.get());
+				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			}
 		}
 	}
-
+	m_timer[T_BUILD_VIS].end();
 	
-	// enable colors
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	
-	// apply visibility function
-	m_visibilityFunc->bind(5);
-
-	// darken the background
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-	m_shaderAdjustBackground->draw();
-
-	
-	// add all values
-	glBlendFunc(GL_ONE, GL_ONE);
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
+	m_timer[T_USE_VIS].begin();
 	{
-		if (s->isTransparent())
+		// enable colors
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		// apply visibility function
+		m_visibilityFunc->bind(5);
+
+		// darken the background
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+		m_shaderAdjustBackground->draw();
+
+
+		// add all values
+		glBlendFunc(GL_ONE, GL_ONE);
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
 		{
-			s->draw(m_shaderApplyVisz.get());
+			if (s->isTransparent())
+			{
+				s->draw(m_shaderApplyVisz.get());
+			}
 		}
+
+		glDisable(GL_BLEND);
+
+		// enable depth write
+		glDepthMask(GL_TRUE);
 	}
-	
-	glDisable(GL_BLEND);
-	
-	// enable depth write
-	glDepthMask(GL_TRUE);
+	m_timer[T_USE_VIS].end();
+
+	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), 0.0, [](auto time, const GpuTimer& timer)
+	{
+		return time + timer.latest();
+	}));
+	Profiler::set("clear", m_timer[T_CLEAR].latest());
+	Profiler::set("opaque", m_timer[T_OPAQUE].latest());
+	Profiler::set("build_vis", m_timer[T_BUILD_VIS].latest());
+	Profiler::set("use_vis", m_timer[T_USE_VIS].latest());
 }
 
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)

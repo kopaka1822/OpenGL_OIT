@@ -1,0 +1,5 @@
+getProfileTime("time")
+getProfileTime("clear")
+getProfileTime("opaque")
+getProfileTime("build_vis")
+getProfileTime("use_vis")

@@ -3,6 +3,8 @@
 #include "Graphics/Program.h"
 #include "SimpleShader.h"
 #include "Framework/Profiler.h"
+#include <numeric>
+#include <functional>
 
 static const size_t NODES_PER_PIXEL = 16;
 
@@ -36,84 +38,93 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 	if (!model || !shader || !camera)
 		return;
 	
-	m_timer.begin();
-	m_mutexTexture->clear(uint32_t(0));
-	m_counter->clear();
-
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	shader->applyCamera(*camera);
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
 
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
+	m_timer[T_CLEAR].begin();
 	{
-		if (!s->isTransparent())
-			s->draw(shader);
+		m_mutexTexture->clear(uint32_t(0));
+		m_counter->clear();
 	}
+	m_timer[T_CLEAR].end();
 
-
-	// disable colors
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	// disable depth write
-	glDepthMask(GL_FALSE);
-
-	model->prepareDrawing();
-
-	m_counter->bind(4);
-	m_mutexTexture->bindAsImage(0, GL_R32UI);
-	m_buffer->bind(3);
-
-	for (const auto& s : model->getShapes())
+	m_timer[T_OPAQUE].begin();
 	{
-		if (s->isTransparent())
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
 		{
-			s->draw(m_shaderBuildVisz.get());
+			if (!s->isTransparent())
+				s->draw(shader);
 		}
 	}
+	m_timer[T_OPAQUE].end();
 
-	// sync shader storage
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-	struct BufferData
+	m_timer[T_BUILD_VIS].begin();
 	{
-		float invAlpha;
-		float depth;
-		uint32_t next;
-	};
+		// disable colors
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		// disable depth write
+		glDepthMask(GL_FALSE);
 
-	//auto counter = m_counter->getData();
-	//auto data = m_buffer->getData<BufferData>();
-	// enable colors
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		model->prepareDrawing();
 
-	// darken the background
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-	m_shaderAdjustBackground->draw();
+		m_counter->bind(4);
+		m_mutexTexture->bindAsImage(0, GL_R32UI);
+		m_buffer->bind(3);
 
-	// add all values
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
-	{
-		if (s->isTransparent())
+		for (const auto& s : model->getShapes())
 		{
-			s->draw(m_shaderApplyVisz.get());
+			if (s->isTransparent())
+			{
+				s->draw(m_shaderBuildVisz.get());
+			}
 		}
+
+		// sync shader storage
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
-	glDisable(GL_BLEND);
+	m_timer[T_BUILD_VIS].end();
+	
+	m_timer[T_USE_VIS].begin();
+	{
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-	// enable depth write
-	glDepthMask(GL_TRUE);
-	m_timer.end();
-	m_timer.receive();
+		// darken the background
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+		m_shaderAdjustBackground->draw();
 
-	Profiler::set("time", m_timer.latest());
+		// add all values
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
+		{
+			if (s->isTransparent())
+			{
+				s->draw(m_shaderApplyVisz.get());
+			}
+		}
+		glDisable(GL_BLEND);
+
+		// enable depth write
+		glDepthMask(GL_TRUE);
+	}
+	m_timer[T_USE_VIS].end();
+	
+	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), 0.0, [](auto time, const GpuTimer& timer)
+	{
+		return time + timer.latest();
+	}));
+	Profiler::set("clear", m_timer[T_CLEAR].latest());
+	Profiler::set("opaque", m_timer[T_OPAQUE].latest());
+	Profiler::set("build_vis", m_timer[T_BUILD_VIS].latest());
+	Profiler::set("use_vis", m_timer[T_USE_VIS].latest());
 }
 
 void LinkedVisibility::onSizeChange(int width, int height)

@@ -1,5 +1,7 @@
 #include "WeightedTransparency.h"
 #include "SimpleShader.h"
+#include "Framework/Profiler.h"
+#include <numeric>
 
 WeightedTransparency::WeightedTransparency()
 {
@@ -23,49 +25,69 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 	if (!model || !shader || !camera)
 		return;
 
-	m_opaqueFramebuffer->bind();
-	//glClearColor(0.7f, 0.9f, 1.0f, 0.0f);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	shader->applyCamera(*camera);
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
+	m_timer[T_OPAQUE].begin();
 	{
-		if (!s->isTransparent())
-			s->draw(shader);
+		m_opaqueFramebuffer->bind();
+		//glClearColor(0.7f, 0.9f, 1.0f, 0.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader->applyCamera(*camera);
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
+		{
+			if (!s->isTransparent())
+				s->draw(shader);
+		}
 	}
+	m_timer[T_OPAQUE].end();
 
-	m_transparentFramebuffer->bind();
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDepthMask(GL_FALSE);
-	glEnable(GL_BLEND);
-	glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
-
-	m_transShader->applyCamera(*camera);
-	model->prepareDrawing();
-	for (const auto& s : model->getShapes())
+	m_timer[T_BUILD_VIS].begin();
 	{
-		if (s->isTransparent())
-			s->draw(m_transShader.get());
+		m_transparentFramebuffer->bind();
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_BLEND);
+		glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
+
+		m_transShader->applyCamera(*camera);
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
+		{
+			if (s->isTransparent())
+				s->draw(m_transShader.get());
+		}
+
+		glDisable(GL_BLEND);
+
+		Framebuffer::unbind();
 	}
+	m_timer[T_BUILD_VIS].end();
 
-	glDisable(GL_BLEND);
+	m_timer[T_USE_VIS].begin();
+	{
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Framebuffer::unbind();
+		m_opaqueTexture->bind(0);
+		m_transparentTexture1->bind(1);
+		m_transparentTexture2->bind(2);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		m_quadShader->draw();
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+	}
+	m_timer[T_USE_VIS].end();
 
-	m_opaqueTexture->bind(0);
-	m_transparentTexture1->bind(1);
-	m_transparentTexture2->bind(2);
-
-	glDisable(GL_DEPTH_TEST);
-	m_quadShader->draw();
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
+	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), 0.0, [](auto time, const GpuTimer& timer)
+	{
+		return time + timer.latest();
+	}));
+	Profiler::set("opaque", m_timer[T_OPAQUE].latest());
+	Profiler::set("build_vis", m_timer[T_BUILD_VIS].latest());
+	Profiler::set("use_vis", m_timer[T_USE_VIS].latest());
 }
 
 void WeightedTransparency::onSizeChange(int width, int height)

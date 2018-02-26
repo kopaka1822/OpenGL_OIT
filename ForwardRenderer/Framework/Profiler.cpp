@@ -20,6 +20,17 @@ void Profiler::init()
 		for (const auto& p : m_profiles)
 			std::cout << "   " << p.first << '\n';
 	});
+	ScriptEngine::addFunction("getProfileTime", [](const std::vector<Token>& args)
+	{
+		if(args.empty())
+		{
+			std::cout << m_activeProfile << ": " << get(m_activeProfile) << "\n";
+		}
+		else
+		{
+			std::cout << args.at(0).getString() << ": " << get(args.at(0).getString()) << "\n";
+		}
+	});
 }
 
 void Profiler::set(const std::string& name, double time)

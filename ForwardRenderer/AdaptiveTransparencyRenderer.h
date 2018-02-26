@@ -5,6 +5,8 @@
 #include "Framework/IWindowReceiver.h"
 #include "Graphics/ShaderStorageBuffer.h"
 #include "FullscreenQuadShader.h"
+#include <array>
+#include "Graphics/GpuTimer.h"
 
 class AdaptiveTransparencyRenderer : public IRenderer, public IWindowReceiver
 {
@@ -21,4 +23,14 @@ private:
 	std::unique_ptr<Texture2D> m_mutexTexture;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
 	const glm::vec2 m_visibilityClearColor;
+
+	enum Timer
+	{
+		T_CLEAR,
+		T_OPAQUE,
+		T_BUILD_VIS,
+		T_USE_VIS,
+		SIZE
+	};
+	std::array<GpuTimer, SIZE> m_timer;
 };

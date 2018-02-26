@@ -53,6 +53,7 @@ public:
 		m_runningQueries.push(m_currentQuery);
 		m_currentQuery = 0;
 		curTimer() = nullptr;
+		receive();
 	}
 	double average() const
 	{

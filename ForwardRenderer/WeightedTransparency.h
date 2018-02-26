@@ -3,6 +3,8 @@
 #include "Framework/IWindowReceiver.h"
 #include "Graphics/Framebuffer.h"
 #include "FullscreenQuadShader.h"
+#include "Graphics/GpuTimer.h"
+#include <array>
 
 class WeightedTransparency : public IRenderer, public IWindowReceiver
 {
@@ -21,4 +23,13 @@ private:
 	std::unique_ptr<Framebuffer> m_opaqueFramebuffer;
 	std::unique_ptr<FullscreenQuadShader> m_quadShader;
 	std::unique_ptr<IShader> m_transShader;
+
+	enum Timer
+	{
+		T_OPAQUE,
+		T_BUILD_VIS,
+		T_USE_VIS,
+		SIZE
+	};
+	std::array<GpuTimer, SIZE> m_timer;
 };

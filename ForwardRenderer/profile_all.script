@@ -1,0 +1,8 @@
+renderer=forward
+execute(profile.script)
+renderer=adaptive
+execute(profile.script)
+renderer=weighted_oit
+execute(profile.script)
+renderer=linked
+execute(profile.script)
