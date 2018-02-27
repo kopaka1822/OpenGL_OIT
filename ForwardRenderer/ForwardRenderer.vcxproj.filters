@@ -53,9 +53,6 @@
     <ClInclude Include="Graphics\VertexArrayObject.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\ElementBuffer.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\IShape.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
@@ -81,9 +78,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\ICamera.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\UniformBuffer.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="ProjectionCamera.h">

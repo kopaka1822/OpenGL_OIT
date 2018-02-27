@@ -2,7 +2,6 @@
 #include "Graphics/IShape.h"
 #include <vector>
 #include "ObjModel.h"
-#include "Graphics/ElementBuffer.h"
 #include "Graphics/IShader.h"
 #include "SimpleMaterial.h"
 

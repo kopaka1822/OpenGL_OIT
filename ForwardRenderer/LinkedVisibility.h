@@ -1,7 +1,6 @@
 #pragma once
 #include "Graphics/IRenderer.h"
 #include "Framework/IWindowReceiver.h"
-#include "Graphics/UniformBuffer.h"
 #include "FullscreenQuadShader.h"
 #include "Framework/AtomicCounterBuffer.h"
 #include "Graphics/GpuTimer.h"

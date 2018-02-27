@@ -139,6 +139,8 @@ namespace gl
 
 	template <GLenum TUsage>
 	using UniformBufferT = Buffer<GL_UNIFORM_BUFFER, TUsage>;
+	using StaticUniformBuffer = UniformBufferT<0>;
+	using DynamicUniformBuffer = UniformBufferT<GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using AtomicCounterBufferT = Buffer<GL_ATOMIC_COUNTER_BUFFER, TUsage>;

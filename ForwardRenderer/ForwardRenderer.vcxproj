@@ -170,7 +170,6 @@
     <ClInclude Include="Framework\IWindowReceiver.h" />
     <ClInclude Include="Framework\Profiler.h" />
     <ClInclude Include="FullscreenQuadShader.h" />
-    <ClInclude Include="Graphics\ElementBuffer.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GpuTimer.h" />
     <ClInclude Include="Graphics\ICamera.h" />
@@ -183,7 +182,6 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\Texture2D.h" />
     <ClInclude Include="Graphics\Texture3D.h" />
-    <ClInclude Include="Graphics\UniformBuffer.h" />
     <ClInclude Include="Graphics\VertexArrayObject.h" />
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="ObjModel.h" />

@@ -2,8 +2,8 @@
 #include "Graphics/IShader.h"
 #include "Graphics/Program.h"
 #include <memory>
-#include "Graphics/UniformBuffer.h"
 #include "Graphics/IMaterial.h"
+#include "Dependencies/gl/buffer.hpp"
 
 class SimpleShader : public IShader
 {
@@ -136,10 +136,9 @@ public:
 		m_materialBuffer.bind(1);
 	}
 private:
-	// TODO make uniform buffers static?
 	Program m_program;
-	UniformBuffer m_transformBuffer;
-	UniformBuffer m_materialBuffer;
+	gl::DynamicUniformBuffer m_transformBuffer;
+	gl::DynamicUniformBuffer m_materialBuffer;
 	UniformData m_uniformData;
 	MaterialData m_materialData;
 	std::shared_ptr<Texture2D> m_defaultTex;

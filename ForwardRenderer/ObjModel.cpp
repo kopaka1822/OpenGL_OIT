@@ -3,7 +3,6 @@
 #include "Dependencies/tiny_obj_loader.h"
 #include <iostream>
 #include <chrono>
-#include "Graphics/ElementBuffer.h"
 #include "ObjShape.h"
 #include "SimpleMaterial.h"
 #include "SimpleMaterial.h"
