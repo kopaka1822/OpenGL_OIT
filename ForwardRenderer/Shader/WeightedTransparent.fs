@@ -46,8 +46,9 @@ float weight(float z, float alpha)
 {
 	//return 1.0;
 	//return alpha * max(10e-2, min(3e3, 0.03 / (10e-5 + pow(abs(z) / 200.0, 4.0))));
-	return alpha * max(10e-2, min(3e3, 10.0 / (10e-5 + pow(abs(z) * 0.1, 3.0) + pow(abs(z) / 200.0, 6.0))));
-	//return alpha * pow(1.0, -4.0);
+	//return alpha * max(10e-2, min(3e3, 10.0 / (10e-5 + pow(abs(z) * 0.1, 3.0) + pow(abs(z) / 200.0, 6.0))));
+	return alpha * pow(z, -4.0);
+	//return 300000 * pow(1.3, -abs(z)); // village best
 }
 
 void main()
