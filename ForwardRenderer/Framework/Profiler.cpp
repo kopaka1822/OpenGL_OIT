@@ -4,16 +4,16 @@
 #include <iostream>
 
 static std::unordered_map<std::string, Profiler::Profile> m_profiles;
-static std::string m_activeProfile = "time";
+static std::string s_activeProfile = "time";
 static std::string s_activeType = "latest";
 
 void Profiler::init()
 {
-	ScriptEngine::addProperty("profiler", []() {std::cout << "profiler: " << m_activeProfile << '\n'; }, [](const std::vector<Token>& args)
+	ScriptEngine::addProperty("profiler", []() {std::cout << "profiler: " << s_activeProfile << '\n'; }, [](const std::vector<Token>& args)
 	{
 		if (args.empty())
 			throw std::runtime_error("profiler name missing");
-		m_activeProfile = args.at(0).getString();
+		s_activeProfile = args.at(0).getString();
 	});
 
 	ScriptEngine::addProperty("profiles", []()
@@ -25,7 +25,7 @@ void Profiler::init()
 	{
 		if(args.empty())
 		{
-			std::cout << m_activeProfile << ": " << get(m_activeProfile) << "\n";
+			std::cout << s_activeProfile << ": " << get(s_activeProfile) << "\n";
 		}
 		else
 		{
@@ -58,5 +58,5 @@ double Profiler::get(const std::string& name)
 
 std::tuple<std::string, double> Profiler::getActive()
 {
-	return { m_activeProfile, get(m_activeProfile) };
+	return { s_activeProfile, get(s_activeProfile) };
 }
