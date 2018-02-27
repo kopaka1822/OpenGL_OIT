@@ -30,6 +30,9 @@
     <Filter Include="Source Files\Shader">
       <UniqueIdentifier>{f07daae7-8e31-41d9-b7e1-d20cf407b493}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Dependencies\gl">
+      <UniqueIdentifier>{7da42d78-6248-46f1-94ec-e00d6acd44a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\DebugContext.h">
@@ -149,6 +152,15 @@
     </ClInclude>
     <ClInclude Include="Framework\AsynchInput.h">
       <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\gl\buffer.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\opengl.h">
+      <Filter>Source Files\Dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\gl\id.h">
+      <Filter>Source Files\Dependencies\gl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
