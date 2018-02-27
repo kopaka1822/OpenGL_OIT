@@ -17,6 +17,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../Dependencies/stb_image_write.h"
 
+#include "../Dependencies/stb_image.h"
+#include "../Dependencies/stbi_helper.h"
+
 std::vector<ITickReceiver*> s_tickReceiver;
 
 static std::string s_rendererName;
@@ -94,6 +97,17 @@ Application::Application()
 		m_screenshotDestination = args.at(0).getString();
 	});
 
+	ScriptEngine::addFunction("makeDiff", [this](const std::vector<Token>& args)
+	{
+		if (args.size() < 3)
+			throw std::runtime_error("expected at least three arguments. source1, source2, destination [, factor]");
+		float factor = 1.0f;
+		if (args.size() >= 4)
+			factor = args.at(3).getFloat();
+
+		makeDiff(args.at(0).getString(), args.at(1).getString(), args.at(2).getString(), factor);
+	});
+
 	ICamera::initScripts();
 
 	m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
@@ -125,7 +139,9 @@ void Application::tick()
 
 	// adjust window title
 	auto profile = Profiler::getActive();
-	m_window.setTitle("ForwardRenderer " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile)));
+	m_window.setTitle(s_rendererName + " " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile))
+		+ " iterations: " + std::to_string(ScriptEngine::getIteration())
+	);
 }
 
 bool Application::isRunning() const
@@ -163,4 +179,36 @@ void Application::makeScreenshot(const std::string& filename)
 		std::cerr << "could not save screenshot\n";
 	else
 		std::cout << "saved " << filename << '\n';
+}
+
+void Application::makeDiff(const std::string& src1, const std::string& src2, const std::string& dst, float factor)
+{
+	int width1 = 0, width2 = 0, height1 = 0, height2 = 0, channels1 = 0, channels2 = 0;
+	
+	stbi_ptr pic1(stbi_load(src1.c_str(), &width1, &height1, &channels1, 3));
+	if (!pic1)
+		throw std::runtime_error("could not open " + src1);
+
+	stbi_ptr pic2(stbi_load(src2.c_str(), &width2, &height2, &channels2, 3));
+	if (!pic2)
+		throw std::runtime_error("could not open " + src2);
+
+	if (width1 != width2 || height1 != height2)
+		throw std::runtime_error(src1 + " and " + src2 + " have not the same dimensions");
+
+	// save transformed image into pic1
+	const size_t size = width1 * height1 * 3;
+	const auto it1 = stdext::make_checked_array_iterator(pic1.get(), size);
+	const auto it2 = stdext::make_checked_array_iterator(pic2.get(), size);
+	std::transform(it1, it1 + size, it2, it1, [factor](unsigned char b1, unsigned char b2)
+	{
+		return static_cast<unsigned char>(std::min(255.0f, std::abs(b1 - b2) * factor));
+	});
+
+	// save image
+	stbi_flip_vertically_on_write(1);
+	if (!stbi_write_png(dst.c_str(), width1, height1, 3, pic1.get(), 0))
+		std::cerr << "could not save diff\n";
+	else
+		std::cout << "saved diff\n";
 }

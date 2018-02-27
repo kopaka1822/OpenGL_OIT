@@ -144,6 +144,9 @@
     <ClInclude Include="Framework\Profiler.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\stbi_helper.h">
+      <Filter>Source Files\Dependencies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

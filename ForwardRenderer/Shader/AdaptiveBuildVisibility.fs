@@ -155,7 +155,6 @@ void main()
 			{
 				insertAlpha(1.0 - dissolve, dist); 
 				
-				memoryBarrier();
 				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
 				keepWaiting = false;
 			}

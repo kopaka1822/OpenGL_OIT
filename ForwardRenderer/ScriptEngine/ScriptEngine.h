@@ -31,4 +31,6 @@ public:
 	static void executeCommand(const std::string& prefix, const std::string& command);
 	// increases the iteration count
 	static void iteration();
+
+	static size_t getIteration();
 };

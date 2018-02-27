@@ -21,6 +21,7 @@ public:
 
 private:
 	static void makeScreenshot(const std::string& filename);
+	static void makeDiff(const std::string& src1, const std::string& src2, const std::string& dst, float factor);
 
 private:
 	Window m_window;
