@@ -147,6 +147,9 @@
     <ClInclude Include="Dependencies\stbi_helper.h">
       <Filter>Source Files\Dependencies</Filter>
     </ClInclude>
+    <ClInclude Include="Framework\AsynchInput.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

@@ -158,6 +158,7 @@
     <ClInclude Include="AdaptiveTransparencyRenderer.h" />
     <ClInclude Include="Dependencies\stbi_helper.h" />
     <ClInclude Include="Framework\Application.h" />
+    <ClInclude Include="Framework\AsynchInput.h" />
     <ClInclude Include="Framework\AtomicCounterBuffer.h" />
     <ClInclude Include="Framework\DebugContext.h" />
     <ClInclude Include="Framework\IKeyReceiver.h" />
