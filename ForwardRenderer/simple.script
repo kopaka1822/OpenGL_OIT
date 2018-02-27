@@ -1,4 +1,4 @@
-renderer = forward
+renderer = linked
 camera = projection
 //debugOutput = false
 profileType = latest

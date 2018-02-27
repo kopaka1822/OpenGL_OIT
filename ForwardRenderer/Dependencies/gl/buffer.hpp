@@ -77,12 +77,6 @@ namespace gl
 		}
 
 		template<class T, bool TEnabled = (TUsage & GL_DYNAMIC_STORAGE_BIT) != 0>
-		std::enable_if_t<TEnabled> update(const T& data)
-		{
-			update(&data, 0, sizeof T);
-		}
-
-		template<class T, bool TEnabled = (TUsage & GL_DYNAMIC_STORAGE_BIT) != 0>
 		std::enable_if_t<TEnabled> update(const std::vector<T>& data)
 		{
 			update(data.data(), 0, data.size() * sizeof T);
