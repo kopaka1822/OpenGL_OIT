@@ -110,9 +110,6 @@
     <ClInclude Include="SimpleMaterial.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\ShaderStorageBuffer.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\IWindowReceiver.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>

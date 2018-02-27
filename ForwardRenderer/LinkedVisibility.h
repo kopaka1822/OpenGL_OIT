@@ -2,11 +2,11 @@
 #include "Graphics/IRenderer.h"
 #include "Framework/IWindowReceiver.h"
 #include "Graphics/UniformBuffer.h"
-#include "Graphics/ShaderStorageBuffer.h"
 #include "FullscreenQuadShader.h"
 #include "Framework/AtomicCounterBuffer.h"
 #include "Graphics/GpuTimer.h"
 #include <array>
+#include "Dependencies/gl/buffer.hpp"
 
 class LinkedVisibility : public IRenderer, public IWindowReceiver
 {
@@ -20,7 +20,7 @@ private:
 	std::unique_ptr<IShader> m_shaderBuildVisz;
 	std::unique_ptr<IShader> m_shaderApplyVisz;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
-	std::unique_ptr<ShaderStorageBuffer> m_buffer;
+	gl::DynamicShaderStorageBuffer m_buffer;
 	std::unique_ptr<Texture2D> m_mutexTexture;
 	std::unique_ptr<AtomicCounterBuffer> m_counter;
 	enum Timer

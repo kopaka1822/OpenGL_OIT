@@ -3,7 +3,6 @@
 #include "Graphics/IShader.h"
 #include "Graphics/Texture3D.h"
 #include "Framework/IWindowReceiver.h"
-#include "Graphics/ShaderStorageBuffer.h"
 #include "FullscreenQuadShader.h"
 #include <array>
 #include "Graphics/GpuTimer.h"

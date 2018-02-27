@@ -53,19 +53,16 @@ ObjModel::ObjModel(const std::string& filename)
 	m_vao->addArray(1, 0, 1, GL_INT, sizeof(int));
 	m_vao->addArray(2, 0, 1, GL_INT, sizeof(int) * 2);
 
-	m_vertices.reset(
-		new ShaderStorageBuffer(attrib.vertices.size() * sizeof(attrib.vertices[0]), attrib.vertices.data(), 0));
+	m_vertices = gl::StaticShaderStorageBuffer(sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
 
-	if (attrib.normals.size())
+	if (!attrib.normals.empty())
 	{
-		m_normals.reset(
-			new ShaderStorageBuffer(attrib.normals.size() * sizeof(attrib.normals[0]), attrib.normals.data(), 0));
+		m_normals = gl::StaticShaderStorageBuffer(sizeof(attrib.normals[0]), GLsizei(attrib.normals.size()), attrib.normals.data());
 
 	}
-	if (attrib.texcoords.size())
+	if (!attrib.texcoords.empty())
 	{
-		m_texcoords.reset(
-			new ShaderStorageBuffer(attrib.texcoords.size() * sizeof(attrib.texcoords[0]), attrib.texcoords.data(), 0));
+		m_texcoords = gl::StaticShaderStorageBuffer(sizeof(attrib.texcoords[0]), GLsizei(attrib.texcoords.size()), attrib.texcoords.data());
 		
 	}
 	
@@ -126,11 +123,11 @@ void ObjModel::prepareDrawing() const
 	// just bind the vertex format
 	assert(m_vao);
 	m_vao->bind();
-	m_vertices->bind(0);
-	if (m_normals)
-		m_normals->bind(1);
-	if (m_texcoords)
-		m_texcoords->bind(2);
+	m_vertices.bind(0);
+	if (!m_normals.empty())
+		m_normals.bind(1);
+	if (!m_texcoords.empty())
+		m_texcoords.bind(2);
 }
 
 const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const

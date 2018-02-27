@@ -44,10 +44,17 @@ namespace gl
 		}
 
 		template<bool TEnabled = (TUsage & GL_DYNAMIC_STORAGE_BIT) != 0>
-		std::enable_if_t<TEnabled> subDataUpdate(GLintptr byteOffset, GLsizei size, const GLvoid* data)
+		std::enable_if_t<TEnabled> update(const GLvoid* data, GLintptr byteOffset, GLsizei size)
 		{
+			assert(size - byteOffset <= m_size);
 			bind();
 			glBufferSubData(TType, byteOffset, size, data);
+		}
+
+		template<bool TEnabled = (TUsage & GL_DYNAMIC_STORAGE_BIT) != 0>
+		std::enable_if_t<TEnabled> update(const GLvoid* data)
+		{
+			update(data, 0, m_size);
 		}
 		
 		void clear()
@@ -57,6 +64,25 @@ namespace gl
 			glClearBufferData(TType, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
 		}
 
+		template<class T>
+		std::vector<T> getData()
+		{
+			std::vector<T> res;
+			res.resize(m_size / sizeof(T));
+			bind();
+			glGetBufferSubData(TType, 0, m_size, res.data());
+			return res;
+		}
+
+		GLsizei size() const
+		{
+			return m_size;
+		}
+
+		bool empty() const
+		{
+			return m_size == 0;
+		}
 	private:
 		unique<GLuint> m_id;
 		unique<GLsizei> m_elementCount;
@@ -66,17 +92,18 @@ namespace gl
 
 	template <GLenum TUsage>
 	using ArrayBufferT = Buffer<GL_ARRAY_BUFFER, TUsage>;
-	using ArrayBuffer = ArrayBufferT<0>;
+	using StaticArrayBuffer = ArrayBufferT<0>;
 	using DynamicArrayBuffer = ArrayBufferT<GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using ElementBufferT = Buffer<GL_ELEMENT_ARRAY_BUFFER, TUsage>;
-	using ElementBuffer = ElementBufferT<0>;
+	using StaticElementBuffer = ElementBufferT<0>;
 	using DynamicElementBuffer = ElementBufferT<GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using ShaderStorageBufferT = Buffer<GL_SHADER_STORAGE_BUFFER, TUsage>;
-	using ShaderStorageBuffer = ShaderStorageBufferT<GL_DYNAMIC_STORAGE_BIT>;
+	using StaticShaderStorageBuffer = ShaderStorageBufferT<0>;
+	using DynamicShaderStorageBuffer = ShaderStorageBufferT<GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using TextureBufferT = Buffer<GL_TEXTURE_BUFFER, TUsage>;
