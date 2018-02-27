@@ -56,6 +56,9 @@ static void mouseScrollFunc(GLFWwindow* window, double x, double y)
 
 static void windowSizeFunc(GLFWwindow* window, int width, int height)
 {
+	if (width == 0 || height == 0)
+		return;
+
 	s_windowWidth = width;
 	s_windowHeight = height;
 	glViewport(0, 0, width, height);
