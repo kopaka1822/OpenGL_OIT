@@ -1,8 +1,8 @@
 #pragma once
-#include "VertexBuffer.h"
 #include <string>
 #include "IShape.h"
 #include <memory>
+#include <vector>
 
 class IModel
 {

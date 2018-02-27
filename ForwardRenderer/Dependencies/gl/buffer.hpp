@@ -19,6 +19,16 @@ namespace gl
 			bind();
 			glBufferStorage(TType, m_size, data, TUsage);
 		}
+
+		/// \brief 
+		/// \param data buffer data
+		/// \param elementStride number of components (T) for one element. E.g. vector<float> would have an elementStride of 3 for vec3 elements.
+		template<class T>
+		explicit Buffer(const std::vector<T>& data, GLsizei elementStride = 1)
+			:
+		Buffer(sizeof T, GLsizei(data.size()), data.data())
+		{}
+
 		~Buffer()
 		{
 			glDeleteBuffers(1, &m_id);
@@ -33,12 +43,21 @@ namespace gl
 			glBindBuffer(TType, m_id);
 		}
 		template<bool TEnabled = (TType == GL_ATOMIC_COUNTER_BUFFER) || (TType == GL_TRANSFORM_FEEDBACK_BUFFER)
-		|| (TType == GL_UNIFORM_BUFFER) || (TType == GL_SHADER_STORAGE_BUFFER)>
+		|| (TType == GL_UNIFORM_BUFFER) || (TType == GL_SHADER_STORAGE_BUFFER) || (TType == GL_ARRAY_BUFFER)>
 		std::enable_if_t<TEnabled> bind(GLuint bindingIndex) const
 		{
-			glBindBufferRange(TType, bindingIndex, m_id, 0, m_size);
-		} 
-		void bindAsVertexBuffer(GLuint bindingIndex, GLuint elementOffset) const
+			if (TType == GL_ARRAY_BUFFER)
+				bindAsVertexBuffer(bindingIndex);
+			else
+				glBindBufferRange(TType, bindingIndex, m_id, 0, m_size);
+		}
+		template<bool TEnabled = (TType == GL_ARRAY_BUFFER)>
+		std::enable_if_t<TEnabled> bind(GLuint bindingIndex, GLuint elementOffset) const
+		{
+			bindAsVertexBuffer(bindingIndex, elementOffset);
+		}
+
+		void bindAsVertexBuffer(GLuint bindingIndex, GLuint elementOffset = 0) const
 		{
 			glBindVertexBuffer(bindingIndex, m_id, elementOffset * m_elementSize, m_elementSize);
 		}
@@ -77,6 +96,16 @@ namespace gl
 		GLsizei size() const
 		{
 			return m_size;
+		}
+
+		GLsizei getNumElements() const
+		{
+			return m_elementCount;
+		}
+
+		GLsizei getElementSize() const
+		{
+			return m_elementSize;
 		}
 
 		bool empty() const

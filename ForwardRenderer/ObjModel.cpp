@@ -109,7 +109,7 @@ ObjModel::ObjModel(const std::string& filename)
 
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
-			VertexBuffer(s.mesh.indices, 1), 
+			gl::StaticArrayBuffer(s.mesh.indices), 
 			*m_material[materialId]));
 	}
 }

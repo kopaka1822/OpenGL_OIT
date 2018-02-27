@@ -50,9 +50,6 @@
     <ClInclude Include="Graphics\IModel.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\VertexBuffer.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\VertexArrayObject.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
@@ -181,9 +178,6 @@
     </ClCompile>
     <ClCompile Include="ObjModel.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\VertexBuffer.cpp">
-      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\VertexArrayObject.cpp">
       <Filter>Source Files\Graphics</Filter>

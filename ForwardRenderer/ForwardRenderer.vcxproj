@@ -185,7 +185,6 @@
     <ClInclude Include="Graphics\Texture3D.h" />
     <ClInclude Include="Graphics\UniformBuffer.h" />
     <ClInclude Include="Graphics\VertexArrayObject.h" />
-    <ClInclude Include="Graphics\VertexBuffer.h" />
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="ObjModel.h" />
     <ClInclude Include="ObjShape.h" />
@@ -210,7 +209,6 @@
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\Texture2D.cpp" />
     <ClCompile Include="Graphics\VertexArrayObject.cpp" />
-    <ClCompile Include="Graphics\VertexBuffer.cpp" />
     <ClCompile Include="LinkedVisibility.cpp" />
     <ClCompile Include="ObjModel.cpp" />
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp" />

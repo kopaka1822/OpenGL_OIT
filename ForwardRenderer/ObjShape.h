@@ -9,7 +9,7 @@
 class ObjShape : public IShape
 {
 public:
-	ObjShape(VertexBuffer& buffer, const SimpleMaterial& material)
+	ObjShape(gl::StaticArrayBuffer& buffer, const SimpleMaterial& material)
 		:
 	m_material(material),
 	m_elements(std::move(buffer))
@@ -34,7 +34,7 @@ public:
 		}
 
 		m_elements.bind(0);
-		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_elements.getNumVertices()));
+		glDrawArrays(GL_TRIANGLES, 0, m_elements.getNumElements());
 	}
 
 	bool isTransparent() const override
@@ -43,6 +43,6 @@ public:
 	}
 private:
 	const SimpleMaterial& m_material;
-	VertexBuffer m_elements;
+	gl::StaticArrayBuffer m_elements;
 	bool m_isTransparent = false;
 };
