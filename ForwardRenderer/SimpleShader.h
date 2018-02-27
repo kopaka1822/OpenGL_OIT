@@ -83,7 +83,7 @@ public:
 		if(transform != m_uniformData.model)
 		{
 			m_uniformData.model = transform;
-			m_transformBuffer.update(m_uniformData);
+			m_transformBuffer.update(&m_uniformData);
 		}
 	}
 
@@ -132,7 +132,7 @@ public:
 			m_materialData.m_dissolve = 1.0f;
 
 		// upload the data
-		m_materialBuffer.update(m_materialData);
+		m_materialBuffer.update(&m_materialData);
 		m_materialBuffer.bind(1);
 	}
 private:

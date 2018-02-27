@@ -2,7 +2,6 @@
 #include "Graphics/IRenderer.h"
 #include "Framework/IWindowReceiver.h"
 #include "FullscreenQuadShader.h"
-#include "Framework/AtomicCounterBuffer.h"
 #include "Graphics/GpuTimer.h"
 #include <array>
 #include "Dependencies/gl/buffer.hpp"
@@ -21,7 +20,7 @@ private:
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
 	gl::DynamicShaderStorageBuffer m_buffer;
 	std::unique_ptr<Texture2D> m_mutexTexture;
-	std::unique_ptr<AtomicCounterBuffer> m_counter;
+	gl::DynamicAtomicCounterBuffer m_counter;
 	enum Timer
 	{
 		T_CLEAR,

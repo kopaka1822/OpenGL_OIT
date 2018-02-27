@@ -29,7 +29,7 @@ LinkedVisibility::LinkedVisibility()
 	m_shaderApplyVisz = std::make_unique<SimpleShader>(std::move(useProgram));
 	m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
 
-	m_counter = std::make_unique<AtomicCounterBuffer>(1);
+	m_counter = gl::DynamicAtomicCounterBuffer(sizeof GLuint);
 
 	LinkedVisibility::onSizeChange(Window::getWidth(), Window::getHeight());
 }
@@ -47,7 +47,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
 		m_mutexTexture->clear(uint32_t(0));
-		m_counter->clear();
+		m_counter.clear();
 	}
 	
 	{
@@ -74,7 +74,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 
 		model->prepareDrawing();
 
-		m_counter->bind(4);
+		m_counter.bind(4);
 		m_mutexTexture->bindAsImage(0, GL_R32UI);
 		m_buffer.bind(3);
 

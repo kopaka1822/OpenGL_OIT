@@ -156,6 +156,8 @@ namespace gl
 
 	template <GLenum TUsage>
 	using AtomicCounterBufferT = Buffer<GL_ATOMIC_COUNTER_BUFFER, TUsage>;
+	using StaticAtomicCounterBuffer = AtomicCounterBufferT<0>;
+	using DynamicAtomicCounterBuffer = AtomicCounterBufferT<GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using IndirectDispatchBufferT = Buffer<GL_DISPATCH_INDIRECT_BUFFER, TUsage>;
