@@ -4,6 +4,7 @@
 #include "Graphics/Framebuffer.h"
 #include "FullscreenQuadShader.h"
 #include "Graphics/GpuTimer.h"
+#include "Dependencies/gl/texture.hpp"
 #include <array>
 
 class WeightedTransparency : public IRenderer, public IWindowReceiver
@@ -14,10 +15,10 @@ public:
 
 	void onSizeChange(int width, int height) override;
 private:
-	std::unique_ptr<CachedTexture2D> m_transparentTexture1;
-	std::unique_ptr<CachedTexture2D> m_transparentTexture2;
-	std::unique_ptr<CachedTexture2D> m_opaqueTexture;
-	std::unique_ptr<CachedTexture2D> m_depthTexture;
+	gl::Texture2D m_transparentTexture1;
+	gl::Texture2D m_transparentTexture2;
+	gl::Texture2D m_opaqueTexture;
+	gl::Texture2D m_depthTexture;
 
 	std::unique_ptr<Framebuffer> m_transparentFramebuffer;
 	std::unique_ptr<Framebuffer> m_opaqueFramebuffer;

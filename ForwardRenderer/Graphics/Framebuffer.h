@@ -1,6 +1,6 @@
 #pragma once
 #include <glad/glad.h>
-#include "CachedTexture2D.h"
+#include "Dependencies/gl/texture.hpp"
 
 class Framebuffer
 {
@@ -14,7 +14,7 @@ public:
 		glDeleteFramebuffers(1, &m_id);
 	}
 
-	void attachColorTarget(const CachedTexture2D& texture, size_t index)
+	void attachColorTarget(const gl::Texture2D& texture, size_t index)
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
 		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GLenum(GL_COLOR_ATTACHMENT0 + index), texture.getId(), 0);
@@ -27,7 +27,7 @@ public:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
 	}
 
-	void attachDepthTarget(const CachedTexture2D& depth)
+	void attachDepthTarget(const gl::Texture2D& depth)
 	{
 		assert(!m_hasDepth);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);

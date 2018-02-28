@@ -137,6 +137,11 @@ namespace gl
 			return m_mipLevels;
 		}
 
+		GLuint getId() const
+		{
+			return m_id;
+		}
+
 	private:
 		void bind() const
 		{

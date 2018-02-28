@@ -39,10 +39,10 @@ public:
 	* \param type texel type. e.g. GL_BYTE
 	* \param data image data
 	*/
-	CachedTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, GLenum type, bool mipmaps, const void* data)
+	/*Texture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, GLenum type, bool mipmaps, const void* data)
 	{
 		loadTexture(internalFormat, width, height, format, type, data, mipmaps);
-	}
+	}*/
 
 	void update(const void* data)
 	{
