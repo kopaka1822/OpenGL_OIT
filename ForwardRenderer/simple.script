@@ -1,4 +1,4 @@
-renderer = linked
+renderer = adaptive
 camera = projection
 //debugOutput = false
 profileType = latest
@@ -34,7 +34,7 @@ camDir = 0.920325, -0.257081, 0.294805
 camSpeed = 0.02
 
 //execute(profile_all.script)
-//profileType = average
+profileType = average
 //waitIterations(1000)
-//execute(profile.script)
+execute(profile.script)
 //execute(screenshots.script)

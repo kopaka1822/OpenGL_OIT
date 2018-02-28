@@ -182,7 +182,6 @@
     <ClInclude Include="Graphics\Program.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\Texture2D.h" />
-    <ClInclude Include="Graphics\Texture3D.h" />
     <ClInclude Include="Graphics\VertexArrayObject.h" />
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="ObjModel.h" />

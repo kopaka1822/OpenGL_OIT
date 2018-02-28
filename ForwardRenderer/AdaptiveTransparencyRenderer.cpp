@@ -70,14 +70,14 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 	// reset visibility function data
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
-		m_visibilityFunc->clear(m_visibilityClearColor);
+		m_visibilityFunc.clear(m_visibilityClearColor, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
 	}
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
 
 		// bind as image for building func
-		m_visibilityFunc->bindAsImage(0, GL_RG32F);
+		m_visibilityFunc.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		// bind the atomic counters
 		m_mutexTexture->bindAsImage(1, GL_R32UI);
 
@@ -105,7 +105,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		// apply visibility function
-		m_visibilityFunc->bind(5);
+		m_visibilityFunc.bind(5);
 
 		// darken the background
 		glEnable(GL_BLEND);
@@ -143,7 +143,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 {
 	// create visibility function storage
-	m_visibilityFunc.reset(new Texture3D(GL_RG32F, GL_RG, width, height, NUM_SMAPLES, GL_FLOAT, false));
+	m_visibilityFunc = gl::Texture3D(gl::InternalFormat::RG32F, width, height, NUM_SMAPLES);
 
 	// create buffer which ensures mutual exclusion
 	// 1 entry for each texel + 1 entry for current lock id

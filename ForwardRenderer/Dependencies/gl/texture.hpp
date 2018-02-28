@@ -60,12 +60,12 @@ namespace gl
 			bind();
 		}
 
-		void bindAsImage(GLuint slot, GLuint mipLevel, ImageAccess access) const
+		void bindAsImage(GLuint slot, ImageAccess access, GLuint mipLevel = 0) const
 		{
 			glBindImageTexture(slot, m_id, mipLevel, GL_TRUE, 0, static_cast<GLenum>(access), static_cast<GLenum>(m_internalFormat.value));
 		}
 
-		void bindAsImage(GLuint slot, GLuint mipLevel, ImageAccess access, GLint layer) const
+		void bindAsImage(GLuint slot, ImageAccess access, GLuint mipLevel, GLint layer) const
 		{
 			glBindImageTexture(slot, m_id, mipLevel, GL_FALSE, layer, static_cast<GLenum>(access), static_cast<GLenum>(m_internalFormat.value));
 		}
@@ -102,6 +102,41 @@ namespace gl
 				break;
 			}
 		}
+
+		template<class T>
+		void clear(const T& texel, SetDataFormat format, SetDataType type, GLuint level = 0)
+		{
+			glClearTexImage(m_id, level, static_cast<GLenum>(format), static_cast<GLenum>(type), &texel);
+		}
+
+		template<bool TEnabled = TComponents >= 1>
+		std::enable_if_t<TEnabled, GLsizei> width() const
+		{
+			return m_size[0];
+		}
+
+		template<bool TEnabled = TComponents >= 1>
+		std::enable_if_t<TEnabled, GLsizei> height() const
+		{
+			return m_size[1];
+		}
+
+		template<bool TEnabled = TComponents >= 2>
+		std::enable_if_t<TEnabled, GLsizei> depth() const
+		{
+			return m_size[2];
+		}
+
+		InternalFormat getInternalFormat() const
+		{
+			return m_internalFormat;
+		}
+
+		GLuint getNumLevels() const
+		{
+			return m_mipLevels;
+		}
+
 	private:
 		void bind() const
 		{
@@ -113,16 +148,16 @@ namespace gl
 			switch (TType)
 			{
 			case GL_TEXTURE_1D:
-				glTexStorage1D(TType, m_mipLevels, m_internalFormat, m_size[0]);
+				glTexStorage1D(TType, m_mipLevels, static_cast<GLenum>(m_internalFormat.value), m_size[0]);
 				break;
 			case GL_TEXTURE_2D:
 			case GL_TEXTURE_CUBE_MAP:
-				glTexStorage2D(TType, m_mipLevels, m_internalFormat, m_size[0], m_size[1]);
+				glTexStorage2D(TType, m_mipLevels, static_cast<GLenum>(m_internalFormat.value), m_size[0], m_size[1]);
 				break;
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_2D_ARRAY:
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
-				glTexStorage3D(TType, m_mipLevels, m_internalFormat, m_size[0], m_size[1], m_size[2]);
+				glTexStorage3D(TType, m_mipLevels, static_cast<GLenum>(m_internalFormat.value), m_size[0], m_size[1], m_size[2]);
 				break;
 			}
 		}
