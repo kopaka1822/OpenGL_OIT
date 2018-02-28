@@ -1,14 +1,14 @@
-#include "Texture2D.h"
+#include "CachedTexture2D.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../Dependencies/stb_image.h"
 #include <unordered_map>
 #include <glm/gtx/hash.hpp>
 #include <glad/glad.h>
 
-std::unordered_map<glm::vec4, std::shared_ptr<Texture2D>> s_cachedConstantTextures;
-std::unordered_map<std::string, std::shared_ptr<Texture2D>> s_cachedTextures;
+std::unordered_map<glm::vec4, std::shared_ptr<CachedTexture2D>> s_cachedConstantTextures;
+std::unordered_map<std::string, std::shared_ptr<CachedTexture2D>> s_cachedTextures;
 
-Texture2D::Texture2D(const glm::vec4& color)
+CachedTexture2D::CachedTexture2D(const glm::vec4& color)
 {
 	loadTexture(GL_RGBA, 1, 1, GL_RGBA, GL_FLOAT, &color, true);
 	if (color.a < 1.0f)
@@ -27,7 +27,7 @@ static GLenum getFormatFromComponents(int numComponents)
 	return GL_INVALID_ENUM;
 }
 
-Texture2D::Texture2D(const std::string& filename)
+CachedTexture2D::CachedTexture2D(const std::string& filename)
 {
 	int width = 0, height = 0, numComponents = 0;
 	
@@ -59,7 +59,7 @@ Texture2D::Texture2D(const std::string& filename)
 	stbi_image_free(data);
 }
 
-void Texture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height,
+void CachedTexture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height,
 	GLenum format, GLenum type, const void* data, bool mipmaps, GLsizei compressedSize)
 {
 	m_width = width;
@@ -94,13 +94,13 @@ void Texture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-void Texture2D::bind(GLuint index) const
+void CachedTexture2D::bind(GLuint index) const
 {
 	glActiveTexture(GL_TEXTURE0 + index);
 	glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
-std::shared_ptr<Texture2D> Texture2D::loadFromFile(const std::string& filename)
+std::shared_ptr<CachedTexture2D> CachedTexture2D::loadFromFile(const std::string& filename)
 {
 	// cached?
 	auto it = s_cachedTextures.find(filename);
@@ -108,13 +108,13 @@ std::shared_ptr<Texture2D> Texture2D::loadFromFile(const std::string& filename)
 		return it->second;
 
 	// create new one
-	std::shared_ptr<Texture2D> tex;
-	tex.reset(new Texture2D(filename));
+	std::shared_ptr<CachedTexture2D> tex;
+	tex.reset(new CachedTexture2D(filename));
 	s_cachedTextures[filename] = tex;
 	return tex;
 }
 
-std::shared_ptr<Texture2D> Texture2D::loadConstant(const glm::vec4& color)
+std::shared_ptr<CachedTexture2D> CachedTexture2D::loadConstant(const glm::vec4& color)
 {
 	// cached?
 	auto it = s_cachedConstantTextures.find(color);
@@ -122,19 +122,19 @@ std::shared_ptr<Texture2D> Texture2D::loadConstant(const glm::vec4& color)
 		return it->second;
 
 	// create new one
-	std::shared_ptr<Texture2D> tex;
-	tex.reset(new Texture2D(color));
+	std::shared_ptr<CachedTexture2D> tex;
+	tex.reset(new CachedTexture2D(color));
 	s_cachedConstantTextures[color] = tex;
 	return tex;
 }
 
-void Texture2D::clearCache()
+void CachedTexture2D::clearCache()
 {
 	s_cachedConstantTextures.clear();
 	s_cachedTextures.clear();
 }
 
-Texture2D::~Texture2D()
+CachedTexture2D::~CachedTexture2D()
 {
 	glDeleteTextures(1, &m_id);
 }

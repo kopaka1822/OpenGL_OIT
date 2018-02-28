@@ -19,7 +19,7 @@ private:
 	std::unique_ptr<IShader> m_shaderBuildVisz;
 	std::unique_ptr<IShader> m_shaderApplyVisz;
 	gl::Texture3D m_visibilityFunc;
-	std::unique_ptr<Texture2D> m_mutexTexture;
+	gl::Texture2D m_mutexTexture;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
 	const glm::vec2 m_visibilityClearColor;
 

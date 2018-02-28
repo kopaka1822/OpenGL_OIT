@@ -14,10 +14,10 @@ public:
 
 	void onSizeChange(int width, int height) override;
 private:
-	std::unique_ptr<Texture2D> m_transparentTexture1;
-	std::unique_ptr<Texture2D> m_transparentTexture2;
-	std::unique_ptr<Texture2D> m_opaqueTexture;
-	std::unique_ptr<Texture2D> m_depthTexture;
+	std::unique_ptr<CachedTexture2D> m_transparentTexture1;
+	std::unique_ptr<CachedTexture2D> m_transparentTexture2;
+	std::unique_ptr<CachedTexture2D> m_opaqueTexture;
+	std::unique_ptr<CachedTexture2D> m_depthTexture;
 
 	std::unique_ptr<Framebuffer> m_transparentFramebuffer;
 	std::unique_ptr<Framebuffer> m_opaqueFramebuffer;

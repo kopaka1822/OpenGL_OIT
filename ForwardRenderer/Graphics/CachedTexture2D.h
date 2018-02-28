@@ -6,12 +6,12 @@
 #include <vector>
 #include <glad/glad.h>
 
-class Texture2D
+class CachedTexture2D
 {
 	// create texture with a single color
-	Texture2D(const glm::vec4& color);
+	CachedTexture2D(const glm::vec4& color);
 	// load texture from file
-	Texture2D(const std::string& filename);
+	CachedTexture2D(const std::string& filename);
 
 	/**
 	 * \brief create texture and uploads data. see: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
@@ -27,8 +27,8 @@ class Texture2D
 	void loadTexture(GLenum internalFormat, GLsizei width, GLsizei height, GLenum format,
 		GLenum type, const void* data, bool mipmaps, GLsizei compressedSize = 0);
 public:
-	Texture2D(const Texture2D&) = delete;
-	Texture2D& operator=(const Texture2D&) = delete;
+	CachedTexture2D(const CachedTexture2D&) = delete;
+	CachedTexture2D& operator=(const CachedTexture2D&) = delete;
 
 	/**
 	* \brief 
@@ -39,7 +39,7 @@ public:
 	* \param type texel type. e.g. GL_BYTE
 	* \param data image data
 	*/
-	Texture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, GLenum type, bool mipmaps, const void* data)
+	CachedTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, GLenum type, bool mipmaps, const void* data)
 	{
 		loadTexture(internalFormat, width, height, format, type, data, mipmaps);
 	}
@@ -89,9 +89,9 @@ public:
 	}
 
 	// load texture from file
-	static std::shared_ptr<Texture2D> loadFromFile(const std::string& filename);
+	static std::shared_ptr<CachedTexture2D> loadFromFile(const std::string& filename);
 	// create texture with a single color
-	static std::shared_ptr<Texture2D> loadConstant(const glm::vec4& color);
+	static std::shared_ptr<CachedTexture2D> loadConstant(const glm::vec4& color);
 
 	// empties the cache. note: textures will only be deleted if no shared pointers use them
 	static void clearCache();
@@ -107,7 +107,7 @@ public:
 		glClearTexImage(m_id, 0, m_format, m_type, &texel);
 	}
 
-	~Texture2D();
+	~CachedTexture2D();
 	
 private:
 	GLuint m_id = 0;

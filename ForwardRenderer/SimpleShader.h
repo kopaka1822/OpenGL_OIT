@@ -56,7 +56,7 @@ public:
 
 		m_transformBuffer.update(&m_uniformData);
 
-		m_defaultTex = Texture2D::loadConstant(glm::vec4(1.0f));
+		m_defaultTex = CachedTexture2D::loadConstant(glm::vec4(1.0f));
 	}
 	~SimpleShader() override = default;
 
@@ -141,5 +141,5 @@ private:
 	gl::DynamicUniformBuffer m_materialBuffer;
 	UniformData m_uniformData;
 	MaterialData m_materialData;
-	std::shared_ptr<Texture2D> m_defaultTex;
+	std::shared_ptr<CachedTexture2D> m_defaultTex;
 };

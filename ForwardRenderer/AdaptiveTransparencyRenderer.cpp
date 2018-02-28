@@ -79,7 +79,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		// bind as image for building func
 		m_visibilityFunc.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		// bind the atomic counters
-		m_mutexTexture->bindAsImage(1, GL_R32UI);
+		m_mutexTexture.bindAsImage(1, gl::ImageAccess::READ_WRITE);
 
 		// disable colors
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -145,15 +145,5 @@ void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 	// create visibility function storage
 	m_visibilityFunc = gl::Texture3D(gl::InternalFormat::RG32F, width, height, NUM_SMAPLES);
 
-	// create buffer which ensures mutual exclusion
-	// 1 entry for each texel + 1 entry for current lock id
-	size_t mutexSize = width * height;
-
-	std::vector<uint32_t> mutexData;
-	mutexData.resize(mutexSize);
-	memset(mutexData.data(), 0, mutexSize * sizeof(mutexData[0]));
-
-	m_mutexTexture.reset(new Texture2D(GL_R32UI, GL_RED_INTEGER,width, height, GL_UNSIGNED_INT, false,
-		mutexData.data()
-		));
+	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

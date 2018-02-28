@@ -46,7 +46,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 	
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
-		m_mutexTexture->clear(uint32_t(0));
+		m_mutexTexture.clear(uint32_t(0), gl::SetDataFormat::R_INTEGER, gl::SetDataType::UINT32);
 		m_counter.clear();
 	}
 	
@@ -75,7 +75,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 		model->prepareDrawing();
 
 		m_counter.bind(4);
-		m_mutexTexture->bindAsImage(0, GL_R32UI);
+		m_mutexTexture.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		m_buffer.bind(3);
 
 		for (const auto& s : model->getShapes())
@@ -130,5 +130,5 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 void LinkedVisibility::onSizeChange(int width, int height)
 {
 	m_buffer = gl::DynamicShaderStorageBuffer(width * height * NODES_PER_PIXEL, 12);
-	m_mutexTexture.reset(new Texture2D(GL_R32UI, GL_RED_INTEGER, width, height, GL_UNSIGNED_INT, false, nullptr));
+	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

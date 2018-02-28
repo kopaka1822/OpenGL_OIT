@@ -138,7 +138,7 @@ void ObjModel::tryAddingTexture(SimpleMaterial& material, const std::string& att
 {
 	try
 	{
-		auto tex = Texture2D::loadFromFile(textureName);
+		auto tex = CachedTexture2D::loadFromFile(textureName);
 		material.addTexture(attrName, tex);
 	}
 	catch(const std::exception& e)

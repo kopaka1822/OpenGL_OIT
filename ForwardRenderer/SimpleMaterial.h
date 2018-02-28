@@ -4,7 +4,7 @@
 
 class SimpleMaterial : public IMaterial
 {
-	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_cachedTex;
+	std::unordered_map<std::string, std::shared_ptr<CachedTexture2D>> m_cachedTex;
 	std::unordered_map<std::string, glm::vec4> m_cachedAttr;
 public:
 	void addAttribute(const std::string& name, const glm::vec4& value)
@@ -12,7 +12,7 @@ public:
 		m_cachedAttr[name] = value;
 	}
 
-	void addTexture(const std::string& name, std::shared_ptr<Texture2D> tex)
+	void addTexture(const std::string& name, std::shared_ptr<CachedTexture2D> tex)
 	{
 		m_cachedTex[name] = tex;
 	}
@@ -24,7 +24,7 @@ public:
 			return &(it->second);
 		return nullptr;
 	}
-	const Texture2D* getTexture(const std::string& name) const override
+	const CachedTexture2D* getTexture(const std::string& name) const override
 	{
 		const auto it = m_cachedTex.find(name);
 		if (it != m_cachedTex.end())

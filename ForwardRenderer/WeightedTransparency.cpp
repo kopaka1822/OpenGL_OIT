@@ -94,10 +94,10 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 void WeightedTransparency::onSizeChange(int width, int height)
 {
 	
-	m_transparentTexture1.reset(new Texture2D(GL_RGBA16F, GL_RGBA, width, height, GL_FLOAT, false, nullptr));
-	m_transparentTexture2.reset(new Texture2D(GL_R16F, GL_RED, width, height, GL_FLOAT, false, nullptr));
-	m_depthTexture.reset(new Texture2D(GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, width, height, GL_FLOAT, false, nullptr));
-	m_opaqueTexture.reset(new Texture2D(GL_RGB8, GL_RGB, width, height, GL_UNSIGNED_BYTE, false, nullptr));
+	m_transparentTexture1.reset(new CachedTexture2D(GL_RGBA16F, GL_RGBA, width, height, GL_FLOAT, false, nullptr));
+	m_transparentTexture2.reset(new CachedTexture2D(GL_R16F, GL_RED, width, height, GL_FLOAT, false, nullptr));
+	m_depthTexture.reset(new CachedTexture2D(GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, width, height, GL_FLOAT, false, nullptr));
+	m_opaqueTexture.reset(new CachedTexture2D(GL_RGB8, GL_RGB, width, height, GL_UNSIGNED_BYTE, false, nullptr));
 
 	m_transparentFramebuffer = std::make_unique<Framebuffer>();
 	m_transparentFramebuffer->attachDepthTarget(*m_depthTexture);

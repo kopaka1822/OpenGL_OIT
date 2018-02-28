@@ -181,7 +181,7 @@
     <ClInclude Include="Graphics\IShape.h" />
     <ClInclude Include="Graphics\Program.h" />
     <ClInclude Include="Graphics\Shader.h" />
-    <ClInclude Include="Graphics\Texture2D.h" />
+    <ClInclude Include="Graphics\CachedTexture2D.h" />
     <ClInclude Include="Graphics\VertexArrayObject.h" />
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="ObjModel.h" />
@@ -205,7 +205,7 @@
     <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\Program.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
-    <ClCompile Include="Graphics\Texture2D.cpp" />
+    <ClCompile Include="Graphics\CachedTexture2D.cpp" />
     <ClCompile Include="Graphics\VertexArrayObject.cpp" />
     <ClCompile Include="LinkedVisibility.cpp" />
     <ClCompile Include="ObjModel.cpp" />

@@ -95,9 +95,6 @@
     <ClInclude Include="Graphics\IMaterial.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Texture2D.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="SimpleMaterial.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -150,6 +147,9 @@
     <ClInclude Include="Dependencies\gl\format.h">
       <Filter>Source Files\Dependencies\gl</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\CachedTexture2D.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">
@@ -182,9 +182,6 @@
     <ClCompile Include="Graphics\Program.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Texture2D.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp">
       <Filter>Source Files\ScriptEngine</Filter>
     </ClCompile>
@@ -202,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="Framework\Profiler.cpp">
       <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\CachedTexture2D.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
