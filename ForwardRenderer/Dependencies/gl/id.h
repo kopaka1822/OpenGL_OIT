@@ -5,7 +5,7 @@ namespace gl
 {
 	// struct that ensures that a value can only be moved ond not copied
 	// if the move constructor is called, the value will be initialized to the provided default value
-	template<class T, T defaultValue = T(0.0)>
+	template<class T, T defaultValue = T(0)>
 	struct unique
 	{
 		T value;

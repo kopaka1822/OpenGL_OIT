@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include "../opengl.h"
 #include "id.h"
 
