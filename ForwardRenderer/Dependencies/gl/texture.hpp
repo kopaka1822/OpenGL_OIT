@@ -3,6 +3,7 @@
 #include "../opengl.h"
 #include "format.h"
 #include <array>
+#include <numeric>
 
 namespace gl
 {
@@ -12,26 +13,26 @@ namespace gl
 	public:
 		Texture() = default;
 		template<bool TEnabled = TComponents == 1>
-		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width)
+		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width, GLuint mipLevels = 1)
 			:
-		Texture(internalFormat)
+		Texture(internalFormat, mipLevels)
 		{
 			m_size[0] = width;
 			allocateMemory();
 		}
 		template<bool TEnabled = TComponents == 2>
-		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width, GLsizei height)
+		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width, GLsizei height, GLuint mipLevels = 1)
 			:
-		Texture(internalFormat)
+		Texture(internalFormat, mipLevels)
 		{
 			m_size[0] = width;
 			m_size[1] = height;
 			allocateMemory();
 		}
 		template<bool TEnabled = TComponents == 3>
-		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width, GLsizei height, GLsizei depth)
+		explicit Texture(InternalFormat internalFormat, std::enable_if_t<TEnabled, GLsizei> width, GLsizei height, GLsizei depth, GLuint mipLevels = 1)
 			:
-		Texture(internalFormat)
+		Texture(internalFormat, mipLevels)
 		{
 			m_size[0] = width;
 			m_size[1] = height;
@@ -39,9 +40,10 @@ namespace gl
 			allocateMemory();
 		}
 
-		explicit Texture(InternalFormat internalFormat)
+		explicit Texture(InternalFormat internalFormat, GLuint mipLevels = 1)
 			:
-		m_internalFormat(internalFormat)
+		m_internalFormat(internalFormat),
+		m_mipLevels(mipLevels)
 		{
 			glGenTextures(1, &m_id);
 		}
@@ -107,6 +109,8 @@ namespace gl
 		{
 			bind();
 			glGenerateMipmap(TType);
+			// calculate number of mipmaps
+			m_mipLevels = computeMaxMipMapLevels();
 		}
 
 		template<class T>
@@ -157,8 +161,6 @@ namespace gl
 			allocateMemory();
 		}
 
-		
-
 		InternalFormat getInternalFormat() const
 		{
 			return m_internalFormat;
@@ -197,6 +199,16 @@ namespace gl
 				glTexStorage3D(TType, m_mipLevels, static_cast<GLenum>(m_internalFormat.value), m_size[0], m_size[1], m_size[2]);
 				break;
 			}
+		}
+		GLuint computeMaxMipMapLevels()
+		{
+			GLuint maxMip = 1;
+			GLuint maxResolution = std::accumulate(m_size.begin(), m_size.end(), GLuint(0), [](GLuint a, GLuint b)
+			{
+				return std::max(a, b);
+			});
+			while ((maxResolution /= 2) > 0) ++maxMip;
+			return maxMip;
 		}
 	private:
 		unique<GLuint> m_id;

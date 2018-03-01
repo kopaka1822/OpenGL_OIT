@@ -9,27 +9,27 @@ namespace gl
 	struct unique
 	{
 		T value;
-		unique() : value(defaultValue) {}
+		constexpr unique() : value(defaultValue) {}
 		~unique() = default;
-		explicit unique(const T& v) : value(v) {}
+		explicit constexpr unique(const T& v) : value(v) {}
 		unique(const unique&) = delete;
 		unique& operator=(const unique&) = delete;
-		unique(unique&& m) noexcept
+		constexpr unique(unique&& m) noexcept
 			: value(m.value)
 		{
 			m.value = defaultValue;
 		}
-		unique& operator=(unique&& m) noexcept
+		constexpr unique& operator=(unique&& m) noexcept
 		{
 			std::swap(value, m.value);
 			return *this;
 		}
-		unique& operator=(const T& v)
+		constexpr unique& operator=(const T& v)
 		{
 			value = v;
 			return *this;
 		}
-		operator T() const noexcept
+		constexpr operator T() const noexcept
 		{
 			return value;
 		}
