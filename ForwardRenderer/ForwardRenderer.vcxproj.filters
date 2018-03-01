@@ -150,6 +150,9 @@
     <ClInclude Include="Graphics\CachedTexture2D.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\gl\sampler.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

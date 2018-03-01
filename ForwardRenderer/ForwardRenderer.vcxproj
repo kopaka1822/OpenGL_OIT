@@ -159,6 +159,7 @@
     <ClInclude Include="Dependencies\gl\buffer.hpp" />
     <ClInclude Include="Dependencies\gl\format.h" />
     <ClInclude Include="Dependencies\gl\id.h" />
+    <ClInclude Include="Dependencies\gl\sampler.hpp" />
     <ClInclude Include="Dependencies\gl\texture.hpp" />
     <ClInclude Include="Dependencies\opengl.h" />
     <ClInclude Include="Dependencies\stbi_helper.h" />
