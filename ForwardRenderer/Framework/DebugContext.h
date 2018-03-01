@@ -2,6 +2,7 @@
 
 class DebugContext
 {
+	DebugContext() = delete;
 public:
-	DebugContext();
+	static void Init();
 };

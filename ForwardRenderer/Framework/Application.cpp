@@ -61,7 +61,7 @@ Application::Application()
 	:
 	m_window(800, 600, "ForwardRenderer")
 {
-	DebugContext context;
+	DebugContext::Init();
 
 	ScriptEngine::addProperty("renderer", []()
 	{

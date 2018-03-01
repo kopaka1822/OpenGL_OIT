@@ -103,6 +103,12 @@ namespace gl
 			}
 		}
 
+		void generateMipmaps()
+		{
+			bind();
+			glGenerateMipmap(TType);
+		}
+
 		template<class T>
 		void clear(const T& texel, SetDataFormat format, SetDataType type, GLuint level = 0)
 		{
@@ -115,17 +121,43 @@ namespace gl
 			return m_size[0];
 		}
 
-		template<bool TEnabled = TComponents >= 1>
+		template<bool TEnabled = TComponents >= 2>
 		std::enable_if_t<TEnabled, GLsizei> height() const
 		{
 			return m_size[1];
 		}
 
-		template<bool TEnabled = TComponents >= 2>
+		template<bool TEnabled = TComponents >= 3>
 		std::enable_if_t<TEnabled, GLsizei> depth() const
 		{
 			return m_size[2];
 		}
+
+		template<bool TEnabled = TComponents == 1>
+		std::enable_if_t<TEnabled> resize(GLsizei width)
+		{
+			m_size[0] = width;
+			allocateMemory();
+		}
+
+		template<bool TEnabled = TComponents == 2>
+		std::enable_if_t<TEnabled> resize(GLsizei width, GLsizei height)
+		{
+			m_size[0] = width;
+			m_size[1] = height;
+			allocateMemory();
+		}
+
+		template<bool TEnabled = TComponents == 3>
+		std::enable_if_t<TEnabled> resize(GLsizei width, GLsizei height, GLsizei depth)
+		{
+			m_size[0] = width;
+			m_size[1] = height;
+			m_size[2] = depth;
+			allocateMemory();
+		}
+
+		
 
 		InternalFormat getInternalFormat() const
 		{

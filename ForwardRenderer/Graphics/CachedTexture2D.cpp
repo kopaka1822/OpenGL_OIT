@@ -9,22 +9,37 @@ std::unordered_map<glm::vec4, std::shared_ptr<CachedTexture2D>> s_cachedConstant
 std::unordered_map<std::string, std::shared_ptr<CachedTexture2D>> s_cachedTextures;
 
 CachedTexture2D::CachedTexture2D(const glm::vec4& color)
+	:
+Texture(gl::InternalFormat::RGBA8, 1, 1)
 {
-	loadTexture(GL_RGBA, 1, 1, GL_RGBA, GL_FLOAT, &color, true);
+	update(gl::SetDataFormat::RGBA, gl::SetDataType::FLOAT, &color);
+	
 	if (color.a < 1.0f)
 		m_isTransparent = true;
 }
 
-static GLenum getFormatFromComponents(int numComponents)
+static gl::InternalFormat getSizedFormatFromComponents(int numComponents)
 {
 	switch(numComponents)
 	{
-	case 1: return GL_RED;
-	case 2: return GL_RG;
-	case 3: return GL_RGB;
-	case 4: return GL_RGBA;
+	case 1: return gl::InternalFormat::R8;
+	case 2: return gl::InternalFormat::RG8;
+	case 3: return gl::InternalFormat::RGB8;
+	case 4: return gl::InternalFormat::RGBA8;
 	}
-	return GL_INVALID_ENUM;
+	return gl::InternalFormat(-1);
+}
+
+static gl::SetDataFormat getFormatFromComponents(int numComponents)
+{
+	switch (numComponents)
+	{
+	case 1: return gl::SetDataFormat::R;
+	case 2: return gl::SetDataFormat::RG;
+	case 3: return gl::SetDataFormat::RGB;
+	case 4: return gl::SetDataFormat::RGBA;
+	}
+	return gl::SetDataFormat(-1);
 }
 
 CachedTexture2D::CachedTexture2D(const std::string& filename)
@@ -36,8 +51,12 @@ CachedTexture2D::CachedTexture2D(const std::string& filename)
 	if (!data)
 		throw std::runtime_error("cannot load texture " + filename);
 
-	auto format = getFormatFromComponents(numComponents);
-	loadTexture(format, width, height, format, GL_UNSIGNED_BYTE, data, true);
+	auto format = getSizedFormatFromComponents(numComponents);
+
+	// reinitialize texture
+	reinterpret_cast<gl::Texture2D&>(*this) = gl::Texture2D(format, width, height);
+	update(getFormatFromComponents(numComponents), gl::SetDataType::UINT8, data);
+	generateMipmaps();
 
 	// determine if transparent
 	if(numComponents == 4)
@@ -57,47 +76,6 @@ CachedTexture2D::CachedTexture2D(const std::string& filename)
 	}
 
 	stbi_image_free(data);
-}
-
-void CachedTexture2D::loadTexture(GLenum internalFormat, GLsizei width, GLsizei height,
-	GLenum format, GLenum type, const void* data, bool mipmaps, GLsizei compressedSize)
-{
-	m_width = width;
-	m_height = height;
-	m_format = format;
-	m_type = type;
-
-	glGenTextures(1, &m_id);
-	glBindTexture(GL_TEXTURE_2D, m_id);
-
-	if(compressedSize)
-	{
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,
-			compressedSize, data);
-	}
-	else
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,
-			format, type, data);
-	}
-
-	if(mipmaps)
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	if (mipmaps)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	else
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-}
-
-void CachedTexture2D::bind(GLuint index) const
-{
-	glActiveTexture(GL_TEXTURE0 + index);
-	glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
 std::shared_ptr<CachedTexture2D> CachedTexture2D::loadFromFile(const std::string& filename)
@@ -132,9 +110,4 @@ void CachedTexture2D::clearCache()
 {
 	s_cachedConstantTextures.clear();
 	s_cachedTextures.clear();
-}
-
-CachedTexture2D::~CachedTexture2D()
-{
-	glDeleteTextures(1, &m_id);
 }

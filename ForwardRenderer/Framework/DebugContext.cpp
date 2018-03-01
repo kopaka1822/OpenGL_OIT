@@ -59,7 +59,7 @@ static void glDebugOutput(GLenum _source, GLenum _type, GLuint _id, GLenum _seve
 		std::cerr << "WAR: " << logMessage.c_str() << '\n';
 }
 
-DebugContext::DebugContext()
+void DebugContext::Init()
 {
 	if (!gladLoadGL())
 		throw std::exception("Cannot initialize Glad/load gl-function pointers!\n");
@@ -75,7 +75,7 @@ DebugContext::DebugContext()
 
 	ScriptEngine::addProperty("debugOutput", []()
 	{
-		std::cout << "debugOutput: " << (s_detailedOutput?"true":"false") << '\n';
+		std::cout << "debugOutput: " << (s_detailedOutput ? "true" : "false") << '\n';
 	}, [](const std::vector<Token>& args)
 	{
 		s_detailedOutput = args.at(0).getString() != "false";
