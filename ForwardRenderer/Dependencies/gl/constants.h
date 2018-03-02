@@ -176,6 +176,14 @@ namespace gl
 	struct get
 	{};
 
+	template<> struct get<GetParam::ACTIVE_TEXTURE> {
+			static GLint value() {
+				GLint res;															
+				glGetIntegerv(static_cast<GLenum>(GetParam::ACTIVE_TEXTURE), &res);
+				return res - GL_TEXTURE0;															
+		}
+	};
+
 #define __gl_get_integer(Enum) template<> struct get<Enum>{ \
 		static GLint value() {													\
 			GLint res;															\
@@ -183,7 +191,6 @@ namespace gl
 			return res;															\
 		}}
 
-	__gl_get_integer(GetParam::ACTIVE_TEXTURE);
 	__gl_get_integer(GetParam::ARRAY_BUFFER_BINDING);
 	__gl_get_integer(GetParam::COPY_READ_BUFFER_BINDING);
 	__gl_get_integer(GetParam::COPY_WRITE_BUFFER_BINDING);
