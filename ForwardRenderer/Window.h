@@ -12,6 +12,7 @@ public:
 	~Window();
 	bool isOpen() const { return m_open; }
 	void handleEvents();
+
 	void swapBuffer() const;
 	void setTitle(const std::string& title);
 
@@ -25,6 +26,9 @@ public:
 	static void registerWindowReceiver(IWindowReceiver* recv);
 	static void unregisterWindowReceiver(IWindowReceiver* recv);
 private:
+	static void windowSizeFunc(struct GLFWwindow* window, int width, int height);
+	void resetState() const;
+
 	struct GLFWwindow* m_handle = nullptr;
 	bool m_open = true;
 };

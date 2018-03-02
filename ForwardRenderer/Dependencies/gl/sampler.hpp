@@ -74,6 +74,10 @@ namespace gl
 			// border color
 			glSamplerParameterfv(m_id, GL_TEXTURE_BORDER_COLOR, borderColor.data());
 		}
+		void bind(GLuint slot) const
+		{
+			glBindSampler(slot, m_id);
+		}
 		~Sampler()
 		{
 			glDeleteSamplers(1, &m_id);

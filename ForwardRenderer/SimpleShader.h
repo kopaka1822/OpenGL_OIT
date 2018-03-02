@@ -4,6 +4,7 @@
 #include <memory>
 #include "Graphics/IMaterial.h"
 #include "Dependencies/gl/buffer.hpp"
+#include "Graphics/SamplerCache.h"
 
 class SimpleShader : public IShader
 {
@@ -48,7 +49,8 @@ public:
 		:
 	m_program(std::move(program)),
 	m_transformBuffer(sizeof(UniformData)),
-	m_materialBuffer(sizeof(MaterialData))
+	m_materialBuffer(sizeof(MaterialData)),
+	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR))
 	{
 		m_uniformData.model = glm::mat4();
 		m_uniformData.viewProjection = glm::mat4();
@@ -90,6 +92,11 @@ public:
 	void setMaterial(const IMaterial& material) override
 	{
 		// set texture bindings
+		m_sampler.bind(DIFFUSE_BINDING);
+		m_sampler.bind(DISSOLVE_BINDING);
+		m_sampler.bind(AMBIENT_BINDING);
+		m_sampler.bind(SPECULAR_BINDING);
+
 		auto tex = material.getTexture("diffuse");
 		if (tex) tex->bind(DIFFUSE_BINDING);
 		else m_defaultTex->bind(DIFFUSE_BINDING);
@@ -142,4 +149,5 @@ private:
 	UniformData m_uniformData;
 	MaterialData m_materialData;
 	std::shared_ptr<CachedTexture2D> m_defaultTex;
+	gl::Sampler& m_sampler;
 };

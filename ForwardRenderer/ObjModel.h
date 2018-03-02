@@ -3,6 +3,7 @@
 #include <memory>
 #include "Graphics/VertexArrayObject.h"
 #include "Dependencies/gl/buffer.hpp"
+#include "Graphics/SamplerCache.h"
 
 class SimpleMaterial;
 

@@ -1,4 +1,6 @@
 #include "Window.h"
+#include <glad/glad.h>
+#include "Framework/DebugContext.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
@@ -6,12 +8,15 @@
 #include "Framework/IKeyReceiver.h"
 #include "Framework/IMouseReceiver.h"
 #include "Framework/IWindowReceiver.h"
+#include "Dependencies/gl/constants.h"
+#include <cassert>
 
 static std::vector<IKeyReceiver*> s_keyReceiver;
 static std::vector<IMouseReceiver*> s_mouseReceiver;
 static std::vector<IWindowReceiver*> s_windowReceiver;
 static int s_windowWidth = 0;
 static int s_windowHeight = 0;
+static Window* s_wnd = nullptr;
 
 static void errorCallbackGLFW(int error, const char* description)
 {
@@ -54,7 +59,7 @@ static void mouseScrollFunc(GLFWwindow* window, double x, double y)
 		r->onScroll(x, y);
 }
 
-static void windowSizeFunc(GLFWwindow* window, int width, int height)
+void Window::windowSizeFunc(GLFWwindow* window, int width, int height)
 {
 	if (width == 0 || height == 0)
 		return;
@@ -62,6 +67,7 @@ static void windowSizeFunc(GLFWwindow* window, int width, int height)
 	s_windowWidth = width;
 	s_windowHeight = height;
 	glViewport(0, 0, width, height);
+	s_wnd->resetState();
 
 	for (const auto& r : s_windowReceiver)
 		r->onSizeChange(width, height);
@@ -69,6 +75,8 @@ static void windowSizeFunc(GLFWwindow* window, int width, int height)
 
 Window::Window(size_t width, size_t height, const std::string& title)
 {
+	assert(!s_wnd);
+	s_wnd = this;
 	glfwSetErrorCallback(errorCallbackGLFW);
 	if (!glfwInit()) throw std::runtime_error("Cannot initialize GLFW!\n");
 	std::cerr << "INF: Creating window and context...\n";
@@ -92,6 +100,8 @@ Window::Window(size_t width, size_t height, const std::string& title)
 	glfwSetScrollCallback(m_handle, mouseScrollFunc);
 	glfwSetWindowSizeCallback(m_handle, windowSizeFunc);
 
+	DebugContext::Init();
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 }
@@ -101,6 +111,7 @@ Window::~Window()
 	if (m_handle)
 		glfwDestroyWindow(m_handle);
 	glfwTerminate();
+	s_wnd = nullptr;
 }
 
 void Window::handleEvents()
@@ -113,6 +124,7 @@ void Window::swapBuffer() const
 {
 	glFlush();
 	glfwSwapBuffers(m_handle);
+	resetState();
 }
 
 void Window::setTitle(const std::string& title)
@@ -170,4 +182,9 @@ void Window::unregisterWindowReceiver(IWindowReceiver* recv)
 		return (i == recv);
 	});
 	s_windowReceiver.erase(end, s_windowReceiver.end());
+}
+
+void Window::resetState() const
+{
+	glUseProgram(0);
 }

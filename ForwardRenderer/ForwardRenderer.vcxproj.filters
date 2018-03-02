@@ -156,6 +156,9 @@
     <ClInclude Include="Graphics\SamplerCache.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\gl\constants.h">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

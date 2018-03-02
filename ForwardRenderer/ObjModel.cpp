@@ -6,6 +6,7 @@
 #include "ObjShape.h"
 #include "SimpleMaterial.h"
 #include "SimpleMaterial.h"
+#include "Graphics/SamplerCache.h"
 
 // attempts to retrieve the file directory
 static std::string GetDirectory(const std::string &filepath) {
@@ -119,7 +120,7 @@ ObjModel::~ObjModel()
 
 void ObjModel::prepareDrawing() const
 {
-	// just bind the vertex format
+	// bind the vertex format
 	assert(m_vao);
 	m_vao->bind();
 	m_vertices.bind(0);

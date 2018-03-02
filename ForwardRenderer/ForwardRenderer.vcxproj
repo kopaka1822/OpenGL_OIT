@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="AdaptiveTransparencyRenderer.h" />
     <ClInclude Include="Dependencies\gl\buffer.hpp" />
+    <ClInclude Include="Dependencies\gl\constants.h" />
     <ClInclude Include="Dependencies\gl\format.h" />
     <ClInclude Include="Dependencies\gl\id.h" />
     <ClInclude Include="Dependencies\gl\sampler.hpp" />
