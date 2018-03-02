@@ -104,6 +104,8 @@ Window::Window(size_t width, size_t height, const std::string& title)
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	std::cerr << "active texture: " << gl::get<gl::GetParam::ACTIVE_TEXTURE>::value();
 }
 
 Window::~Window()
