@@ -119,8 +119,7 @@ namespace gl
 			glClearTexImage(m_id, level, static_cast<GLenum>(format), static_cast<GLenum>(type), &texel);
 		}
 
-		template<bool TEnabled = TComponents >= 1>
-		std::enable_if_t<TEnabled, GLsizei> width() const
+		GLsizei width() const
 		{
 			return m_size[0];
 		}
@@ -161,7 +160,7 @@ namespace gl
 			allocateMemory();
 		}
 
-		InternalFormat getInternalFormat() const
+		InternalFormat format() const
 		{
 			return m_internalFormat;
 		}
