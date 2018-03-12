@@ -5,6 +5,7 @@
 #include <cassert>
 #include <queue>
 #include "../Framework/Profiler.h"
+#include "../Dependencies/gl/query.h"
 
 class GpuTimer
 {
@@ -13,46 +14,29 @@ public:
 	GpuTimer(GLsizei capacity = 5)
 	{
 		m_freeQueries.resize(5);
-		glGenQueries(capacity, m_freeQueries.data());
-	}
-	~GpuTimer()
-	{
-		while (!m_runningQueries.empty())
-		{
-			m_freeQueries.push_back(m_runningQueries.front());
-			m_runningQueries.pop();
-		}
-		if(m_currentQuery)
-		{
-			m_freeQueries.push_back(m_currentQuery);
-			m_currentQuery = 0;
-		}
-		glDeleteQueries(GLsizei(m_freeQueries.size()), m_freeQueries.data());
-		m_freeQueries.clear();
 	}
 	void lock()
 	{
-		assert(m_currentQuery == 0);
+		assert(m_currentQuery.getId() == 0);
 		// no other timer may run
 		assert(curTimer() == nullptr);
 
 		if(!m_freeQueries.empty())
 		{
-			m_currentQuery = m_freeQueries.back();
+			m_currentQuery = std::move(m_freeQueries.back());
 			m_freeQueries.pop_back();
-			glBeginQuery(GL_TIME_ELAPSED, m_currentQuery);
+			m_currentQuery.begin();
 			curTimer() = this;
 		}
 	}
 	void unlock()
 	{
-		assert(m_currentQuery != 0);
+		assert(m_currentQuery.getId() != 0);
 		// timer should have been started
 		assert(curTimer() == this);
 
 		glEndQuery(GL_TIME_ELAPSED);
-		m_runningQueries.push(m_currentQuery);
-		m_currentQuery = 0;
+		m_runningQueries.push(std::move(m_currentQuery));
 		curTimer() = nullptr;
 		receive();
 	}
@@ -82,10 +66,8 @@ public:
 	{
 		while(!m_runningQueries.empty())
 		{
-			auto id = m_runningQueries.front();
-			GLuint res = GLuint(-1);
-			glGetQueryObjectuiv(id, GL_QUERY_RESULT_NO_WAIT, &res);
-			if (res == GLuint(-1))
+			auto [ready, res] = m_runningQueries.front().receiveRaw(false);
+			if (!ready)
 				return; // query was not ready
 
 			// update statistics
@@ -94,8 +76,10 @@ public:
 			++m_sumCount;
 			m_minTime = (std::min)(m_latestTime, m_minTime);
 			m_maxTime = (std::max)(m_latestTime, m_maxTime);
+
+			auto q = std::move(m_runningQueries.front());
 			m_runningQueries.pop();
-			m_freeQueries.push_back(id);
+			m_freeQueries.push_back(std::move(q));
 		}
 	}
 
@@ -108,9 +92,9 @@ private:
 	}
 
 private:
-	std::queue<GLuint> m_runningQueries;
-	std::vector<GLuint> m_freeQueries;
-	GLuint m_currentQuery = 0;
+	std::queue<gl::TimeElapsedQuery> m_runningQueries;
+	std::vector<gl::TimeElapsedQuery> m_freeQueries;
+	gl::TimeElapsedQuery m_currentQuery = gl::TimeElapsedQuery::empty();
 	size_t m_sumTime = 0;
 	size_t m_sumCount = 0;
 	size_t m_latestTime = 0;
