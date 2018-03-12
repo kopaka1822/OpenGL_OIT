@@ -1,6 +1,5 @@
 #pragma once
 #include "id.h"
-#include <glad/glad.h>
 #include "texture.hpp"
 #include "renderbuffer.hpp"
 #include <vector>
