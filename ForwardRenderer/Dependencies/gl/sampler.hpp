@@ -86,6 +86,11 @@ namespace gl
 		Sampler& operator=(const Sampler&) = delete;
 		Sampler(Sampler&&) = default;
 		Sampler& operator=(Sampler&&) = default;
+		
+		GLuint getId() const
+		{
+			return m_id;
+		}
 	private:
 		unique<GLuint> m_id;
 	};

@@ -2,6 +2,7 @@
 #include "id.h"
 #include "../opengl.h"
 #include "format.h"
+#include "sampler.hpp"
 #include <array>
 #include <numeric>
 
@@ -175,6 +176,26 @@ namespace gl
 			return m_id;
 		}
 
+#ifdef GL_TEXTURE_BINDLESS
+		void makeResident()
+		{
+			assert(m_lastHandle == 0);
+			m_lastHandle = glGetTextureHandleARB(m_id);
+			glMakeTextureHandleResidentARB(m_lastHandle);
+		}
+		void makeResident(const Sampler& sampler)
+		{
+			assert(m_lastHandle == 0);
+			m_lastHandle = glGetTextureSamplerHandleARB(m_id, sampler.getId());
+			glMakeTextureHandleResidentARB(m_lastHandle);
+		}
+		void makeNonResident()
+		{
+			assert(m_lastHandle != 0);
+			glMakeTextureHandleNonResidentARB(m_lastHandle);
+			m_lastHandle = 0;
+		}
+#endif
 	private:
 		void bind() const
 		{
@@ -214,6 +235,10 @@ namespace gl
 		unique<InternalFormat> m_internalFormat;
 		std::array<unique<GLsizei>, TComponents> m_size;
 		unique<GLuint, 1> m_mipLevels;
+
+#ifdef GL_TEXTURE_BINDLESS
+		unique<GLuint64> m_lastHandle;
+#endif
 	};
 
 	using Texture1D = Texture<GL_TEXTURE_1D, 1>;
