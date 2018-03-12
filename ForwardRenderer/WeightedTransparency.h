@@ -1,11 +1,11 @@
 #pragma once
 #include "Graphics/IRenderer.h"
 #include "Framework/IWindowReceiver.h"
-#include "Graphics/Framebuffer.h"
 #include "FullscreenQuadShader.h"
 #include "Graphics/GpuTimer.h"
 #include "Dependencies/gl/texture.hpp"
 #include <array>
+#include "Dependencies/gl/framebuffer.hpp"
 
 class WeightedTransparency : public IRenderer, public IWindowReceiver
 {
@@ -20,8 +20,8 @@ private:
 	gl::Texture2D m_opaqueTexture;
 	gl::Texture2D m_depthTexture;
 
-	std::unique_ptr<Framebuffer> m_transparentFramebuffer;
-	std::unique_ptr<Framebuffer> m_opaqueFramebuffer;
+	gl::Framebuffer m_transparentFramebuffer = gl::Framebuffer::empty();
+	gl::Framebuffer m_opaqueFramebuffer = gl::Framebuffer::empty();
 	std::unique_ptr<FullscreenQuadShader> m_quadShader;
 	std::unique_ptr<IShader> m_transShader;
 

@@ -116,9 +116,6 @@
     <ClInclude Include="WeightedTransparency.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Framebuffer.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="Graphics\GpuTimer.h">
       <Filter>Source Files\Graphics</Filter>

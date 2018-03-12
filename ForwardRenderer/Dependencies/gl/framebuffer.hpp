@@ -74,7 +74,7 @@ namespace gl
 				throw std::runtime_error("invalid framebuffer");
 
 			// enable buffers
-			glDrawBuffers(m_attachments.size(), m_attachments.data());
+			glDrawBuffers(GLsizei(m_attachments.size()), m_attachments.data());
 		}
 
 		void bind() const

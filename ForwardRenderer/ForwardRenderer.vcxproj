@@ -175,7 +175,6 @@
     <ClInclude Include="Framework\IWindowReceiver.h" />
     <ClInclude Include="Framework\Profiler.h" />
     <ClInclude Include="FullscreenQuadShader.h" />
-    <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\GpuTimer.h" />
     <ClInclude Include="Graphics\ICamera.h" />
     <ClInclude Include="Graphics\IMaterial.h" />

@@ -29,7 +29,7 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 
-		m_opaqueFramebuffer->bind();
+		m_opaqueFramebuffer.bind();
 		//glClearColor(0.7f, 0.9f, 1.0f, 0.0f);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -46,7 +46,7 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
 
-		m_transparentFramebuffer->bind();
+		m_transparentFramebuffer.bind();
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDepthMask(GL_FALSE);
@@ -63,7 +63,7 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 
 		glDisable(GL_BLEND);
 
-		Framebuffer::unbind();
+		gl::Framebuffer::unbind();
 	}
 
 	{
@@ -98,16 +98,16 @@ void WeightedTransparency::onSizeChange(int width, int height)
 	m_depthTexture = gl::Texture2D(gl::InternalFormat::DEPTH_COMPONENT32F, width, height);
 	m_opaqueTexture = gl::Texture2D(gl::InternalFormat::RGB8, width, height);
 
-	m_transparentFramebuffer = std::make_unique<Framebuffer>();
-	m_transparentFramebuffer->attachDepthTarget(m_depthTexture);
-	m_transparentFramebuffer->attachColorTarget(m_transparentTexture1, 0);
-	m_transparentFramebuffer->attachColorTarget(m_transparentTexture2, 1);
-	m_transparentFramebuffer->validate();
-	Framebuffer::unbind();
+	m_transparentFramebuffer = gl::Framebuffer();
+	m_transparentFramebuffer.attachDepth(m_depthTexture);
+	m_transparentFramebuffer.attachColor(0, m_transparentTexture1);
+	m_transparentFramebuffer.attachColor(1, m_transparentTexture2);
+	m_transparentFramebuffer.validate();
+	gl::Framebuffer::unbind();
 
-	m_opaqueFramebuffer = std::make_unique<Framebuffer>();
-	m_opaqueFramebuffer->attachDepthTarget(m_depthTexture);
-	m_opaqueFramebuffer->attachColorTarget(m_opaqueTexture, 0);
-	m_opaqueFramebuffer->validate();
-	Framebuffer::unbind();
+	m_opaqueFramebuffer = gl::Framebuffer();
+	m_opaqueFramebuffer.attachDepth(m_depthTexture);
+	m_opaqueFramebuffer.attachColor(0, m_opaqueTexture);
+	m_opaqueFramebuffer.validate();
+	gl::Framebuffer::unbind();
 }
