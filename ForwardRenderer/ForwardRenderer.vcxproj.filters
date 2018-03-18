@@ -50,9 +50,6 @@
     <ClInclude Include="Graphics\IModel.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\VertexArrayObject.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\IShape.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
@@ -165,6 +162,9 @@
     <ClInclude Include="Dependencies\gl\query.h">
       <Filter>Source Files\Dependencies\gl</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">
@@ -187,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="ObjModel.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\VertexArrayObject.cpp">
-      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Shader.cpp">
       <Filter>Source Files\Graphics</Filter>

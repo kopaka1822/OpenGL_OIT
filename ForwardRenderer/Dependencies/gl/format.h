@@ -135,9 +135,29 @@ namespace gl
 		READ_WRITE = GL_READ_WRITE
 	};
 
-	inline bool isDepthFormat(InternalFormat _format)
+	enum class VertexType
 	{
-		switch (_format)
+		INT8 = GL_BYTE,
+		UINT8 = GL_UNSIGNED_BYTE,
+		INT16 = GL_SHORT,
+		UINT16 = GL_UNSIGNED_SHORT,
+		INT32 = GL_INT,
+		UINT32 = GL_UNSIGNED_INT,
+
+		FIXED = GL_FIXED,
+
+		FLOAT = GL_FLOAT,
+		HALF = GL_HALF_FLOAT,
+		DOUBLE = GL_DOUBLE,
+
+		INT_2_10_10_10 = GL_INT_2_10_10_10_REV,
+		UINT_2_10_10_10 = GL_UNSIGNED_INT_10_10_10_2,
+		UINT_10F_11F_11F = GL_UNSIGNED_INT_10F_11F_11F_REV,
+	};
+
+	inline bool isDepthFormat(InternalFormat format)
+	{
+		switch (format)
 		{
 		case InternalFormat::DEPTH24_STENCIL8:
 		case InternalFormat::DEPTH32F_STENCIL8:
@@ -150,9 +170,9 @@ namespace gl
 		}
 	}
 
-	inline bool isStencilFormat(InternalFormat _format)
+	inline bool isStencilFormat(InternalFormat format)
 	{
-		switch (_format)
+		switch (format)
 		{
 		case InternalFormat::DEPTH24_STENCIL8:
 		case InternalFormat::DEPTH32F_STENCIL8:
@@ -163,9 +183,9 @@ namespace gl
 		}
 	}
 
-	inline bool isSignedFormat(InternalFormat _format)
+	inline bool isSignedFormat(InternalFormat format)
 	{
-		switch (_format)
+		switch (format)
 		{
 		case InternalFormat::R8S:
 		case InternalFormat::R16S:
@@ -175,6 +195,22 @@ namespace gl
 		case InternalFormat::RGB16S:
 		case InternalFormat::RGBA8S:
 		case InternalFormat::RGBA16S:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	inline bool isIntegerType(VertexType t)
+	{
+		switch (t)
+		{
+		case VertexType::INT8:
+		case VertexType::UINT8:
+		case VertexType::INT16:
+		case VertexType::UINT16:
+		case VertexType::INT32:
+		case VertexType::UINT32:
 			return true;
 		default:
 			return false;

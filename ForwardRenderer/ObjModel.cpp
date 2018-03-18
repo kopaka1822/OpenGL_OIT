@@ -48,10 +48,9 @@ ObjModel::ObjModel(const std::string& filename)
 	if (!attrib.vertices.size())
 		throw std::runtime_error("no vertices found");
 
-	m_vao = std::make_unique<VertexArrayObject>();
-	m_vao->addArray(0, 0, 1, GL_INT, 0);
-	m_vao->addArray(1, 0, 1, GL_INT, sizeof(int));
-	m_vao->addArray(2, 0, 1, GL_INT, sizeof(int) * 2);
+	m_vao.addAttribute(0, 0, gl::VertexType::INT32, 1, 0);
+	m_vao.addAttribute(1, 0, gl::VertexType::INT32, 1, sizeof(int));
+	m_vao.addAttribute(2, 0, gl::VertexType::INT32, 1, sizeof(int) * 2);
 
 	m_vertices = gl::StaticShaderStorageBuffer(sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
 
@@ -121,8 +120,7 @@ ObjModel::~ObjModel()
 void ObjModel::prepareDrawing() const
 {
 	// bind the vertex format
-	assert(m_vao);
-	m_vao->bind();
+	m_vao.bind();
 	m_vertices.bind(0);
 	if (!m_normals.empty())
 		m_normals.bind(1);

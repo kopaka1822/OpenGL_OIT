@@ -167,6 +167,7 @@
     <ClInclude Include="Dependencies\gl\renderbuffer.hpp" />
     <ClInclude Include="Dependencies\gl\sampler.hpp" />
     <ClInclude Include="Dependencies\gl\texture.hpp" />
+    <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp" />
     <ClInclude Include="Dependencies\opengl.h" />
     <ClInclude Include="Dependencies\stbi_helper.h" />
     <ClInclude Include="Framework\Application.h" />
@@ -189,7 +190,6 @@
     <ClInclude Include="Graphics\SamplerCache.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\CachedTexture2D.h" />
-    <ClInclude Include="Graphics\VertexArrayObject.h" />
     <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="ObjModel.h" />
     <ClInclude Include="ObjShape.h" />
@@ -213,7 +213,6 @@
     <ClCompile Include="Graphics\Program.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
     <ClCompile Include="Graphics\CachedTexture2D.cpp" />
-    <ClCompile Include="Graphics\VertexArrayObject.cpp" />
     <ClCompile Include="LinkedVisibility.cpp" />
     <ClCompile Include="ObjModel.cpp" />
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp" />

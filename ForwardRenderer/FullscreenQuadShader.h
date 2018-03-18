@@ -2,7 +2,7 @@
 #include "Graphics/IShader.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Program.h"
-#include "Graphics/VertexArrayObject.h"
+#include "Dependencies/gl/vertexarrayobject.hpp"
 
 /**
  * \brief helper class to draw a fullscreen quad
@@ -31,5 +31,5 @@ public:
 
 private:
 	Program m_program;
-	VertexArrayObject m_vao;
+	gl::VertexArrayObject m_vao;
 };

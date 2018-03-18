@@ -1,9 +1,9 @@
 #pragma once
 #include "Graphics/IModel.h"
 #include <memory>
-#include "Graphics/VertexArrayObject.h"
 #include "Dependencies/gl/buffer.hpp"
 #include "Graphics/SamplerCache.h"
+#include "Dependencies/gl/vertexarrayobject.hpp"
 
 class SimpleMaterial;
 
@@ -22,7 +22,7 @@ private:
 	gl::StaticShaderStorageBuffer m_vertices;
 	gl::StaticShaderStorageBuffer m_normals;
 	gl::StaticShaderStorageBuffer m_texcoords;
-	std::unique_ptr<VertexArrayObject> m_vao;
+	gl::VertexArrayObject m_vao;
 	std::vector<std::unique_ptr<IShape>> m_shapes;
 	std::vector<std::unique_ptr<SimpleMaterial>> m_material;
 };
