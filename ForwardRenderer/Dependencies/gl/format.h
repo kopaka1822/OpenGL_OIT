@@ -155,6 +155,51 @@ namespace gl
 		UINT_10F_11F_11F = GL_UNSIGNED_INT_10F_11F_11F_REV,
 	};
 
+	// Buffers can only use a restricted set of the internal formats
+	enum class TextureBufferFormat
+	{
+		// One channel
+		R8 = GL_R8,
+		R8I = GL_R8I,
+		R8UI = GL_R8UI,
+		R16 = GL_R16,
+		R16I = GL_R16I,
+		R16UI = GL_R16UI,
+		R16F = GL_R16F,
+		R32I = GL_R32I,
+		R32UI = GL_R32UI,
+		R32F = GL_R32F,
+
+		// Two channels
+		RG8 = GL_RG8,
+		RG8I = GL_RG8I,
+		RG8UI = GL_RG8UI,
+		RG16 = GL_RG16,
+		RG16I = GL_RG16I,
+		RG16UI = GL_RG16UI,
+		RG16F = GL_RG16F,
+		RG32I = GL_RG32I,
+		RG32UI = GL_RG32UI,
+		RG32F = GL_RG32F,
+
+		// Three channels
+		RGB32F = GL_RGB32F,
+		RGB32I = GL_RGB32I,
+		RGB32UI = GL_RGB32UI,
+
+		// Four channels
+		RGBA8 = GL_RGBA8,
+		RGBA8I = GL_RGBA8I,
+		RGBA8UI = GL_RGBA8UI,
+		RGBA16 = GL_RGBA16,
+		RGBA16I = GL_RGBA16I,
+		RGBA16UI = GL_RGBA16UI,
+		RGBA16F = GL_RGBA16F,
+		RGBA32I = GL_RGBA32I,
+		RGBA32UI = GL_RGBA32UI,
+		RGBA32F = GL_RGBA32F,
+	};
+
 	inline bool isDepthFormat(InternalFormat format)
 	{
 		switch (format)
