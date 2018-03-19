@@ -33,6 +33,9 @@
     <Filter Include="Source Files\Dependencies\gl">
       <UniqueIdentifier>{7da42d78-6248-46f1-94ec-e00d6acd44a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Renderer">
+      <UniqueIdentifier>{f1f06147-49ff-4af6-9895-b5f3e659c7a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\DebugContext.h">
@@ -60,9 +63,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ObjModel.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleForwardRenderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Shader.h">
@@ -104,16 +104,9 @@
     <ClInclude Include="ScriptEngine\Token.h">
       <Filter>Source Files\ScriptEngine</Filter>
     </ClInclude>
-    <ClInclude Include="AdaptiveTransparencyRenderer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="FullscreenQuadShader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="WeightedTransparency.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LinkedVisibility.h" />
     <ClInclude Include="Graphics\GpuTimer.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
@@ -165,11 +158,20 @@
     <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp">
       <Filter>Source Files\Dependencies\gl</Filter>
     </ClInclude>
+    <ClInclude Include="AdaptiveTransparencyRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleForwardRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="WeightedTransparency.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedVisibility.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ForwardRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Dependencies\glad\src\glad.c">
       <Filter>Source Files\Dependencies\glad\src</Filter>
     </ClCompile>
@@ -181,9 +183,6 @@
     </ClCompile>
     <ClCompile Include="Framework\Application.cpp">
       <Filter>Source Files\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleForwardRenderer.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ObjModel.cpp">
       <Filter>Source Files</Filter>
@@ -200,20 +199,26 @@
     <ClCompile Include="Graphics\ICamera.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="AdaptiveTransparencyRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WeightedTransparency.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LinkedVisibility.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Framework\Profiler.cpp">
       <Filter>Source Files\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\CachedTexture2D.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AdaptiveTransparencyRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleForwardRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="WeightedTransparency.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedVisibility.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="ForwardRenderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

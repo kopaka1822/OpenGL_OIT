@@ -52,16 +52,16 @@ ObjModel::ObjModel(const std::string& filename)
 	m_vao.addAttribute(1, 0, gl::VertexType::INT32, 1, sizeof(int));
 	m_vao.addAttribute(2, 0, gl::VertexType::INT32, 1, sizeof(int) * 2);
 
-	m_vertices = gl::StaticShaderStorageBuffer(sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
+	m_vertices = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGB32F, sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
 
 	if (!attrib.normals.empty())
 	{
-		m_normals = gl::StaticShaderStorageBuffer(sizeof(attrib.normals[0]), GLsizei(attrib.normals.size()), attrib.normals.data());
+		m_normals = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGB32F, sizeof(attrib.normals[0]), GLsizei(attrib.normals.size()), attrib.normals.data());
 
 	}
 	if (!attrib.texcoords.empty())
 	{
-		m_texcoords = gl::StaticShaderStorageBuffer(sizeof(attrib.texcoords[0]), GLsizei(attrib.texcoords.size()), attrib.texcoords.data());
+		m_texcoords = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RG32F, sizeof(attrib.texcoords[0]), GLsizei(attrib.texcoords.size()), attrib.texcoords.data());
 		
 	}
 	
@@ -121,11 +121,14 @@ void ObjModel::prepareDrawing() const
 {
 	// bind the vertex format
 	m_vao.bind();
-	m_vertices.bind(0);
+	//m_vertices.bind(0);
+	m_vertices.bindAsTextureBuffer(4);
 	if (!m_normals.empty())
-		m_normals.bind(1);
+		//m_normals.bind(1);
+		m_normals.bindAsTextureBuffer(5);
 	if (!m_texcoords.empty())
-		m_texcoords.bind(2);
+		//m_texcoords.bind(2);
+		m_texcoords.bindAsTextureBuffer(6);
 }
 
 const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const

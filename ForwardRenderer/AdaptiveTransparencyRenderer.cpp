@@ -105,7 +105,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, IShader* shader, 
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		// apply visibility function
-		m_visibilityFunc.bind(5);
+		m_visibilityFunc.bind(7);
 
 		// darken the background
 		glEnable(GL_BLEND);

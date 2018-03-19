@@ -1,4 +1,4 @@
-renderer = adaptive
+renderer = forward
 camera = projection
 //debugOutput = false
 profileType = latest
@@ -8,9 +8,9 @@ profileType = latest
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
 //camSpeed = 0.001
 
-//camPos = 761.506, 656.085, -143.716
-//camDir =  -0.93403, -0.29552, 0.200637
-//loadObj("Scene/sponza/sponza.obj")
+camPos = 761.506, 656.085, -143.716
+camDir =  -0.93403, -0.29552, 0.200637
+loadObj("Scene/sponza/sponza.obj")
 
 //loadObj("Scene/test.obj")
 
@@ -28,13 +28,13 @@ profileType = latest
 //camDir = 0.0688572, -0.0914645, -0.993427
 //camSpeed =  0.0015625
 
-loadObj("Scene/avent/avent.obj")
-camPos = -5.36067, 1.70059, -1.34476
-camDir = 0.920325, -0.257081, 0.294805
-camSpeed = 0.02
+//loadObj("Scene/avent/avent.obj")
+//camPos = -5.36067, 1.70059, -1.34476
+//camDir = 0.920325, -0.257081, 0.294805
+//camSpeed = 0.02
 
 //execute(profile_all.script)
-profileType = average
+//profileType = average
 //waitIterations(1000)
-execute(profile.script)
+//execute(profile.script)
 //execute(screenshots.script)

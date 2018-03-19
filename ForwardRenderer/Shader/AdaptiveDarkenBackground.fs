@@ -1,7 +1,7 @@
 #version 430 core
 
 layout(location = 0) out vec4 out_fragColor;
-layout(binding = 5) uniform sampler3D tex_visz;
+layout(binding = 7) uniform sampler3D tex_visz;
 
 void main()
 {

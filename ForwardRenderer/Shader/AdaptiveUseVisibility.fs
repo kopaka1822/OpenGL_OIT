@@ -26,7 +26,7 @@ layout(binding = 1) uniform sampler2D tex_dissolve;
 layout(binding = 2) uniform sampler2D tex_diffuse;
 layout(binding = 3) uniform sampler2D tex_specular;
 
-layout(binding = 5) uniform sampler3D tex_visz;
+layout(binding = 7) uniform sampler3D tex_visz;
 
 float visz(float depth)
 {

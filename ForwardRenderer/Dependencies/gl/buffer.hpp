@@ -2,6 +2,7 @@
 #include <cassert>
 #include "../opengl.h"
 #include "id.h"
+#include "format.h"
 
 namespace gl
 {
@@ -127,7 +128,7 @@ namespace gl
 	};
 
 	template <GLenum TType, GLenum TUsage>
-	class TextureBuffer : public Buffer<GL_TEXTURE_BUFFER, TUsage>
+	class TextureBuffer : public Buffer<TType, TUsage>
 	{
 	public:
 		explicit TextureBuffer() = default;
