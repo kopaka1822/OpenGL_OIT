@@ -13,6 +13,7 @@ class SimpleShader : public IShader
 		glm::mat4 model;
 		glm::mat4 viewProjection;
 		glm::vec3 cameraPosition;
+		glm::uint32_t screenWidth = 0;
 	};
 
 	struct MaterialData
@@ -71,10 +72,12 @@ public:
 	void applyCamera(const ICamera& camera) override
 	{
 		if (camera.getPosition() != m_uniformData.cameraPosition
-			|| camera.getProjection() != m_uniformData.viewProjection)
+			|| camera.getProjection() != m_uniformData.viewProjection
+			|| Window::getWidth() != m_uniformData.screenWidth)
 		{
 			m_uniformData.cameraPosition = camera.getPosition();
 			m_uniformData.viewProjection = camera.getProjection();
+			m_uniformData.screenWidth = Window::getWidth();
 
 			m_transformBuffer.update(&m_uniformData);
 		}

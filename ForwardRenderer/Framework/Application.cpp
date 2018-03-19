@@ -19,6 +19,7 @@
 
 #include "../Dependencies/stb_image.h"
 #include "../Dependencies/stbi_helper.h"
+#include "../DynamicFragmentBuffer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -40,6 +41,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<WeightedTransparency>();
 	if (name == "linked")
 		return std::make_unique<LinkedVisibility>();
+	if (name == "dynamic_fragment")
+		return std::make_unique<DynamicFragmentBufferRenderer>();
 
 	throw std::runtime_error("renderer not found");
 }

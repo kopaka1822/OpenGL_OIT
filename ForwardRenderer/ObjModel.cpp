@@ -119,16 +119,20 @@ ObjModel::~ObjModel()
 
 void ObjModel::prepareDrawing() const
 {
+	
+
 	// bind the vertex format
 	m_vao.bind();
-	//m_vertices.bind(0);
 	m_vertices.bindAsTextureBuffer(4);
 	if (!m_normals.empty())
-		//m_normals.bind(1);
 		m_normals.bindAsTextureBuffer(5);
+	// workaround for texture usage stage warning
+	else m_vertices.bindAsTextureBuffer(5);
+
 	if (!m_texcoords.empty())
-		//m_texcoords.bind(2);
 		m_texcoords.bindAsTextureBuffer(6);
+	// workaround for texture usage stage warning
+	else m_vertices.bindAsTextureBuffer(6);
 }
 
 const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const
