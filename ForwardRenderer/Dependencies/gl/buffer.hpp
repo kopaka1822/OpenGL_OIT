@@ -91,6 +91,13 @@ namespace gl
 			glClearBufferData(TType, GL_R32UI, GL_RED, GL_UNSIGNED_INT, &zero);
 		}
 
+		template <class T>
+		void fill(const T& value, InternalFormat bufferInternalFormat, SetDataFormat format, SetDataType type)
+		{
+			bind();
+			glClearBufferData(TType, GLenum(bufferInternalFormat), GLenum(format), GLenum(type), &value);
+		}
+
 		template<class T>
 		std::vector<T> getData()
 		{
@@ -98,6 +105,17 @@ namespace gl
 			res.resize(m_size / sizeof(T));
 			bind();
 			glGetBufferSubData(TType, 0, m_size, res.data());
+			return res;
+		}
+
+		template<class T>
+		T getElement(GLsizei index)
+		{
+			T res;
+			assert(sizeof T == m_elementSize);
+			assert(index < m_elementCount);
+			bind();
+			glGetBufferSubData(TType, index * m_elementSize, m_elementSize, &res);
 			return res;
 		}
 
@@ -183,6 +201,7 @@ namespace gl
 	using ShaderStorageBufferT = Buffer<GL_SHADER_STORAGE_BUFFER, TUsage>;
 	using StaticShaderStorageBuffer = ShaderStorageBufferT<0>;
 	using DynamicShaderStorageBuffer = ShaderStorageBufferT<GL_DYNAMIC_STORAGE_BIT>;
+	using StaticClientShaderStorageBuffer = ShaderStorageBufferT<GL_CLIENT_STORAGE_BIT>;
 
 	template <GLenum TType, GLenum TUsage>
 	using TextureBufferT = TextureBuffer<TType, TUsage>;

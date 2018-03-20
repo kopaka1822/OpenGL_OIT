@@ -3,6 +3,7 @@
 #include "Graphics/Shader.h"
 #include "Graphics/Program.h"
 #include "SimpleShader.h"
+#include <iostream>
 
 static const int WORKGROUP_SIZE = 1024;
 static const int ELEM_PER_THREAD_SCAN = 8;
@@ -16,8 +17,10 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 	auto countFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicCountFragment.fs");
 
 	auto scanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/Scan.comp");
+	auto pushScanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/ScanPush.comp");
 
 	m_scanShader.attach(scanShader).link();
+	m_pushScanShader.attach(pushScanShader).link();
 
 	Program countProgram;
 	countProgram.attach(vertex).attach(countFragments).link();
@@ -25,6 +28,9 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 	m_shaderCountFragments = std::make_unique<SimpleShader>(std::move(countProgram));
 
 	DynamicFragmentBufferRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
+
+	// staging resource for the fragment count
+	m_scanStageBuffer = gl::StaticClientShaderStorageBuffer(sizeof uint32_t);
 }
 
 void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader, const ICamera* camera)
@@ -56,14 +62,14 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
 		// TODO use clear in blend stage
-		m_auxBuffer.at(0).clear();
+		m_countingBuffer.clear();
 	}
 
 	// count fragments
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_COUNT_FRAGMENTS]);
 
-		m_auxBuffer.at(0).bind(5);
+		m_countingBuffer.bind(5);
 
 		// disable colors
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -71,7 +77,6 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 		glDepthMask(GL_FALSE);
 
 		model->prepareDrawing();
-		int shapeCount = 0;
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())
@@ -81,61 +86,44 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 		}
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-		// enable colors
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		// enable depth write
-		glDepthMask(GL_TRUE);
+		// leave colors disabled
 	}
-
-	auto data = m_auxBuffer.at(0).getData<uint32_t>();
-
-	// scan
-	{
-		std::lock_guard<GpuTimer> g(m_timer[T_SCAN]);
-
-		m_scanShader.bind();
-
-		auto bs = m_curScanSize; int i = 0;
-		const auto elemPerWk = WORKGROUP_SIZE * ELEM_PER_THREAD_SCAN;
-		// Hierarchical scan of blocks
-		while (bs > 1)
-		{
-			m_auxBuffer.at(i).bindAsTextureBuffer(0);
-			// shader storage buffer binding
-			m_auxBuffer.at(i).bind(0);
-
-			// Bind the auxiliary buffer for the next step or unbind (in the last step)
-			if (i + 1 < m_auxBuffer.size())
-				// shader storage buffer binding
-				m_auxBuffer.at(i + 1).bind(1);
-			else glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
-
-			glDispatchCompute((bs + elemPerWk - 1) / elemPerWk, 1, 1);
-
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			auto data = m_auxBuffer.at(i).getData<uint32_t>();
-			if(i + 1 < m_auxBuffer.size())
-			{
-				auto data2 = m_auxBuffer.at(i + 1).getData<uint32_t>();
-				int a = 3;
-			}
-
-			bs /= elemPerWk;
-			++i;
-		}
-
-
-	}
+	
+	performScan();
 
 	{
 		// resize
 		std::lock_guard<GpuTimer> g(m_timer[T_RESIZE]);
 
-		GLsizei newSize = 100;
+		auto newSize = m_scanStageBuffer.getElement<uint32_t>(0);
+
 		if (newSize > m_fragmentStorage.getNumElements())
 		{
 			m_fragmentStorage = gl::DynamicShaderStorageBuffer(16, newSize);
 		}
+	}
+
+	{
+		// store fragments
+		std::lock_guard<GpuTimer> g(m_timer[T_STORE_FRAGMENTS]);
+
+		// counter
+		
+
+		// colors are still diabled
+		model->prepareDrawing();
+		for (const auto& s : model->getShapes())
+		{
+			if (s->isTransparent())
+			{
+				s->draw(m_shaderStoreFragments.get());
+			}
+		}
+
+		// enable colors
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		// enable depth write
+		glDepthMask(GL_TRUE);
 	}
 
 	{
@@ -155,21 +143,90 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 	Profiler::set("count_fragments", m_timer[T_COUNT_FRAGMENTS].get());
 	Profiler::set("scan", m_timer[T_SCAN].get());
 	Profiler::set("opaque", m_timer[T_RESIZE].get());
+	Profiler::set("store_fragments", m_timer[T_STORE_FRAGMENTS].get());
 	Profiler::set("sort", m_timer[T_SORT].get());
+}
+
+// alignment that works if alignment is a power of 2
+uint32_t alignPowerOfTwo(uint32_t size, uint32_t alignment)
+{
+	return (size + alignment - 1) & ~(alignment - 1);
 }
 
 void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 {
 	uint32_t alignment = WORKGROUP_SIZE * ELEM_PER_THREAD_SCAN;
-	m_curScanSize = width * height;
-	if (m_curScanSize % alignment != 0)
-		m_curScanSize = ((m_curScanSize / alignment) + 1) * alignment;
+	m_curScanSize = alignPowerOfTwo(width * height, alignment);
+	m_curLastIndex = width * height - 1;
 
+	// buffer for the fragment list length
+	m_countingBuffer = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGBA32UI, GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(m_curScanSize, 4)));
 	uint32_t bs = m_curScanSize;
 	while (bs > 1)
 	{
-		m_auxBuffer.emplace_back(gl::TextureBufferFormat::RGBA32UI, GLsizei(sizeof uint32_t), GLsizei(bs));
+		// buffers for the scan
+		m_auxBuffer.emplace_back(gl::TextureBufferFormat::RGBA32UI, GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(bs, 4)));
 		bs /= alignment;
 	}
-	
+}
+
+void DynamicFragmentBufferRenderer::performScan()
+{
+	std::lock_guard<GpuTimer> g(m_timer[T_SCAN]);
+
+	m_scanShader.bind();
+
+	auto bs = m_curScanSize; int i = 0;
+	const auto elemPerWk = WORKGROUP_SIZE * ELEM_PER_THREAD_SCAN;
+	// Hierarchical scan of blocks
+	while (bs > 1)
+	{
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+
+		if (i == 0) // in the first step the counting buffer should be used
+			m_countingBuffer.bindAsTextureBuffer(0);
+		else
+			m_auxBuffer.at(i).bindAsTextureBuffer(0);
+
+		// shader storage buffer binding
+		m_auxBuffer.at(i).bind(0);
+
+		// Bind the auxiliary buffer for the next step or unbind (in the last step)
+		if (i + 1 < m_auxBuffer.size())
+			// shader storage buffer binding
+			m_auxBuffer.at(i + 1).bind(1);
+		else glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+
+		glUniform1ui(0, m_auxBuffer.at(i).getNumElements());
+		//glUniform1ui(0, 0);
+		glDispatchCompute((bs + elemPerWk - 1) / elemPerWk, 1, 1);
+
+		bs /= elemPerWk;
+		++i;
+	}
+
+	// Complete Intra-block scan by pushing the values up
+	m_pushScanShader.bind();
+	glUniform1ui(0, elemPerWk);
+	glUniform1ui(1, 0);
+
+	m_scanStageBuffer.bind(2);
+
+	--i; bs = m_curScanSize;
+	while (bs > elemPerWk) bs /= elemPerWk;
+	while (bs < m_curScanSize)
+	{
+		bs *= elemPerWk;
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		// bind as shader storage
+		m_auxBuffer.at(i - 1).bind(1);
+		m_auxBuffer.at(i).bind(0);
+
+		if (i == 1) // last write
+			glUniform1ui(1, m_curLastIndex);
+
+		glDispatchCompute((bs - elemPerWk) / 64, 1, 1);
+		--i;
+	}
 }

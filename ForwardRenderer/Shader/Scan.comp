@@ -72,6 +72,7 @@ void intraBlockScan(int threadID)
 	if(lane >= 16) s_temp[threadID] += s_temp[threadID - 16];*/
 }
 
+layout(location = 0) uniform uint u_bufferSize;
 
 void main()
 {
@@ -111,10 +112,15 @@ void main()
 	//idx = int(gl_WorkGroupID.x * WK_SIZE * 2);
 	TYPE blockOffset = threadID < 64 ? 0 : s_blockSums[threadID / 64 - 1];
 	TYPE val = s_temp[threadID] + blockOffset;
-	data[idx] = TYPEV4(val - inputValuesA.w + inputValuesA.xyz, val);
+	if(idx < u_bufferSize / 4)
+		data[idx] = TYPEV4(val - inputValuesA.w + inputValuesA.xyz, val);
+	
+	
 	blockOffset = s_blockSums[(threadID + WK_SIZE) / 64 - 1];
 	val = s_temp[threadID + WK_SIZE] + blockOffset;
-	data[idx + WK_SIZE] = TYPEV4(val - inputValuesB.w + inputValuesB.xyz, val);
+
+	if(idx + WK_SIZE < u_bufferSize / 4)
+		data[idx + WK_SIZE] = TYPEV4(val - inputValuesB.w + inputValuesB.xyz, val);
 	
 	// 5. The last thread in each block must return into the (thickly packed) auxiliary array
 	if(threadID == WK_SIZE-1)
