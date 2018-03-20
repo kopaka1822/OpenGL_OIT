@@ -160,12 +160,18 @@ void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 	m_curLastIndex = width * height - 1;
 
 	// buffer for the fragment list length
-	m_countingBuffer = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGBA32UI, GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(m_curScanSize, 4)));
+	m_countingBuffer = gl::StaticShaderStorageBuffer(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(m_curScanSize, 4)));
+	m_countingTextureView = gl::TextureBuffer(gl::TextureBufferFormat::RGBA32UI, m_countingBuffer);
+
+	m_auxBuffer.clear();
+	m_auxTextureViews.clear();
+
 	uint32_t bs = m_curScanSize;
 	while (bs > 1)
 	{
 		// buffers for the scan
-		m_auxBuffer.emplace_back(gl::TextureBufferFormat::RGBA32UI, GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(bs, 4)));
+		m_auxBuffer.emplace_back(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(bs, 4)));
+		m_auxTextureViews.emplace_back(gl::TextureBufferFormat::RGBA32UI, m_auxBuffer.back());
 		bs /= alignment;
 	}
 }
@@ -184,9 +190,9 @@ void DynamicFragmentBufferRenderer::performScan()
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
 		if (i == 0) // in the first step the counting buffer should be used
-			m_countingBuffer.bindAsTextureBuffer(0);
+			m_countingTextureView.bind(0);
 		else
-			m_auxBuffer.at(i).bindAsTextureBuffer(0);
+			m_auxTextureViews.at(i).bind(0);
 
 		// shader storage buffer binding
 		m_auxBuffer.at(i).bind(0);

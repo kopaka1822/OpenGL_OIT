@@ -52,17 +52,18 @@ ObjModel::ObjModel(const std::string& filename)
 	m_vao.addAttribute(1, 0, gl::VertexType::INT32, 1, sizeof(int));
 	m_vao.addAttribute(2, 0, gl::VertexType::INT32, 1, sizeof(int) * 2);
 
-	m_vertices = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGB32F, sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
+	m_vertices = gl::StaticShaderStorageBuffer(sizeof(attrib.vertices[0]), GLsizei(attrib.vertices.size()), attrib.vertices.data());
+	m_verticesTextureView = gl::TextureBuffer(gl::TextureBufferFormat::RGB32F, m_vertices);
 
 	if (!attrib.normals.empty())
 	{
-		m_normals = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RGB32F, sizeof(attrib.normals[0]), GLsizei(attrib.normals.size()), attrib.normals.data());
-
+		m_normals = gl::StaticShaderStorageBuffer(sizeof(attrib.normals[0]), GLsizei(attrib.normals.size()), attrib.normals.data());
+		m_normalsTextureView = gl::TextureBuffer(gl::TextureBufferFormat::RGB32F, m_normals);
 	}
 	if (!attrib.texcoords.empty())
 	{
-		m_texcoords = gl::StaticTextureShaderStorageBuffer(gl::TextureBufferFormat::RG32F, sizeof(attrib.texcoords[0]), GLsizei(attrib.texcoords.size()), attrib.texcoords.data());
-		
+		m_texcoords = gl::StaticShaderStorageBuffer(sizeof(attrib.texcoords[0]), GLsizei(attrib.texcoords.size()), attrib.texcoords.data());
+		m_texcoordsTextureView = gl::TextureBuffer(gl::TextureBufferFormat::RG32F, m_texcoords);
 	}
 	
 	std::cerr << "INF: creating material" << std::endl;
@@ -123,16 +124,16 @@ void ObjModel::prepareDrawing() const
 
 	// bind the vertex format
 	m_vao.bind();
-	m_vertices.bindAsTextureBuffer(4);
+	m_verticesTextureView.bind(4);
 	if (!m_normals.empty())
-		m_normals.bindAsTextureBuffer(5);
+		m_normalsTextureView.bind(5);
 	// workaround for texture usage stage warning
-	else m_vertices.bindAsTextureBuffer(5);
+	else m_verticesTextureView.bind(5);
 
 	if (!m_texcoords.empty())
-		m_texcoords.bindAsTextureBuffer(6);
+		m_texcoordsTextureView.bind(6);
 	// workaround for texture usage stage warning
-	else m_vertices.bindAsTextureBuffer(6);
+	else m_verticesTextureView.bind(6);
 }
 
 const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const

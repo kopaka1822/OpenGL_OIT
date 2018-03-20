@@ -22,8 +22,10 @@ private:
 	std::unique_ptr<IShader> m_shaderSortFragments;
 
 	gl::DynamicShaderStorageBuffer m_fragmentStorage;
-	gl::StaticTextureShaderStorageBuffer m_countingBuffer;
-	std::vector<gl::StaticTextureShaderStorageBuffer> m_auxBuffer;
+	gl::StaticShaderStorageBuffer m_countingBuffer;
+	gl::TextureBuffer m_countingTextureView;
+	std::vector<gl::StaticShaderStorageBuffer> m_auxBuffer;
+	std::vector<gl::TextureBuffer> m_auxTextureViews;
 	gl::StaticClientShaderStorageBuffer m_scanStageBuffer;
 
 	Program m_scanShader;

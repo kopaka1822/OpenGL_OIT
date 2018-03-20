@@ -138,6 +138,11 @@ namespace gl
 		{
 			return m_size == 0;
 		}
+
+		GLuint getId() const
+		{
+			return m_id;
+		}
 	protected:
 		unique<GLuint> m_id;
 		unique<GLsizei> m_elementCount;
@@ -145,28 +150,17 @@ namespace gl
 		unique<GLsizei> m_size;
 	};
 
-	template <GLenum TType, GLenum TUsage>
-	class TextureBuffer : public Buffer<TType, TUsage>
+	class TextureBuffer
 	{
 	public:
 		explicit TextureBuffer() = default;
-		explicit TextureBuffer(TextureBufferFormat format, GLsizei elementSize, GLsizei elementCount = 1, const void* data = nullptr)
-			:
-		Buffer(elementSize, elementCount, data)
+		template <GLenum TType, GLenum TUsage>
+		explicit TextureBuffer(TextureBufferFormat format, const Buffer<TType, TUsage>& buffer)
 		{
 			glGenTextures(1, &m_texId);
 			glBindTexture(GL_TEXTURE_BUFFER, m_texId);
-			glTexBuffer(GL_TEXTURE_BUFFER, GLenum(format), m_id);
+			glTexBuffer(GL_TEXTURE_BUFFER, GLenum(format), buffer.getId());
 		}
-
-		/// \brief 
-		/// \param data buffer data
-		/// \param elementStride number of components (T) for one element. E.g. vector<float> would have an elementStride of 3 for vec3 elements.
-		template<class T>
-		explicit TextureBuffer(TextureBufferFormat format, const std::vector<T>& data, GLsizei elementStride = 1)
-			:
-		TextureBuffer(format, sizeof T * elementStride, GLsizei(data.size()) / elementStride, data.data())
-		{}
 
 		virtual ~TextureBuffer()
 		{
@@ -178,7 +172,7 @@ namespace gl
 		TextureBuffer(TextureBuffer&&) = default;
 		TextureBuffer& operator=(TextureBuffer&&) = default;
 
-		void bindAsTextureBuffer(GLuint slot) const
+		void bind(GLuint slot) const
 		{
 			glActiveTexture(GL_TEXTURE0 + slot);
 			glBindTexture(GL_TEXTURE_BUFFER, m_texId);
@@ -202,11 +196,6 @@ namespace gl
 	using StaticShaderStorageBuffer = ShaderStorageBufferT<0>;
 	using DynamicShaderStorageBuffer = ShaderStorageBufferT<GL_DYNAMIC_STORAGE_BIT>;
 	using StaticClientShaderStorageBuffer = ShaderStorageBufferT<GL_CLIENT_STORAGE_BIT>;
-
-	template <GLenum TType, GLenum TUsage>
-	using TextureBufferT = TextureBuffer<TType, TUsage>;
-	using StaticTextureShaderStorageBuffer = TextureBufferT<GL_SHADER_STORAGE_BUFFER, 0>;
-	using DynamicTextureShaderStorageBuffer = TextureBufferT<GL_SHADER_STORAGE_BUFFER, GL_DYNAMIC_STORAGE_BIT>;
 
 	template <GLenum TUsage>
 	using UniformBufferT = Buffer<GL_UNIFORM_BUFFER, TUsage>;
