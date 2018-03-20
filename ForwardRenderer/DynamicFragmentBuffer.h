@@ -23,7 +23,7 @@ private:
 
 	gl::DynamicShaderStorageBuffer m_fragmentStorage;
 	gl::StaticShaderStorageBuffer m_countingBuffer;
-	gl::TextureBuffer m_countingTextureView;
+	gl::TextureBuffer m_countingTextureRGBAView;
 	std::vector<gl::StaticShaderStorageBuffer> m_auxBuffer;
 	std::vector<gl::TextureBuffer> m_auxTextureViews;
 	gl::StaticClientShaderStorageBuffer m_scanStageBuffer;

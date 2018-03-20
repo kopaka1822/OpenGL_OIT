@@ -99,7 +99,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 
 		if (newSize > m_fragmentStorage.getNumElements())
 		{
-			m_fragmentStorage = gl::DynamicShaderStorageBuffer(16, newSize);
+			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, newSize);
 		}
 	}
 
@@ -108,7 +108,9 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 		std::lock_guard<GpuTimer> g(m_timer[T_STORE_FRAGMENTS]);
 
 		// counter
-		
+		m_countingBuffer.bind(5);
+		// base buffer
+		m_auxBuffer.front().bind(6);
 
 		// colors are still diabled
 		model->prepareDrawing();
@@ -161,7 +163,7 @@ void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 
 	// buffer for the fragment list length
 	m_countingBuffer = gl::StaticShaderStorageBuffer(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(m_curScanSize, 4)));
-	m_countingTextureView = gl::TextureBuffer(gl::TextureBufferFormat::RGBA32UI, m_countingBuffer);
+	m_countingTextureRGBAView = gl::TextureBuffer(gl::TextureBufferFormat::RGBA32UI, m_countingBuffer);
 
 	m_auxBuffer.clear();
 	m_auxTextureViews.clear();
@@ -190,7 +192,7 @@ void DynamicFragmentBufferRenderer::performScan()
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
 		if (i == 0) // in the first step the counting buffer should be used
-			m_countingTextureView.bind(0);
+			m_countingTextureRGBAView.bind(0);
 		else
 			m_auxTextureViews.at(i).bind(0);
 

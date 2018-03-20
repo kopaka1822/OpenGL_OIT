@@ -45,13 +45,6 @@ void main()
 	
 	// angle for diffuse
 	float cosTheta = dot(-LIGHT_DIR, normal);
-	/*if(cosTheta > 0.0)
-		out_fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-	else if(cosTheta < 0.0)
-		out_fragColor = vec4(0.0, 0.0, 1.0, 1.0);
-	else
-		out_fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-	return;*/
 	// angle for specular color
 	vec3 viewDir = normalize(in_position - u_cameraPosition);
 	float HdotN = dot(normalize(viewDir + LIGHT_DIR), normal);

@@ -18,20 +18,6 @@ layout(binding = 4) uniform samplerBuffer buf_positions;
 layout(binding = 5) uniform samplerBuffer buf_normals;
 layout(binding = 6) uniform samplerBuffer buf_texCoords;
 
-/*layout(binding = 0, std430) buffer ssbo_positions
-{
-	float[] b_positions;
-};
-
-layout(binding = 1, std430) buffer ssbo_normals
-{
-	float[] b_normals;
-};
-
-layout(binding = 2, std430) buffer ssbo_texCoords
-{
-	float[] b_texCoords;
-};*/
 
 layout(location = 0) out vec3 out_position;
 layout(location = 1) out vec3 out_normal;
