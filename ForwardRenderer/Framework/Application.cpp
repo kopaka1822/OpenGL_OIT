@@ -113,6 +113,13 @@ Application::Application()
 	ICamera::initScripts();
 
 	m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
+	
+	ScriptEngine::addFunction("reloadShader", [this](const std::vector<Token>& args)
+	{
+		m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
+		std::cerr << "reloaded shader\n";
+	});
+
 }
 
 void Application::tick()
