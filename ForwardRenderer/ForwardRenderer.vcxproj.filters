@@ -165,6 +165,9 @@
     <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp">
       <Filter>Source Files\Dependencies\gl</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\gl\shader.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ForwardRenderer.cpp">

@@ -166,6 +166,7 @@
     <ClInclude Include="Dependencies\gl\query.h" />
     <ClInclude Include="Dependencies\gl\renderbuffer.hpp" />
     <ClInclude Include="Dependencies\gl\sampler.hpp" />
+    <ClInclude Include="Dependencies\gl\shader.hpp" />
     <ClInclude Include="Dependencies\gl\texture.hpp" />
     <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp" />
     <ClInclude Include="Dependencies\opengl.h" />
