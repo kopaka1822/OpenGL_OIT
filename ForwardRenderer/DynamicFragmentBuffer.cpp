@@ -4,6 +4,7 @@
 #include "Graphics/Program.h"
 #include "SimpleShader.h"
 #include <iostream>
+#include <glad/glad.h>
 
 static const int WORKGROUP_SIZE = 1024;
 static const int ELEM_PER_THREAD_SCAN = 8;
@@ -15,6 +16,8 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 	// geometry build normals if they are not present
 	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
 	auto countFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicCountFragment.fs");
+	auto storeFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicStoreFragment.fs");
+	auto sortBlendShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicSortBlendFragment.fs");
 
 	auto scanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/Scan.comp");
 	auto pushScanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/ScanPush.comp");
@@ -25,7 +28,12 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 	Program countProgram;
 	countProgram.attach(vertex).attach(countFragments).link();
 
+	Program storeProgram;
+	storeProgram.attach(vertex).attach(geometry).attach(storeFragments).link();
+
 	m_shaderCountFragments = std::make_unique<SimpleShader>(std::move(countProgram));
+	m_shaderStoreFragments = std::make_unique<SimpleShader>(std::move(storeProgram));
+	m_shaderSortBlendFragments = std::make_unique<FullscreenQuadShader>(sortBlendShader);
 
 	DynamicFragmentBufferRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
 
@@ -41,6 +49,8 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 
 	shader->applyCamera(*camera);
 	m_shaderCountFragments->applyCamera(*camera);
+	m_shaderStoreFragments->applyCamera(*camera);
+	
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
@@ -61,8 +71,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 	// reset visibility function data
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
-		// TODO use clear in blend stage
-		m_countingBuffer.clear();
+		// nothing needs to be cleard?
 	}
 
 	// count fragments
@@ -107,10 +116,12 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 		// store fragments
 		std::lock_guard<GpuTimer> g(m_timer[T_STORE_FRAGMENTS]);
 
-		// counter
+		// counter (will be counted down to 0's)
 		m_countingBuffer.bind(5);
 		// base buffer
 		m_auxBuffer.front().bind(6);
+		// storage
+		m_fragmentStorage.bind(7);
 
 		// colors are still diabled
 		model->prepareDrawing();
@@ -124,15 +135,31 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 
 		// enable colors
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		// enable depth write
-		glDepthMask(GL_TRUE);
+
+		// TODO is this required?
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 
 	{
 		// sort and blend
 		std::lock_guard<GpuTimer> g(m_timer[T_SORT]);
 
+		// base buffer for list length determination
+		m_auxBuffer.front().bind(6);
+		// storage data
+		m_fragmentStorage.bind(7);
 
+		// set up blending
+		glEnable(GL_BLEND);
+		// add final color and darken the background
+		glBlendFunc(GL_ONE, GL_SRC_ALPHA);
+
+		m_shaderSortBlendFragments->draw();
+
+		glDisable(GL_BLEND);
+
+		// enable depth write
+		glDepthMask(GL_TRUE);
 	}
 
 
@@ -144,7 +171,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 	Profiler::set("opaque", m_timer[T_OPAQUE].get());
 	Profiler::set("count_fragments", m_timer[T_COUNT_FRAGMENTS].get());
 	Profiler::set("scan", m_timer[T_SCAN].get());
-	Profiler::set("opaque", m_timer[T_RESIZE].get());
+	Profiler::set("resize", m_timer[T_RESIZE].get());
 	Profiler::set("store_fragments", m_timer[T_STORE_FRAGMENTS].get());
 	Profiler::set("sort", m_timer[T_SORT].get());
 }
@@ -164,6 +191,8 @@ void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 	// buffer for the fragment list length
 	m_countingBuffer = gl::StaticShaderStorageBuffer(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(m_curScanSize, 4)));
 	m_countingTextureRGBAView = gl::TextureBuffer(gl::TextureBufferFormat::RGBA32UI, m_countingBuffer);
+	// reset to 0's
+	m_countingBuffer.clear();
 
 	m_auxBuffer.clear();
 	m_auxTextureViews.clear();
@@ -176,6 +205,10 @@ void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 		m_auxTextureViews.emplace_back(gl::TextureBufferFormat::RGBA32UI, m_auxBuffer.back());
 		bs /= alignment;
 	}
+
+	// store screen width for sort blend indexing
+	m_shaderSortBlendFragments->bind();
+	glUniform1ui(0, width);
 }
 
 void DynamicFragmentBufferRenderer::performScan()

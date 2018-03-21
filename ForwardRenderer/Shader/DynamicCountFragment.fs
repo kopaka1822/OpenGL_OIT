@@ -39,9 +39,11 @@ void main()
 	// take the diffuse texture alpha since its sometimes meant to be the alpha
 	dissolve *= texture(tex_diffuse, in_texcoord).a;
 	
-	// count fragment
-	uint index = uint(gl_FragCoord.y) * u_screenWidth + uint(gl_FragCoord.x);
-	atomicAdd(b_fragmentCount[index], 1);
-	
+	if(dissolve > 0.0)
+	{
+		// count fragment
+		uint index = uint(gl_FragCoord.y) * u_screenWidth + uint(gl_FragCoord.x);
+		atomicAdd(b_fragmentCount[index], 1);
+	}
 	out_fragColor = vec4(0.0);
 }

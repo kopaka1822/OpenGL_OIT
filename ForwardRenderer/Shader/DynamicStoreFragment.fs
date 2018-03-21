@@ -43,7 +43,7 @@ struct Fragment
 {
 	float depth;
 	uint color;
-}
+};
 
 layout(binding = 7, std430) writeonly buffer ssbo_fragmentStore
 {
@@ -64,30 +64,36 @@ void main()
 	// take the diffuse texture alpha since its sometimes meant to be the alpha
 	dissolve *= texture(tex_diffuse, in_texcoord).a;
 	
-	vec3 normal = normalize(in_normal);
+	if(dissolve > 0.0)
+	{
+			vec3 normal = normalize(in_normal);
 	
-	// angle for diffuse
-	float cosTheta = dot(-LIGHT_DIR, normal);
-	// angle for specular color
-	vec3 viewDir = normalize(in_position - u_cameraPosition);
-	float HdotN = dot(normalize(viewDir + LIGHT_DIR), normal);
-	
-	vec3 color = 
-		max(vec3(0.0), ambient_col) + // ambient color
-		max(vec3(0.0), diffuse_col * cosTheta) + // diffuse color
-		max(vec3(0.0), specular_col * pow(max(0.0, -HdotN), m_specular.a)) +
-		diffuse_col * 0.01;
+			// angle for diffuse
+			float cosTheta = dot(-LIGHT_DIR, normal);
+			// angle for specular color
+			vec3 viewDir = normalize(in_position - u_cameraPosition);
+			float HdotN = dot(normalize(viewDir + LIGHT_DIR), normal);
+			
+			vec3 color = 
+				max(vec3(0.0), ambient_col) + // ambient color
+				max(vec3(0.0), diffuse_col * cosTheta) + // diffuse color
+				max(vec3(0.0), specular_col * pow(max(0.0, -HdotN), m_specular.a)) +
+				diffuse_col * 0.01;
 
-	// store color etc.
-	uint index = uint(gl_FragCoord.y) * u_screenWidth + uint(gl_FragCoord.x);
-	uint offset = atomicAdd(b_fragmentCount[], uint(-1)) - 1;
-	uint base = 0;
-	if(index > 0)
-		base = b_fragmentBase[index - 1];
+			// store color etc.
+			uint index = uint(gl_FragCoord.y) * u_screenWidth + uint(gl_FragCoord.x);
+			uint offset = atomicAdd(b_fragmentCount[index], uint(-1)) - 1;
+			uint base = 0;
+			if(index > 0)
+				base = b_fragmentBase[index - 1];
+			
+			// store
+			uint storeIdx = base + offset;
+			
+			b_fragmentDest[storeIdx].depth = distance(u_cameraPosition, in_position);
+			b_fragmentDest[storeIdx].color = packUnorm4x8(vec4(color, dissolve));
+	}
 	
-	// store
-	uint storeIdx = base + offset;
 	
-	
-	out_fragColor = vec4(color, dissolve);
+	out_fragColor = vec4(0.0);
 }

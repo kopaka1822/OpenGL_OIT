@@ -1,18 +1,19 @@
-renderer = forward
+renderer = dynamic_fragment
 camera = projection
 //debugOutput = false
 profileType = latest
 
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
-//loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//camSpeed = 0.001
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
+loadObj("Scene/miguel/san-miguel-low-poly.obj")
+camSpeed = 0.001
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
 
-loadObj("Scene/test.obj")
+//camSpeed = 0.01
+//loadObj("Scene/test.obj")
 
 //camPos = 1708.72, 1501.76, -831.255
 //camDir = -0.83374, -0.352274, 0.425183

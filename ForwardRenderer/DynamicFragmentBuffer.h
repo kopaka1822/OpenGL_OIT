@@ -4,6 +4,7 @@
 #include "Graphics/GpuTimer.h"
 #include "Dependencies/gl/buffer.hpp"
 #include "Graphics/Program.h"
+#include "FullscreenQuadShader.h"
 
 class DynamicFragmentBufferRenderer : public IRenderer, public IWindowReceiver
 {
@@ -20,6 +21,7 @@ private:
 	std::unique_ptr<IShader> m_shaderCountFragments;
 	std::unique_ptr<IShader> m_shaderStoreFragments;
 	std::unique_ptr<IShader> m_shaderSortFragments;
+	std::unique_ptr<FullscreenQuadShader> m_shaderSortBlendFragments;
 
 	gl::DynamicShaderStorageBuffer m_fragmentStorage;
 	gl::StaticShaderStorageBuffer m_countingBuffer;

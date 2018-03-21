@@ -144,7 +144,7 @@ void main()
 	// take the diffuse texture alpha since its sometimes meant to be the alpha
 	dissolve *= texture(tex_diffuse, in_texcoord).a;
 	float dist = distance(u_cameraPosition, in_position);
-	if(dissolve >= 0.0 && !gl_HelperInvocation) // is it event visible?
+	if(dissolve > 0.0 && !gl_HelperInvocation) // is it event visible?
 	{
 		
 		bool keepWaiting = true;
