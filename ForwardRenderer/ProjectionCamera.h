@@ -121,7 +121,7 @@ public:
 private:
 	void calcProjection()
 	{
-		m_projection = glm::perspective(s_fov * 3.1415926f / 180.0f, m_aspect, 0.1f, 10000000.0f)
+		m_projection = glm::perspective(s_fov * 3.1415926f / 180.0f, m_aspect, s_nearPlane, s_farPlane)
 			* glm::lookAt(s_position, s_position + s_direction, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 

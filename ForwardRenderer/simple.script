@@ -12,6 +12,7 @@ loadObj("Scene/powerplant/powerplant.obj")
 camSpeed = 40
 camPos = 107055, 86794.4, 116970
 camDir = -0.747132, -0.179029, -0.640115
+camNear = 10
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637

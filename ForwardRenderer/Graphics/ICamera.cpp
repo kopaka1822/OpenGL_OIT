@@ -6,6 +6,8 @@ glm::vec3 ICamera::s_position = glm::vec3(-1.0f, 0.0f, 0.0f);
 glm::vec3 ICamera::s_direction = glm::vec3(1.0f, 0.0f, 0.0f);
 float ICamera::s_fov = 40.0f;
 float ICamera::s_speed = 0.1f;
+float ICamera::s_nearPlane = 0.1f;
+float ICamera::s_farPlane = 10000000.0f;
 
 void ICamera::initScripts()
 {
@@ -35,6 +37,30 @@ void ICamera::initScripts()
 		if (args[0].getType() != Token::Type::Number)
 			throw std::runtime_error("please provide fov degree");
 		s_fov = args[0].getFloat();
+	});
+
+	ScriptEngine::addProperty("camNear", []()
+	{
+		std::cout << "near: " << s_nearPlane << std::endl;
+	}, [](std::vector<Token> args)
+	{
+		if (args.size() == 0)
+			throw std::runtime_error("please provide near plane distance");
+		if (args[0].getType() != Token::Type::Number)
+			throw std::runtime_error("please provide near plane distance");
+		s_nearPlane = args[0].getFloat();
+	});
+
+	ScriptEngine::addProperty("camFar", []()
+	{
+		std::cout << "far: " << s_farPlane << std::endl;
+	}, [](std::vector<Token> args)
+	{
+		if (args.size() == 0)
+			throw std::runtime_error("please provide far plane distance");
+		if (args[0].getType() != Token::Type::Number)
+			throw std::runtime_error("please provide far plane distance");
+		s_farPlane = args[0].getFloat();
 	});
 
 	ScriptEngine::addProperty("camPos", []()

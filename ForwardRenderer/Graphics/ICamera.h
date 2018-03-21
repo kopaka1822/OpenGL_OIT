@@ -14,4 +14,6 @@ protected:
 	static glm::vec3 s_direction;
 	static float s_fov;
 	static float s_speed;
+	static float s_nearPlane;
+	static float s_farPlane;
 };
