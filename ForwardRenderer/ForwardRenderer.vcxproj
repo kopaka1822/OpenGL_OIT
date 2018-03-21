@@ -163,6 +163,7 @@
     <ClInclude Include="Dependencies\gl\format.h" />
     <ClInclude Include="Dependencies\gl\framebuffer.hpp" />
     <ClInclude Include="Dependencies\gl\id.h" />
+    <ClInclude Include="Dependencies\gl\program.hpp" />
     <ClInclude Include="Dependencies\gl\query.h" />
     <ClInclude Include="Dependencies\gl\renderbuffer.hpp" />
     <ClInclude Include="Dependencies\gl\sampler.hpp" />

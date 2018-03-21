@@ -173,6 +173,12 @@
     <ClInclude Include="DynamicFragmentBuffer.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\gl\shader.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\gl\program.hpp">
+      <Filter>Source Files\Dependencies\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">

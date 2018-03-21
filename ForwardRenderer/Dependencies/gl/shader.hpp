@@ -36,7 +36,7 @@ namespace gl
 		{
 			return m_id;
 		}
-		void compile(GLsizei count, const char* const* source, const char* debugName = "")
+		Shader& compile(GLsizei count, const char* const* source, const char* debugName = "")
 		{
 			glShaderSource(m_id, count, source, nullptr);
 
@@ -54,6 +54,7 @@ namespace gl
 				glGetShaderInfoLog(m_id, length, &length, &errorLog[0]);
 				throw std::runtime_error("failed to compile shader " + std::string(debugName) + "\n" + errorLog);
 			}
+			return *this;
 		}
 
 	private:
