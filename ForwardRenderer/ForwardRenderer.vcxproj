@@ -206,8 +206,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdaptiveTransparencyRenderer.cpp" />
-    <ClCompile Include="Dependencies\filewatcher\source\FileWatcher.cpp" />
-    <ClCompile Include="Dependencies\filewatcher\source\FileWatcherWin32.cpp" />
     <ClCompile Include="Dependencies\glad\src\glad.c" />
     <ClCompile Include="DynamicFragmentBuffer.cpp" />
     <ClCompile Include="ForwardRenderer.cpp" />

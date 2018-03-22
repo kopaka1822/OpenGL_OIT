@@ -36,9 +36,6 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{f1f06147-49ff-4af6-9895-b5f3e659c7a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Dependencies\filewatcher">
-      <UniqueIdentifier>{55b139d5-3844-4aa9-9d79-fe60081786ce}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\DebugContext.h">
@@ -228,12 +225,6 @@
     </ClCompile>
     <ClCompile Include="Graphics\HotReloadShader.cpp">
       <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\filewatcher\source\FileWatcher.cpp">
-      <Filter>Source Files\Dependencies\filewatcher</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\filewatcher\source\FileWatcherWin32.cpp">
-      <Filter>Source Files\Dependencies\filewatcher</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
