@@ -13,8 +13,12 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 {
 	// build the shaders
 	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-	// geometry build normals if they are not present
 	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
+	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
+	Program defaultProgram;
+	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
+	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
+
 	auto countFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicCountFragment.fs");
 	auto storeFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicStoreFragment.fs");
 	auto sortBlendShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicSortBlendFragment.fs");
@@ -41,13 +45,13 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 	m_scanStageBuffer = gl::StaticClientShaderStorageBuffer(sizeof uint32_t);
 }
 
-void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader, const ICamera* camera)
+void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* camera)
 {
 	// uniform updates etc.
-	if (!model || !shader || !camera)
+	if (!model || !camera)
 		return;
 
-	shader->applyCamera(*camera);
+	m_defaultShader->applyCamera(*camera);
 	m_shaderCountFragments->applyCamera(*camera);
 	m_shaderStoreFragments->applyCamera(*camera);
 	
@@ -64,7 +68,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, IShader* shader,
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
-				s->draw(shader);
+				s->draw(m_defaultShader.get());
 		}
 	}
 

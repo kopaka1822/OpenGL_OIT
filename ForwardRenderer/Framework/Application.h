@@ -27,7 +27,6 @@ private:
 	Window m_window;
 	std::unique_ptr<IRenderer> m_renderer;
 	std::unique_ptr<IModel> m_model;
-	std::unique_ptr<IShader> m_shader;
 	std::unique_ptr<ICamera> m_camera;
 	std::string m_screenshotDestination;
 };

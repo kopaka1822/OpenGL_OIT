@@ -7,5 +7,5 @@ class IRenderer
 {
 public:
 	virtual ~IRenderer(){}
-	virtual void render(const IModel* model, IShader* shader, const ICamera* camera) = 0;
+	virtual void render(const IModel* model, const ICamera* camera) = 0;
 };

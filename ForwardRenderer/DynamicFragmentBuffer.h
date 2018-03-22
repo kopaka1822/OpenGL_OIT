@@ -10,7 +10,7 @@ class DynamicFragmentBufferRenderer : public IRenderer, public IWindowReceiver
 {
 public:
 	DynamicFragmentBufferRenderer();
-	void render(const IModel* model, IShader* shader, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera) override;
 
 	void onSizeChange(int width, int height) override;
 
@@ -18,6 +18,7 @@ private:
 	void performScan();
 
 private:
+	std::unique_ptr<IShader> m_defaultShader;
 	std::unique_ptr<IShader> m_shaderCountFragments;
 	std::unique_ptr<IShader> m_shaderStoreFragments;
 	std::unique_ptr<IShader> m_shaderSortFragments;

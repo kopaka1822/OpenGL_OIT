@@ -10,8 +10,13 @@ WeightedTransparency::WeightedTransparency()
 	m_quadShader = std::make_unique<FullscreenQuadShader>(combineShader);
 
 	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-	auto transShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/WeightedTransparent.fs");
 	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
+	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
+	Program defaultProgram;
+	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
+	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
+
+	auto transShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/WeightedTransparent.fs");
 
 	Program transProgram;
 	transProgram.attach(vertex).attach(geometry).attach(transShader).link();
@@ -21,9 +26,9 @@ WeightedTransparency::WeightedTransparency()
 	WeightedTransparency::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void WeightedTransparency::render(const IModel * model, IShader * shader, const ICamera * camera)
+void WeightedTransparency::render(const IModel * model, const ICamera * camera)
 {
-	if (!model || !shader || !camera)
+	if (!model || !camera)
 		return;
 
 	{
@@ -34,12 +39,12 @@ void WeightedTransparency::render(const IModel * model, IShader * shader, const 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader->applyCamera(*camera);
+		m_defaultShader->applyCamera(*camera);
 		model->prepareDrawing();
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
-				s->draw(shader);
+				s->draw(m_defaultShader.get());
 		}
 	}
 

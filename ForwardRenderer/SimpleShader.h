@@ -5,6 +5,7 @@
 #include "Graphics/IMaterial.h"
 #include "Dependencies/gl/buffer.hpp"
 #include "Graphics/SamplerCache.h"
+#include "Window.h"
 
 class SimpleShader : public IShader
 {

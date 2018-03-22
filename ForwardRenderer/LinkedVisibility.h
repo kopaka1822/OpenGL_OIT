@@ -12,10 +12,11 @@ class LinkedVisibility : public IRenderer, public IWindowReceiver
 public:
 	LinkedVisibility();
 
-	void render(const IModel* model, IShader* shader, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera) override;
 	void onSizeChange(int width, int height) override;
 
 private:
+	std::unique_ptr<IShader> m_defaultShader;
 	std::unique_ptr<IShader> m_shaderBuildVisz;
 	std::unique_ptr<IShader> m_shaderApplyVisz;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;

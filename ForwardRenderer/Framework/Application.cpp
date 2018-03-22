@@ -111,15 +111,6 @@ Application::Application()
 	});
 
 	ICamera::initScripts();
-
-	m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
-	
-	ScriptEngine::addFunction("reloadShader", [this](const std::vector<Token>& args)
-	{
-		m_shader = std::make_unique<SimpleShader>(SimpleShader::getLinkedDefaultProgram());
-		std::cerr << "reloaded shader\n";
-	});
-
 }
 
 void Application::tick()
@@ -136,7 +127,7 @@ void Application::tick()
 		r->tick(dt);
 
 	if (m_renderer)
-		m_renderer->render(m_model.get(), m_shader.get(), m_camera.get());
+		m_renderer->render(m_model.get(), m_camera.get());
 	
 	if(!m_screenshotDestination.empty())
 	{

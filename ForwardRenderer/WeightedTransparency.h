@@ -11,7 +11,7 @@ class WeightedTransparency : public IRenderer, public IWindowReceiver
 {
 public:
 	WeightedTransparency();
-	void render(const IModel* model, IShader* shader, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera) override;
 
 	void onSizeChange(int width, int height) override;
 private:
@@ -22,6 +22,8 @@ private:
 
 	gl::Framebuffer m_transparentFramebuffer = gl::Framebuffer::empty();
 	gl::Framebuffer m_opaqueFramebuffer = gl::Framebuffer::empty();
+
+	std::unique_ptr<IShader> m_defaultShader;
 	std::unique_ptr<FullscreenQuadShader> m_quadShader;
 	std::unique_ptr<IShader> m_transShader;
 

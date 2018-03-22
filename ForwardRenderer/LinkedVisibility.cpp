@@ -14,6 +14,10 @@ LinkedVisibility::LinkedVisibility()
 	// build the shaders
 	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
 	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
+	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
+	Program defaultProgram;
+	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
+	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
 
 	auto buildVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/LinkedBuildVisibility.fs");
 	auto useVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/LinkedUseVisibility.fs");
@@ -34,12 +38,12 @@ LinkedVisibility::LinkedVisibility()
 	LinkedVisibility::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamera* camera)
+void LinkedVisibility::render(const IModel* model, const ICamera* camera)
 {
-	if (!model || !shader || !camera)
+	if (!model || !camera)
 		return;
 	
-	shader->applyCamera(*camera);
+	m_defaultShader->applyCamera(*camera);
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
 
@@ -61,7 +65,7 @@ void LinkedVisibility::render(const IModel* model, IShader* shader, const ICamer
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
-				s->draw(shader);
+				s->draw(m_defaultShader.get());
 		}
 	}
 

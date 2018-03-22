@@ -9,9 +9,10 @@ public:
 	SimpleForwardRenderer();
 	~SimpleForwardRenderer();
 
-	void render(const IModel* model, IShader* shader, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera) override;
 
 private:
 	GpuTimer m_timer;
+	std::unique_ptr<IShader> m_defaultShader;
 };
 

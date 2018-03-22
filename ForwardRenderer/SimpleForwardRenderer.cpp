@@ -3,9 +3,16 @@
 #include <iostream>
 #include "Framework/Profiler.h"
 #include <mutex>
+#include "SimpleShader.h"
 
 SimpleForwardRenderer::SimpleForwardRenderer()
 {
+	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
+	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
+	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
+	Program defaultProgram;
+	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
+	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
 }
 
 
@@ -13,9 +20,9 @@ SimpleForwardRenderer::~SimpleForwardRenderer()
 {
 }
 
-void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const ICamera* camera)
+void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera)
 {
-	if (!model || !shader || !camera)
+	if (!model || !camera)
 		return;
 	{
 		std::lock_guard<GpuTimer> g(m_timer);
@@ -24,13 +31,13 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		shader->applyCamera(*camera);
+		m_defaultShader->applyCamera(*camera);
 
 		auto hasAlpha = false;
 		model->prepareDrawing();
 		for (const auto& s : model->getShapes())
 			if (!s->isTransparent())
-				s->draw(shader);
+				s->draw(m_defaultShader.get());
 			else hasAlpha = true;
 
 		if (hasAlpha)
@@ -42,7 +49,7 @@ void SimpleForwardRenderer::render(const IModel* model, IShader* shader, const I
 			model->prepareDrawing();
 			for (const auto& s : model->getShapes())
 				if (s->isTransparent())
-					s->draw(shader);
+					s->draw(m_defaultShader.get());
 
 			glDisable(GL_BLEND);
 			glDepthMask(GL_TRUE);
