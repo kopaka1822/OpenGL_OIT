@@ -33,6 +33,28 @@ void HotReloadShader::update()
 	
 	s_lastUpdate = now;
 
+	// remove unused programs
+	{
+		const auto it = std::remove_if(s_watchedPrograms.begin(), s_watchedPrograms.end(), [](const auto& program)
+		{
+			return program.use_count() <= 1;
+		});
+		if (it != s_watchedPrograms.end())
+			s_watchedPrograms.erase(it, s_watchedPrograms.end());
+	}
+
+	// remove unused shader
+	{
+		for(auto it = s_watchedShader.begin(); it != s_watchedShader.end();)
+		{
+			if(it->second.use_count() <= 1)
+			{
+				it = s_watchedShader.erase(it);
+			}
+			else ++it;
+		}
+	}
+
 	for(const auto& shader : s_watchedShader)
 	{
 		if(getLastModified(shader.first) > shader.second->m_lastModified)
