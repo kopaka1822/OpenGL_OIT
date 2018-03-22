@@ -51,6 +51,7 @@ void HotReloadShader::update()
 			{
 				std::cerr << "hot reload failed\n";
 				std::cerr << e.what() << "\n";
+				continue;
 			}
 
 			for (auto& program : s_watchedPrograms)
