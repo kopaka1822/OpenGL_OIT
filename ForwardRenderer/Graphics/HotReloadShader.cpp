@@ -1,121 +1,93 @@
 #include "HotReloadShader.h"
-#include "../Dependencies/filewatcher/include/FileWatcher/FileWatcher.h"
 #include <unordered_map>
+#include <chrono>
 #include <fstream>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-struct WatchedDirectory
+#ifndef WIN32
+#include <unistd.h>
+#define stat _stat
+#endif
+
+time_t getLastModified(const std::string& filename)
 {
-	WatchedDirectory() = default;
-	explicit WatchedDirectory(FW::WatchID id)
-		: id(id)
-	{
-	}
+	struct stat result {};
+	if (stat(filename.c_str(), &result) != 0)
+		return 0;
 
-	FW::WatchID id = -1;
-	std::vector<std::shared_ptr<HotReloadShader::WatchedShader>> shader;
-};
+	return result.st_mtime;
+}
 
 // watched shaders with key = directory
-static std::unordered_map<std::string, WatchedDirectory> s_watchedShader;
-static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPrograms;
-
-class HotReloadShader::Listener : public FW::FileWatchListener
-{
-	
-public:
-	void handleFileAction(FW::WatchID watchid, const FW::String& dir, const FW::String& filename, FW::Action action) override
-	{
-		if (action != FW::Action::Modified && action != FW::Action::Add)
-			return; // doesnt matter
-
-		// find directory
-		auto it = s_watchedShader.find(dir);
-		if (it == s_watchedShader.end())
-			return;
-
-		// was an important file modified?
-		auto& loaded = it->second.shader;
-
-		const auto modifiedShader = std::find_if(loaded.begin(), loaded.end(), [&filename](const auto& shader)
-		{
-			return shader->getFilename() == filename;
-		});
-
-		if (modifiedShader == loaded.end())
-			return; // no file modified
-
-		auto& watchedShader = **modifiedShader;
-		const auto fullFilename = dir + "/" + filename;
-		// try a hot reload
-		std::cerr << "attempting hot reload for " << fullFilename << "\n";
-
-		try
-		{
-			HotReloadShader::loadShader(watchedShader);
-			// TODO check if binary has changed?
-			std::cerr << "shader reload was succesfull\n";
-		}
-		catch(const std::exception& e)
-		{
-			std::cerr << "hot reload failed\n";
-			std::cerr << e.what() << "\n";
-		}
-		
-		for(auto& program : s_watchedPrograms)
-		{
-			if(program->hasShader(watchedShader)) try
-			{
-				// relink
-				HotReloadShader::loadProgram(*program);
-			}
-			catch(const std::exception& e)
-			{
-				std::cerr << "program relink failed for" << program->getDescription() << "\n";
-				std::cerr << e.what() << "\n";
-			}
-		}
-	}
-};
-
-static HotReloadShader::Listener s_listener;
-static FW::FileWatcher s_fileWatcher;
+static std::unordered_map<std::string, std::shared_ptr<HotReloadShader::WatchedShader>> s_watchedShader;
+static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPrograms; 
+static std::chrono::steady_clock::time_point s_lastUpdate = std::chrono::steady_clock::now();
 
 void HotReloadShader::update()
 {
-	s_fileWatcher.update();
+	const auto now = std::chrono::steady_clock::now();
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastUpdate).count() < 500)
+		return; // dont spam updates
+	
+	s_lastUpdate = now;
+
+	for(const auto& shader : s_watchedShader)
+	{
+		if(getLastModified(shader.first) > shader.second->m_lastModified)
+		{
+			// file was modified
+			// try a hot reload
+			std::cerr << "attempting hot reload for " << shader.first << "\n";
+
+			try
+			{
+				loadShader(*shader.second);
+				// TODO check if binary has changed?
+				std::cerr << "shader reload was succesfull\n";
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "hot reload failed\n";
+				std::cerr << e.what() << "\n";
+			}
+
+			for (auto& program : s_watchedPrograms)
+			{
+				if (program->hasShader(*shader.second)) try
+				{
+					// relink
+					loadProgram(*program);
+				}
+				catch (const std::exception& e)
+				{
+					std::cerr << "program relink failed for " << program->getDescription() << "\n";
+					std::cerr << e.what() << "\n";
+				}
+			}
+			std::cerr << "finished program reload\n";
+		}
+	}
 }
 
 std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::Shader::Type type,
 	const std::string& directory, const std::string& filename)
 {
+	const auto fullFilename = directory + "/" + filename;
 	// is directory being watched?
-	if(s_watchedShader.find(directory) == s_watchedShader.end())
-	{
-		// add watch for directory
-		const auto watchId = s_fileWatcher.addWatch(directory, &s_listener, false);
-		// add entry
-		s_watchedShader[directory] = WatchedDirectory(watchId);
-	}
-	
-	// is the shader already loaded?
-	auto& loaded = s_watchedShader[directory].shader;
-	auto it = std::find_if(loaded.begin(), loaded.end(), [&filename](const auto& shader)
-	{
-		return shader->getFilename() == filename;
-	});
-	
-	if (it != loaded.end())
-		return *it;
 
-	// create shared ptr
+	const auto it = s_watchedShader.find(fullFilename);
+	if (it != s_watchedShader.end())
+		return it->second;
+	
 	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, directory, filename));
 
 	// load shader source
 	loadShader(*newShader);
 
-	// add to file watcher list
-	loaded.push_back(newShader);
+	// add entry
+	s_watchedShader[fullFilename] = newShader;
 
 	return newShader;
 }
@@ -141,6 +113,9 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	const auto filename = dest.m_directory + "/" + dest.m_filename;
 
+	// update last modified
+	dest.m_lastModified = getLastModified(filename);
+
 	// load file
 	std::ifstream file;
 	file.open(filename);
@@ -149,6 +124,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	std::string line;
 	if (!file.is_open())
 		throw std::runtime_error("could not open file " + filename);
+
 
 	while (file.good())
 	{

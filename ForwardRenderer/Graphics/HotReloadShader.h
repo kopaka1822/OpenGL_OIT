@@ -15,7 +15,8 @@ struct HotReloadShader
 		WatchedShader(gl::Shader::Type shaderType, std::string directory, std::string filename)
 			: m_type(shaderType),
 			  m_directory(std::move(directory)),
-			  m_filename(std::move(filename))
+			  m_filename(std::move(filename)),
+			  m_lastModified(0)
 		{
 		}
 		bool hasShader(const WatchedShader& shader) const
@@ -38,6 +39,7 @@ struct HotReloadShader
 		gl::Shader::Type m_type;
 		std::string m_directory;
 		std::string m_filename;
+		time_t m_lastModified;
 	};
 
 	class WatchedProgram
@@ -59,7 +61,7 @@ struct HotReloadShader
 		{
 			return std::accumulate(m_usedShader.begin(), m_usedShader.end(), std::string("program("), [](std::string res, const auto& shader)
 			{
-				return res + shader->getDescription();
+				return res + shader->getDescription() + " ";
 			}) + ")";
 		}
 	public:
