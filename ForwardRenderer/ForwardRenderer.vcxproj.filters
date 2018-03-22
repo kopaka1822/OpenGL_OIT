@@ -68,12 +68,6 @@
     <ClInclude Include="ObjModel.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Shader.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Program.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="SimpleShader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -201,12 +195,6 @@
     </ClCompile>
     <ClCompile Include="ObjModel.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Shader.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Program.cpp">
-      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp">
       <Filter>Source Files\ScriptEngine</Filter>

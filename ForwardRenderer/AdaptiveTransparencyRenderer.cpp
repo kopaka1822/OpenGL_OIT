@@ -1,6 +1,4 @@
 #include "AdaptiveTransparencyRenderer.h"
-#include "Graphics/Shader.h"
-#include "Graphics/Program.h"
 #include "SimpleShader.h"
 #include "Window.h"
 #include <iostream>
@@ -19,25 +17,21 @@ m_visibilityClearColor(glm::vec2(
 ))
 {
 	// build the shaders
-	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
-	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
-	Program defaultProgram;
-	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
-	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	m_defaultShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto buildVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveBuildVisibility.fs");
-	auto useVisz = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveUseVisibility.fs");
+	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveBuildVisibility.fs");
+	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveUseVisibility.fs");
 
-	auto adjustBg = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/AdaptiveDarkenBackground.fs");
+	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveDarkenBackground.fs");
 
-	Program buildProgram;
-	buildProgram.attach(vertex).attach(buildVisz).link();
-	Program useProgram;
-	useProgram.attach(vertex).attach(geometry).attach(useVisz).link();
-
-	m_shaderBuildVisz = std::make_unique<SimpleShader>(std::move(buildProgram));
-	m_shaderApplyVisz = std::make_unique<SimpleShader>(std::move(useProgram));
+	m_shaderBuildVisz = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, buildVisz}));
+	m_shaderApplyVisz = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, geometry, useVisz}));
 	m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
 
 	AdaptiveTransparencyRenderer::onSizeChange(Window::getWidth(), Window::getHeight());

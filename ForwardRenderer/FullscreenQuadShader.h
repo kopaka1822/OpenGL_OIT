@@ -1,8 +1,7 @@
 #pragma once
 #include "Graphics/IShader.h"
-#include "Graphics/Shader.h"
-#include "Graphics/Program.h"
 #include "Dependencies/gl/vertexarrayobject.hpp"
+#include "Graphics/HotReloadShader.h"
 
 /**
  * \brief helper class to draw a fullscreen quad
@@ -10,16 +9,15 @@
 class FullscreenQuadShader : public IShader
 {
 public:
-	FullscreenQuadShader(const Shader& fragment)
+	FullscreenQuadShader(const std::shared_ptr<HotReloadShader::WatchedShader>& fragment)
 	{
-		Shader vert = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/FullscreenQuad.vs");
-
-		m_program.attach(vert).attach(fragment).link();
+		const auto vert = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "FullscreenQuad.vs");
+		m_program = HotReloadShader::loadProgram({vert, fragment});
 	}
 	
 	void bind() const override
 	{
-		m_program.bind();
+		m_program->getProgram().bind();
 	}
 
 	void draw() const
@@ -30,6 +28,6 @@ public:
 	}
 
 private:
-	Program m_program;
+	std::shared_ptr<HotReloadShader::WatchedProgram> m_program;
 	gl::VertexArrayObject m_vao;
 };

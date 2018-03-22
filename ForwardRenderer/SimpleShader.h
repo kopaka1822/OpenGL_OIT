@@ -1,11 +1,11 @@
 #pragma once
 #include "Graphics/IShader.h"
-#include "Graphics/Program.h"
 #include <memory>
 #include "Graphics/IMaterial.h"
 #include "Dependencies/gl/buffer.hpp"
 #include "Graphics/SamplerCache.h"
 #include "Window.h"
+#include "Graphics/HotReloadShader.h"
 
 class SimpleShader : public IShader
 {
@@ -33,27 +33,19 @@ class SimpleShader : public IShader
 		SPECULAR_BINDING = 3,
 	};
 public:
-	static Program getLinkedDefaultProgram()
-	{
-		auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-		auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
-		auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
-
-		Program p;
-		p.attach(vertex).attach(fragment).attach(geometry).link();
-		return p;
-	}
 	/**
 	 * \brief 
 	 * \param program compiled and linked shader program
 	 */
-	SimpleShader(Program program)
+	SimpleShader(std::shared_ptr<HotReloadShader::WatchedProgram> program)
 		:
 	m_program(std::move(program)),
 	m_transformBuffer(sizeof(UniformData)),
 	m_materialBuffer(sizeof(MaterialData)),
 	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR))
 	{
+		assert(m_program);
+
 		m_uniformData.model = glm::mat4();
 		m_uniformData.viewProjection = glm::mat4();
 		m_uniformData.cameraPosition = glm::vec4();
@@ -66,7 +58,7 @@ public:
 
 	void bind() const override
 	{
-		m_program.bind();
+		m_program->getProgram().bind();
 		m_transformBuffer.bind(0);
 	}
 
@@ -147,7 +139,8 @@ public:
 		m_materialBuffer.bind(1);
 	}
 private:
-	Program m_program;
+	std::shared_ptr<HotReloadShader::WatchedProgram> m_program;
+
 	gl::DynamicUniformBuffer m_transformBuffer;
 	gl::DynamicUniformBuffer m_materialBuffer;
 	UniformData m_uniformData;

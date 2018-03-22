@@ -52,7 +52,7 @@ public:
 
 		try
 		{
-			HotReloadShader::loadFromFile(watchedShader);
+			HotReloadShader::loadShader(watchedShader);
 			// TODO check if binary has changed?
 			std::cerr << "shader reload was succesfull\n";
 		}
@@ -112,7 +112,7 @@ std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::
 	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, directory, filename));
 
 	// load shader source
-	loadFromFile(*newShader);
+	loadShader(*newShader);
 
 	// add to file watcher list
 	loaded.push_back(newShader);
@@ -134,7 +134,7 @@ std::shared_ptr<HotReloadShader::WatchedProgram> HotReloadShader::loadProgram(
 	return newProgram;
 }
 
-void HotReloadShader::loadFromFile(WatchedShader& dest)
+void HotReloadShader::loadShader(WatchedShader& dest)
 {
 	// create new shader object
 	gl::Shader shader(dest.m_type);

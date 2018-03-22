@@ -6,22 +6,20 @@
 
 WeightedTransparency::WeightedTransparency()
 {
-	auto combineShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/WeightedCombine.fs");
+	auto combineShader = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "WeightedCombine.fs");
 	m_quadShader = std::make_unique<FullscreenQuadShader>(combineShader);
 
-	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
-	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
-	Program defaultProgram;
-	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
-	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	
+	m_defaultShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, geometry, fragment}));
 
-	auto transShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/WeightedTransparent.fs");
+	auto transShader = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "WeightedTransparent.fs");
 
-	Program transProgram;
-	transProgram.attach(vertex).attach(geometry).attach(transShader).link();
-
-	m_transShader = std::make_unique<SimpleShader>(std::move(transProgram));
+	m_transShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, geometry, transShader}));
 
 	WeightedTransparency::onSizeChange(Window::getWidth(), Window::getHeight());
 }

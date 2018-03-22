@@ -1,7 +1,5 @@
 #include "DynamicFragmentBuffer.h"
 #include <mutex>
-#include "Graphics/Shader.h"
-#include "Graphics/Program.h"
 #include "SimpleShader.h"
 #include <iostream>
 #include <glad/glad.h>
@@ -12,31 +10,27 @@ static const int ELEM_PER_THREAD_SCAN = 8;
 DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 {
 	// build the shaders
-	auto vertex = Shader::loadFromFile(GL_VERTEX_SHADER, "Shader/DefaultShader.vs");
-	auto geometry = Shader::loadFromFile(GL_GEOMETRY_SHADER, "Shader/DefaultShader.gs");
-	auto fragment = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DefaultShader.fs");
-	Program defaultProgram;
-	defaultProgram.attach(vertex).attach(geometry).attach(fragment).link();
-	m_defaultShader = std::make_unique<SimpleShader>(std::move(defaultProgram));
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
 
-	auto countFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicCountFragment.fs");
-	auto storeFragments = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicStoreFragment.fs");
-	auto sortBlendShader = Shader::loadFromFile(GL_FRAGMENT_SHADER, "Shader/DynamicSortBlendFragment.fs");
+	m_defaultShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, geometry, fragment}));
 
-	auto scanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/Scan.comp");
-	auto pushScanShader = Shader::loadFromFile(GL_COMPUTE_SHADER, "Shader/ScanPush.comp");
+	auto countFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicCountFragment.fs");
+	auto storeFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicStoreFragment.fs");
+	auto sortBlendShader = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicSortBlendFragment.fs");
 
-	m_scanShader.attach(scanShader).link();
-	m_pushScanShader.attach(pushScanShader).link();
+	auto scanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader", "Scan.comp");
+	auto pushScanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader", "ScanPush.comp");
 
-	Program countProgram;
-	countProgram.attach(vertex).attach(countFragments).link();
+	m_scanShader = HotReloadShader::loadProgram({ scanShader });
+	m_pushScanShader = HotReloadShader::loadProgram({ pushScanShader });
 
-	Program storeProgram;
-	storeProgram.attach(vertex).attach(geometry).attach(storeFragments).link();
-
-	m_shaderCountFragments = std::make_unique<SimpleShader>(std::move(countProgram));
-	m_shaderStoreFragments = std::make_unique<SimpleShader>(std::move(storeProgram));
+	m_shaderCountFragments = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, countFragments}));
+	m_shaderStoreFragments = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({vertex, geometry, storeFragments}));
 	m_shaderSortBlendFragments = std::make_unique<FullscreenQuadShader>(sortBlendShader);
 
 	DynamicFragmentBufferRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
@@ -219,7 +213,7 @@ void DynamicFragmentBufferRenderer::performScan()
 {
 	std::lock_guard<GpuTimer> g(m_timer[T_SCAN]);
 
-	m_scanShader.bind();
+	m_scanShader->getProgram().bind();
 
 	auto bs = m_curScanSize; int i = 0;
 	const auto elemPerWk = WORKGROUP_SIZE * ELEM_PER_THREAD_SCAN;
@@ -251,7 +245,7 @@ void DynamicFragmentBufferRenderer::performScan()
 	}
 
 	// Complete Intra-block scan by pushing the values up
-	m_pushScanShader.bind();
+	m_pushScanShader->getProgram().bind();
 	glUniform1ui(0, elemPerWk);
 	glUniform1ui(1, 0);
 

@@ -84,6 +84,6 @@ struct HotReloadShader
 
 
 private:
-	static void loadFromFile(WatchedShader& dest);
+	static void loadShader(WatchedShader& dest);
 	static void loadProgram(WatchedProgram& program);
 };

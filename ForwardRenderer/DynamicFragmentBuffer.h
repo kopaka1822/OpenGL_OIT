@@ -3,7 +3,6 @@
 #include "Framework/IWindowReceiver.h"
 #include "Graphics/GpuTimer.h"
 #include "Dependencies/gl/buffer.hpp"
-#include "Graphics/Program.h"
 #include "FullscreenQuadShader.h"
 
 class DynamicFragmentBufferRenderer : public IRenderer, public IWindowReceiver
@@ -31,8 +30,8 @@ private:
 	std::vector<gl::TextureBuffer> m_auxTextureViews;
 	gl::StaticClientShaderStorageBuffer m_scanStageBuffer;
 
-	Program m_scanShader;
-	Program m_pushScanShader;
+	std::shared_ptr<HotReloadShader::WatchedProgram> m_scanShader;
+	std::shared_ptr<HotReloadShader::WatchedProgram> m_pushScanShader;
 	GLsizei m_curScanSize = 0;
 	GLsizei m_curLastIndex = 0;
 
