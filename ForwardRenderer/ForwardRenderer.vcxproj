@@ -193,6 +193,7 @@
     <ClInclude Include="Graphics\SamplerCache.h" />
     <ClInclude Include="Graphics\CachedTexture2D.h" />
     <ClInclude Include="LinkedVisibility.h" />
+    <ClInclude Include="MultiLayerAlphaRenderer.h" />
     <ClInclude Include="ObjModel.h" />
     <ClInclude Include="ObjShape.h" />
     <ClInclude Include="ProjectionCamera.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\CachedTexture2D.cpp" />
     <ClCompile Include="LinkedVisibility.cpp" />
+    <ClCompile Include="MultiLayerAlphaRenderer.cpp" />
     <ClCompile Include="ObjModel.cpp" />
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp" />
     <ClCompile Include="SimpleForwardRenderer.cpp" />

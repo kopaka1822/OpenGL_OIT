@@ -20,6 +20,7 @@
 #include "../Dependencies/stb_image.h"
 #include "../Dependencies/stbi_helper.h"
 #include "../DynamicFragmentBuffer.h"
+#include "../MultiLayerAlphaRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -43,6 +44,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<LinkedVisibility>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
+	if (name == "multilayer_alpha")
+		return std::make_unique<MultiLayerAlphaRenderer>();
 
 	throw std::runtime_error("renderer not found");
 }
@@ -185,6 +188,7 @@ void Application::makeDiff(const std::string& src1, const std::string& src2, con
 {
 	int width1 = 0, width2 = 0, height1 = 0, height2 = 0, channels1 = 0, channels2 = 0;
 	
+	stbi_set_flip_vertically_on_load(0);
 	stbi_ptr pic1(stbi_load(src1.c_str(), &width1, &height1, &channels1, 3));
 	if (!pic1)
 		throw std::runtime_error("could not open " + src1);
@@ -206,7 +210,7 @@ void Application::makeDiff(const std::string& src1, const std::string& src2, con
 	});
 
 	// save image
-	stbi_flip_vertically_on_write(1);
+	stbi_flip_vertically_on_write(0);
 	if (!stbi_write_png(dst.c_str(), width1, height1, 3, pic1.get(), 0))
 		std::cerr << "could not save diff\n";
 	else
