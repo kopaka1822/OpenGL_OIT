@@ -71,7 +71,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 {
 	g_insertedDepth = depth;
 	
-	int maxZ = imageSize(tex_visz).z;
+	int maxZ = MAX_SAMPLES;//imageSize(tex_visz).z;
 	// get all values from the texture
 	loadFunction(maxZ);
 	// find point to insert the fragment
@@ -152,9 +152,11 @@ void main()
 		{
 			// acquire lock
 			if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
-			//if(imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 1u) == 0u)
 			{
+				
 				insertAlpha(1.0 - dissolve, dist); 
+				
+				memoryBarrierImage();
 				
 				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
 				keepWaiting = false;

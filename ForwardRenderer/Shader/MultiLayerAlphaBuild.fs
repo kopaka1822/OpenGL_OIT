@@ -53,13 +53,15 @@ void insertFragment(vec4 color, float depth)
 	vec2 fragments[MAX_SAMPLES + 1];
 	fragments[0] = vec2(depth, packColor(color));
 	
+	int size = MAX_SAMPLES;
+	
 	// load function
-	for(int i = 0; i < MAX_SAMPLES; ++i){
+	for(int i = 0; i < size; ++i){
 		fragments[i + 1] = imageLoad(tex_fragments, ivec3(gl_FragCoord.xy, i)).xy;
 	}
 	
 	// 1-pass bubble sort to insert fragment
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+	for(int i = 0; i < size; ++i)
 	{
 		if(fragments[i].x > fragments[i + 1].x)
 		{
@@ -73,16 +75,16 @@ void insertFragment(vec4 color, float depth)
 	}
 	
 	// Compression (merge last two rows)
-	float mergedDepth = fragments[MAX_SAMPLES - 1].x;
-	vec4 colorFront = unpackColor(fragments[MAX_SAMPLES - 1].y);
-	vec4 colorBack  = unpackColor(fragments[MAX_SAMPLES].y);
+	float mergedDepth = fragments[size - 1].x;
+	vec4 colorFront = unpackColor(fragments[size - 1].y);
+	vec4 colorBack  = unpackColor(fragments[size].y);
 	vec3 mergedRgb = colorFront.rgb + colorBack.rgb * colorBack.a;
 	float mergedAlpha = colorFront.a * colorBack.a;
 	
-	fragments[MAX_SAMPLES - 1] = vec2(mergedDepth, packColor(vec4(mergedRgb, mergedAlpha)));
+	fragments[size - 1] = vec2(mergedDepth, packColor(vec4(mergedRgb, mergedAlpha)));
 	
 	// write back function
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+	for(int i = 0; i < size; ++i)
 		imageStore(tex_fragments, ivec3(gl_FragCoord.xy, i), vec4(fragments[i], 0.0, 0.0));
 }
 
