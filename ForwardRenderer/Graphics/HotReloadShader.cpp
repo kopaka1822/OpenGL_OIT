@@ -1,5 +1,6 @@
 #include "HotReloadShader.h"
 #include <unordered_map>
+#include <map>
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <sys/stat.h>
 
 #include <filesystem>
+#include <regex>
 namespace fs = std::experimental::filesystem;
 
 #ifndef WIN32
@@ -132,12 +134,81 @@ std::shared_ptr<HotReloadShader::WatchedProgram> HotReloadShader::loadProgram(
 	return newProgram;
 }
 
-std::string loadShaderSource(const fs::path& filename)
+/**
+ * \brief tries to remove as many ../ as possible
+ * \param path path that should be cleansed
+ * \return path without ../ if possible (only if they could be removed)
+ */
+fs::path cleanPath(const fs::path& path)
 {
+	auto string = path.wstring();
+
+	// replace \\ with /
+	for (auto& c : string) {
+		if (c == wchar_t('\\'))
+			c = wchar_t('/');
+	}
+	// remove all ../
+	auto pos = string.find(L"../");
+	while (pos != std::wstring::npos)
+	{
+		if (pos != 0)
+		{
+			// is another ../ before this pos?
+			bool skipThis = false;
+			if (pos > 2)
+			{
+				skipThis = string.at(pos - 1) == wchar_t('/')
+					&& string.at(pos - 2) == wchar_t('.') &&
+					string.at(pos - 3) == wchar_t('.');
+			}
+
+			if (!skipThis)
+			{
+				// remove the previous path
+				// find previous /
+				auto prevSlash = string.find_last_of(wchar_t('/'), pos - 2); // dont take the first / from /../
+				if (prevSlash == std::wstring::npos)
+					prevSlash = 0; // no previous directory
+
+				if (pos > prevSlash)
+				{
+					// remove this part
+					if (prevSlash == 0)
+						string = string.substr(pos + 3);
+					else
+						string = string.substr(0, prevSlash + 1) + string.substr(pos + 3);
+
+					pos = prevSlash;
+				}
+			}
+		}
+		pos = string.find(L"../", pos + 1);
+	}
+
+	return fs::path(string);
+}
+
+std::string loadShaderSource(fs::path filename, HotReloadShader::WatchedShader::PathMap& usedFiles)
+{
+	filename = cleanPath(filename);
+
+	// is the file already included?
+	if (usedFiles.find(filename) != usedFiles.end())
+		return "\n"; // already included
+	// TODO warning for circular dependencies?
+
+	const auto fileNumber = usedFiles.size();
+	usedFiles[filename] = fileNumber;
+
 	std::ifstream file;
 	file.open(filename);
 
 	std::string output;
+	
+	if(fileNumber != 0) // dont put this in the first file because: the first statement must be the version number
+		output = "#line 1 " + std::to_string(fileNumber) + "\n";
+
 	std::string line;
 
 	if (!file.is_open())
@@ -173,9 +244,8 @@ std::string loadShaderSource(const fs::path& filename)
 			const auto includePath = filename.parent_path().append(includeFile);
 
 			// parse this file
-			output += "#line 1\n";
-			output += loadShaderSource(includePath);
-			output += "\n#line " + std::to_string(lineNumber + 1) + '\n';
+			output += loadShaderSource(includePath, usedFiles);
+			output += "\n#line " + std::to_string(lineNumber + 1) + " " + std::to_string(fileNumber) + '\n';
 		}
 		else
 		{
@@ -196,11 +266,55 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	// update last modified
 	dest.m_lastModified = getLastModified(filename);
 
-	auto output = loadShaderSource(filename);
+	WatchedShader::PathMap usedFiles;
+
+	auto output = loadShaderSource(filename, usedFiles);
 
 	// compile shader
 	const char* source = output.c_str();
-	shader.compile(1, &source, filename.c_str());
+	try
+	{
+		shader.compile(1, &source, filename.c_str());
+	}
+	catch(const std::exception& e)
+	{
+		// convert error information with used files table
+		// errors are like \n5(20): => error in file 5 line 20
+		//const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\):");
+		const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\)");
+		std::smatch m;
+
+		std::string error;
+		std::string remaining = e.what();
+
+		while(std::regex_search(remaining, m, expr))
+		{
+			error += m.prefix();
+			error += '\n';
+			// append the correct filename
+			// extract number
+			const auto parOpen = m.str().find('(');
+			const auto fileNumber = m.str().substr(1, parOpen - 1);
+
+			const size_t num = std::stoi(fileNumber);
+			for(const auto& file : usedFiles)
+			{
+				if(file.second == num)
+				{
+					// thats the match
+					error += file.first.string();
+					error += m.str().substr(parOpen);
+					break;
+				}
+			}
+
+			remaining = m.suffix().str();
+		}
+
+		error += remaining;
+
+		throw std::runtime_error(error);
+	}
 
 	// set new shader
 	dest.m_shader = std::move(shader);

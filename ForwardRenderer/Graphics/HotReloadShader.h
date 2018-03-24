@@ -3,6 +3,9 @@
 #include "../Dependencies/gl/shader.hpp"
 #include "../Dependencies/gl/program.hpp"
 #include <numeric>
+#include <filesystem>
+#include <map>
+namespace fs = std::experimental::filesystem;
 
 struct HotReloadShader
 {
@@ -12,6 +15,7 @@ struct HotReloadShader
 	class WatchedShader
 	{
 		friend HotReloadShader;
+
 		WatchedShader(gl::Shader::Type shaderType, std::string directory, std::string filename)
 			: m_type(shaderType),
 			  m_directory(std::move(directory)),
@@ -33,6 +37,8 @@ struct HotReloadShader
 			return m_filename;
 		}
 	public:
+		using PathMap = std::map<fs::path, size_t>;
+
 		const gl::Shader& getShader() const { return m_shader; }
 	private:
 		gl::Shader m_shader;

@@ -1,4 +1,4 @@
-renderer = multilayer_alpha
+renderer = forward
 camera = projection
 //debugOutput = false
 profileType = latest
