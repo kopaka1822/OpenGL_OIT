@@ -7,21 +7,8 @@ layout(location = 2) in vec2 in_texcoord;
 layout(location = 0) out vec4 out_fragColor0;
 layout(location = 1) out float out_fragColor1;
 
-layout(binding = 0) uniform ubo_transform
-{
-	mat4 u_model;
-	mat4 u_viewProjection;
-	vec3 u_cameraPosition;
-	uint u_screenWidth;
-};
-
-layout(binding = 1) uniform ubo_material
-{
-	vec3 m_ambient;
-	float m_dissolve;
-	vec4 m_diffuse;
-	vec4 m_specular;
-};
+#include "uniforms/transform.glsl"
+#include "uniforms/material.glsl"
 
 layout(binding = 0) uniform sampler2D tex_ambient;
 layout(binding = 1) uniform sampler2D tex_dissolve;

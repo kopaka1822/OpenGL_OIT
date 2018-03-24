@@ -307,7 +307,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		// convert error information with used files table
 		// errors are like \n5(20): => error in file 5 line 20
 		//const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\):");
-		const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\)");
+		const std::regex expr("[0-9][0-9]*\\([0-9][0-9]*\\)");
 		std::smatch m;
 
 		std::string error;
@@ -316,11 +316,11 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		while(std::regex_search(remaining, m, expr))
 		{
 			error += m.prefix();
-			error += '\n';
+
 			// append the correct filename
 			// extract number
 			const auto parOpen = m.str().find('(');
-			const auto fileNumber = m.str().substr(1, parOpen - 1);
+			const auto fileNumber = m.str().substr(0, parOpen);
 
 			const size_t num = std::stoi(fileNumber);
 			for(const auto& file : usedFiles)
