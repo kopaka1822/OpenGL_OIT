@@ -27,6 +27,7 @@ time_t getLastModified(const std::string& filename)
 
 // watched shaders with key = directory
 static std::unordered_map<std::string, std::shared_ptr<HotReloadShader::WatchedShader>> s_watchedShader;
+static std::vector<std::shared_ptr<HotReloadShader::WatchedPath>> s_usedFiles;
 static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPrograms; 
 static std::chrono::steady_clock::time_point s_lastUpdate = std::chrono::steady_clock::now();
 
@@ -60,41 +61,65 @@ void HotReloadShader::update()
 		}
 	}
 
-	for(const auto& shader : s_watchedShader)
+	// remove unused files
 	{
-		if(getLastModified(shader.first) > shader.second->m_lastModified)
+		const auto it = std::remove_if(s_usedFiles.begin(), s_usedFiles.end(), [](const auto& path)
+		{
+			return path.use_count() <= 1;
+		});
+		if (it != s_usedFiles.end())
+			s_usedFiles.erase(it, s_usedFiles.end());
+	}
+
+	for(const auto& path : s_usedFiles)
+	{
+		const auto lastModified = getLastModified(path->path.string());
+		if (lastModified > path->lastModified)
 		{
 			// file was modified
-			// try a hot reload
-			std::cerr << "attempting hot reload for " << shader.first << "\n";
+			std::cerr << "file " << path->path << " was modified\n";
+			path->lastModified = lastModified;
 
-			try
-			{
-				loadShader(*shader.second);
-				// TODO check if binary has changed?
-				std::cerr << "shader reload was succesfull\n";
-			}
-			catch (const std::exception& e)
-			{
-				std::cerr << "hot reload failed\n";
-				std::cerr << e.what() << "\n";
-				continue;
-			}
+			// TODO maybe just mark shader for recompilation for the case that multiple files have changed
 
-			for (auto& program : s_watchedPrograms)
+			// do a hot reload for all affected shader
+			for(const auto& shader : s_watchedShader)
 			{
-				if (program->hasShader(*shader.second)) try
+				if(!shader.second->hasDependency(path->path))
+					continue;
+
+				// file was modified
+				// try a hot reload
+				std::cerr << "attempting hot reload for " << shader.first << "\n";
+
+				try
 				{
-					// relink
-					loadProgram(*program);
+					loadShader(*shader.second);
+					// TODO check if binary has changed?
+					std::cerr << "shader reload was succesfull\n";
 				}
 				catch (const std::exception& e)
 				{
-					std::cerr << "program relink failed for " << program->getDescription() << "\n";
+					std::cerr << "hot reload failed\n";
 					std::cerr << e.what() << "\n";
+					continue;
 				}
+
+				for (auto& program : s_watchedPrograms)
+				{
+					if (program->hasShader(*shader.second)) try
+					{
+						// relink
+						loadProgram(*program);
+					}
+					catch (const std::exception& e)
+					{
+						std::cerr << "program relink failed for " << program->getDescription() << "\n";
+						std::cerr << e.what() << "\n";
+					}
+				}
+				std::cerr << "finished program reload\n";
 			}
-			std::cerr << "finished program reload\n";
 		}
 	}
 }
@@ -109,7 +134,7 @@ std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::
 	if (it != s_watchedShader.end())
 		return it->second;
 	
-	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, directory, filename));
+	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, fullFilename));
 
 	// load shader source
 	loadShader(*newShader);
@@ -261,20 +286,21 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	// create new shader object
 	gl::Shader shader(dest.m_type);
 
-	const auto filename = dest.m_directory + "/" + dest.m_filename;
+	const auto& path = dest.m_path;
 
 	// update last modified
-	dest.m_lastModified = getLastModified(filename);
+	auto lastModified = getLastModified(path.string());
 
 	WatchedShader::PathMap usedFiles;
 
-	auto output = loadShaderSource(filename, usedFiles);
+	auto output = loadShaderSource(path, usedFiles);
 
 	// compile shader
 	const char* source = output.c_str();
 	try
 	{
-		shader.compile(1, &source, filename.c_str());
+		auto string = path.string();
+		shader.compile(1, &source, string.c_str());
 	}
 	catch(const std::exception& e)
 	{
@@ -318,6 +344,27 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	// set new shader
 	dest.m_shader = std::move(shader);
+
+	// update dependencies
+	dest.m_usedFiles.clear();
+	for(const auto& file : usedFiles)
+	{
+		// path already in used paths?
+		const auto it = std::find_if(s_usedFiles.begin(), s_usedFiles.end(), [&file](const auto& pathPtr)
+		{
+			return pathPtr->path == file.first;
+		});
+		if(it != s_usedFiles.end())
+		{
+			dest.m_usedFiles.push_back(*it);
+		}
+		else
+		{
+			const auto ptr = std::make_shared<WatchedPath>(file.first, lastModified);
+			dest.m_usedFiles.push_back(ptr);
+			s_usedFiles.push_back(ptr);
+		}
+	}
 }
 
 void HotReloadShader::loadProgram(WatchedProgram& program)

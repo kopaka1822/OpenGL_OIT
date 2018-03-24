@@ -12,29 +12,41 @@ struct HotReloadShader
 	class Listener;
 	friend Listener;
 
+	struct WatchedPath
+	{
+		WatchedPath() = default;
+		WatchedPath(fs::path path, time_t modified) 
+		: path(std::move(path)), lastModified(modified) 
+		{}
+
+		fs::path path;
+		time_t lastModified = 0;
+	};
+
 	class WatchedShader
 	{
 		friend HotReloadShader;
 
-		WatchedShader(gl::Shader::Type shaderType, std::string directory, std::string filename)
+		WatchedShader(gl::Shader::Type shaderType, fs::path path)
 			: m_type(shaderType),
-			  m_directory(std::move(directory)),
-			  m_filename(std::move(filename)),
-			  m_lastModified(0)
+			  m_path(std::move(path))
 		{
 		}
-		bool hasShader(const WatchedShader& shader) const
+		bool hasDependency(const fs::path& path) const
 		{
-			// TODO add includes
-			return m_filename == shader.m_filename && m_directory == shader.m_directory;
+			return m_path == path ||
+			std::any_of(m_usedFiles.begin(), m_usedFiles.end(), [&path](const auto& other)
+			{
+				return other->path == path;
+			});
 		}
 		std::string getDescription() const
 		{
-			return m_directory + "/" + m_filename;
+			return m_path.string();
 		}
-		const std::string& getFilename() const
+		std::string getFilename() const
 		{
-			return m_filename;
+			return m_path.filename().string();
 		}
 	public:
 		using PathMap = std::map<fs::path, size_t>;
@@ -43,9 +55,8 @@ struct HotReloadShader
 	private:
 		gl::Shader m_shader;
 		gl::Shader::Type m_type;
-		std::string m_directory;
-		std::string m_filename;
-		time_t m_lastModified;
+		fs::path m_path;
+		std::vector<std::shared_ptr<WatchedPath>> m_usedFiles;
 	};
 
 	class WatchedProgram
@@ -60,7 +71,7 @@ struct HotReloadShader
 		{
 			return std::any_of(m_usedShader.begin(), m_usedShader.end(), [&shader](const auto& ws)
 			{
-				return ws->hasShader(shader);
+				return ws.get() == &shader;
 			});
 		}
 		std::string getDescription() const
