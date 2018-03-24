@@ -10,12 +10,8 @@ layout(location = 2) in vec2 in_texcoord;
 
 layout(location = 0) out vec4 out_fragColor;
 
-#include "uniforms/transform.glsl"
-#include "uniforms/material.glsl"
-
-// only sampler important for dissolve
-layout(binding = 1) uniform sampler2D tex_dissolve;
-layout(binding = 2) uniform sampler2D tex_diffuse;
+#define LIGHT_ONLY_TRANSPARENT
+#include "light/light.glsl"
 
 // visibility function (xy = fragment xy, z = depth index)
 layout(binding = 0, rg32f) volatile uniform image3D tex_visz; // .x = depth, .y = transmittance
@@ -125,11 +121,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 void main()
 {
-
-	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
+	float dissolve = calcMaterialAlpha();
 	
-	// take the diffuse texture alpha since its sometimes meant to be the alpha
-	dissolve *= texture(tex_diffuse, in_texcoord).a;
 	float dist = distance(u_cameraPosition, in_position);
 	if(dissolve > 0.0 && !gl_HelperInvocation) // is it event visible?
 	{

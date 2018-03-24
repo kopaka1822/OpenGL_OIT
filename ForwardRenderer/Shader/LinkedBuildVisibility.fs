@@ -8,12 +8,8 @@ layout(location = 2) in vec2 in_texcoord;
 
 layout(location = 0) out vec4 out_fragColor;
 
-#include "uniforms/transform.glsl"
-#include "uniforms/material.glsl"
-
-// only sampler important for dissolve
-layout(binding = 1) uniform sampler2D tex_dissolve;
-layout(binding = 2) uniform sampler2D tex_diffuse;
+#define LIGHT_ONLY_TRANSPARENT
+#include "light/light.glsl"
 
 layout(binding = 4) uniform atomic_uint atomic_counter;
 layout(binding = 0, r32ui) coherent uniform uimage2D tex_atomics;
@@ -32,12 +28,8 @@ layout(binding = 3, std430) writeonly buffer buf_visz
 
 void main()
 {
+	float dissolve = calcMaterialAlpha();
 	
-	
-	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
-	
-	// take the diffuse texture alpha since its sometimes meant to be the alpha
-	dissolve *= texture(tex_diffuse, in_texcoord).a;
 	float dist = distance(u_cameraPosition, in_position);
 	if(dissolve >= 0.0) // is it even visible?
 	{

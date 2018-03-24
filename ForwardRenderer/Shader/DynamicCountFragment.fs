@@ -8,11 +8,8 @@ layout(location = 2) in vec2 in_texcoord;
 
 layout(location = 0) out vec4 out_fragColor;
 
-#include "uniforms/transform.glsl"
-#include "uniforms/material.glsl"
-
-layout(binding = 1) uniform sampler2D tex_dissolve;
-layout(binding = 2) uniform sampler2D tex_diffuse;
+#define LIGHT_ONLY_TRANSPARENT
+#include "light/light.glsl"
 
 layout(binding = 5, std430) coherent buffer ssbo_fragmentCount
 {
@@ -21,10 +18,7 @@ layout(binding = 5, std430) coherent buffer ssbo_fragmentCount
 
 void main()
 {
-	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
-	
-	// take the diffuse texture alpha since its sometimes meant to be the alpha
-	dissolve *= texture(tex_diffuse, in_texcoord).a;
+	float dissolve = calcMaterialAlpha();
 	
 	if(dissolve > 0.0)
 	{
