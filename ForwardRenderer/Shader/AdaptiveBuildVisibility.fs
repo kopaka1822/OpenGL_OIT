@@ -1,5 +1,3 @@
-#define MAX_SAMPLES 16
-
 layout(early_fragment_tests) in;
 
 layout(location = 0) in vec3 in_position;
@@ -29,10 +27,12 @@ float getViszDepthValue(int position)
 vec2 getNewViszValue(int position)
 {
 	if(position < g_insertPos)
-		return g_oldFunction[position];
+		// be friendly for loop unrolling
+		return g_oldFunction[position % MAX_SAMPLES];
 	if(position == g_insertPos)
 		return vec2(g_insertedDepth, g_insertedValue);
-	return g_oldFunction[max(position - 1,0)];
+	// position > insert pos 
+	return g_oldFunction[uint(position - 1) % MAX_SAMPLES];
 }
 
 float getRectArea(vec2 pos1, vec2 pos2)
@@ -49,7 +49,7 @@ void loadFunction(int maxZ)
 }
 
 void insertAlpha(float one_minus_alpha, float depth)
-{
+{	
 	g_insertedDepth = depth;
 	
 	int maxZ = MAX_SAMPLES;//imageSize(tex_visz).z;

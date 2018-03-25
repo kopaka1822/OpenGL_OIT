@@ -11,7 +11,7 @@ class AdaptiveTransparencyRenderer : public IRenderer, public IWindowReceiver
 {
 public:
 	
-	AdaptiveTransparencyRenderer();
+	AdaptiveTransparencyRenderer(size_t samplesPerPixel);
 
 	void render(const IModel* model, const ICamera* camera) override;
 	void onSizeChange(int width, int height) override;
@@ -33,4 +33,6 @@ private:
 		SIZE
 	};
 	std::array<GpuTimer, SIZE> m_timer;
+
+	const size_t m_samplesPerPixel;
 };

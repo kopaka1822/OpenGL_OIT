@@ -7,14 +7,13 @@
 #include <numeric>
 #include <mutex>
 
-static const size_t NUM_SMAPLES = 16;
-
-AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer()
+AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
 m_visibilityClearColor(glm::vec2(
 	std::numeric_limits<float>::max(), // super far away
 	1.0f // visibility is still 1
-))
+)),
+m_samplesPerPixel(samplesPerPixel)
 {
 	// build the shaders
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -23,7 +22,9 @@ m_visibilityClearColor(glm::vec2(
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450);
+	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450,
+		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+		);
 	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs");
 
 	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs");
@@ -141,7 +142,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 {
 	// create visibility function storage
-	m_visibilityFunc = gl::Texture3D(gl::InternalFormat::RG32F, width, height, NUM_SMAPLES);
+	m_visibilityFunc = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

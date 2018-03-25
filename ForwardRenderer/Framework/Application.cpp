@@ -37,15 +37,20 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 
 	if(name == "forward")
 		return std::make_unique<SimpleForwardRenderer>();
-	if (name == "adaptive")
-		return std::make_unique<AdaptiveTransparencyRenderer>();
 	if (name == "weighted_oit")
 		return std::make_unique<WeightedTransparency>();
 	if (name == "linked")
 		return std::make_unique<LinkedVisibility>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
-
+	{
+		const std::regex rgx("adaptive[1-9][0-9]*");
+		if (std::regex_match(name, rgx))
+		{
+			size_t num = std::stoi(name.substr(8));
+			return std::make_unique<AdaptiveTransparencyRenderer>(num);
+		}
+	}
 	{
 		const std::regex rgx("multilayer_alpha[1-9][0-9]*");
 		if(std::regex_match(name, rgx))
