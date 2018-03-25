@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <regex>
 #include "DebugContext.h"
 #include "../SimpleForwardRenderer.h"
 #include "../ObjModel.h"
@@ -44,8 +45,15 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<LinkedVisibility>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
-	if (name == "multilayer_alpha")
-		return std::make_unique<MultiLayerAlphaRenderer>();
+
+	{
+		const std::regex rgx("multilayer_alpha[1-9][0-9]*");
+		if(std::regex_match(name, rgx))
+		{
+			size_t num = std::stoi(name.substr(16));
+			return std::make_unique<MultiLayerAlphaRenderer>(num);
+		}
+	}
 
 	throw std::runtime_error("renderer not found");
 }

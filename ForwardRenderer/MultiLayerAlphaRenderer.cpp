@@ -4,9 +4,9 @@
 #include <glad/glad.h>
 #include <glm/detail/func_packing.inl>
 
-static const int SAMPLES_PER_PIXEL = 8;
-
-MultiLayerAlphaRenderer::MultiLayerAlphaRenderer()
+MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
+	:
+m_samplesPerPixel(samplesPerPixel)
 {
 	// build the shaders
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -15,7 +15,9 @@ MultiLayerAlphaRenderer::MultiLayerAlphaRenderer()
 	m_opaqueShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450);
+	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450, 
+		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+		);
 	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs");
 
 	m_transparentShader = std::make_unique<SimpleShader>(
@@ -127,7 +129,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 
 void MultiLayerAlphaRenderer::onSizeChange(int width, int height)
 {
-	m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, SAMPLES_PER_PIXEL);
+	m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

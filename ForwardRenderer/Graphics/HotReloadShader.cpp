@@ -279,7 +279,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	auto output =
 		"#version " + std::to_string(dest.getVersion()) + "\n" +
-		"#line 1" +
+		"#line 1\n" +
 		dest.getPreamble() + "\n" +		
 		loadShaderSource(path, usedFiles);
 

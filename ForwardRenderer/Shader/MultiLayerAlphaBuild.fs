@@ -1,5 +1,3 @@
-#define MAX_SAMPLES 8
-
 layout(early_fragment_tests) in;
 
 layout(location = 0) in vec3 in_position;
