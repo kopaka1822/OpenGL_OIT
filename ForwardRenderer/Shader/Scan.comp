@@ -1,5 +1,3 @@
-#version 450 core
-
 #define WK_SIZE 1024
 
 layout(local_size_x = WK_SIZE, local_size_y = 1) in;

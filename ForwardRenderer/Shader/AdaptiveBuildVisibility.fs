@@ -1,5 +1,3 @@
-#version 450 core
-
 #define MAX_SAMPLES 16
 
 layout(early_fragment_tests) in;

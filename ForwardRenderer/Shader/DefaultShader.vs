@@ -1,5 +1,3 @@
-#version 430
-
 layout(location = 0) in int in_positionIndex;
 layout(location = 1) in int in_normalIndex;
 layout(location = 2) in int in_texcoordIndex;

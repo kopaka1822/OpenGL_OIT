@@ -27,9 +27,11 @@ struct HotReloadShader
 	{
 		friend HotReloadShader;
 
-		WatchedShader(gl::Shader::Type shaderType, fs::path path)
+		WatchedShader(gl::Shader::Type shaderType, fs::path path, size_t glVersion, std::string preamble)
 			: m_type(shaderType),
-			  m_path(std::move(path))
+			  m_path(std::move(path)),
+			  m_glVersion(glVersion),
+			  m_preamble(std::move(preamble))
 		{
 		}
 		bool hasDependency(const fs::path& path) const
@@ -48,6 +50,22 @@ struct HotReloadShader
 		{
 			return m_path.filename().string();
 		}
+
+		/**
+		 * \brief verifies if this shader has the required properties
+		 * \param path shader path
+		 * \param glVersion shader version
+		 * \param preamble shader preamble
+		 * \return true if arguments match
+		 */
+		bool matches(const fs::path& path, size_t glVersion, const std::string& preamble) const
+		{
+			return m_path == path && m_glVersion == glVersion && m_preamble == preamble;
+		}
+
+		/// \return glsl shader version
+		size_t getVersion() const { return m_glVersion; }
+		const std::string& getPreamble() const { return m_preamble; }
 	public:
 		using PathMap = std::map<fs::path, size_t>;
 
@@ -57,6 +75,10 @@ struct HotReloadShader
 		gl::Shader::Type m_type;
 		fs::path m_path;
 		std::vector<std::shared_ptr<WatchedPath>> m_usedFiles;
+		// glsl version
+		size_t m_glVersion;
+		// code block that will be inserted before the first file
+		std::string m_preamble;
 	};
 
 	class WatchedProgram
@@ -95,9 +117,11 @@ struct HotReloadShader
 	 * \brief 
 	 * \param type shader type
 	 * \param filename shader directory + filename
+	 * \param glVersion the glsl version for the shader (default is 430)
+	 * \param preamble an additional glsl code block that is inserted between the version number and the first file (can be used for defines)
 	 * \return 
 	 */
-	static std::shared_ptr<WatchedShader> loadShader(gl::Shader::Type type, const fs::path& filename);
+	static std::shared_ptr<WatchedShader> loadShader(gl::Shader::Type type, const fs::path& filename, size_t glVersion = 430, std::string preamble = "");
 	static std::shared_ptr<WatchedProgram> loadProgram(std::initializer_list<std::shared_ptr<WatchedShader>> shader);
 
 

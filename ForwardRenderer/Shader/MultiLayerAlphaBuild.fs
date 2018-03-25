@@ -1,6 +1,3 @@
-#version 450 core
-//#pragma optionNV unroll all
-
 #define MAX_SAMPLES 8
 
 layout(early_fragment_tests) in;

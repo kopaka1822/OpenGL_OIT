@@ -1,5 +1,3 @@
-#version 430 core
-
 layout(location = 0) out vec4 out_fragColor;
 
 layout(binding = 6, std430) readonly buffer ssbo_fragmentBase

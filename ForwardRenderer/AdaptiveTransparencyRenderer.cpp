@@ -23,7 +23,7 @@ m_visibilityClearColor(glm::vec2(
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs");
+	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450);
 	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs");
 
 	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs");

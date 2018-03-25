@@ -15,7 +15,7 @@ MultiLayerAlphaRenderer::MultiLayerAlphaRenderer()
 	m_opaqueShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs");
+	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450);
 	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs");
 
 	m_transparentShader = std::make_unique<SimpleShader>(

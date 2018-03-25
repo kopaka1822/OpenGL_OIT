@@ -1,5 +1,3 @@
-#version 430 core
-
 layout(binding = 0, r32ui) readonly uniform uimage2D tex_anchor;
 
 struct BufferData

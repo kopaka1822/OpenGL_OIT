@@ -1,4 +1,3 @@
-#version 440 core
 // generating flat normals for each triangle
 
 layout(triangles) in;

@@ -1,5 +1,3 @@
-#version 430 core
-
 // simple fullscreen quad
 
 void main(void)

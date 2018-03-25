@@ -18,7 +18,7 @@ namespace fs = std::experimental::filesystem;
 
 time_t getLastModified(const std::string& filename)
 {
-	struct stat result {};
+	struct stat result{};
 	if (stat(filename.c_str(), &result) != 0)
 		return 0;
 
@@ -26,9 +26,10 @@ time_t getLastModified(const std::string& filename)
 }
 
 // watched shaders with key = directory
-static std::unordered_map<std::string, std::shared_ptr<HotReloadShader::WatchedShader>> s_watchedShader;
+static std::vector<std::shared_ptr<HotReloadShader::WatchedShader>> s_watchedShader;
 static std::vector<std::shared_ptr<HotReloadShader::WatchedPath>> s_usedFiles;
-static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPrograms; 
+static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPrograms;
+
 static std::chrono::steady_clock::time_point s_lastUpdate = std::chrono::steady_clock::now();
 
 void HotReloadShader::update()
@@ -36,42 +37,24 @@ void HotReloadShader::update()
 	const auto now = std::chrono::steady_clock::now();
 	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastUpdate).count() < 500)
 		return; // dont spam updates
-	
+
 	s_lastUpdate = now;
 
-	// remove unused programs
+	const auto removeSingleSharedPtr = [](auto& vector)
 	{
-		const auto it = std::remove_if(s_watchedPrograms.begin(), s_watchedPrograms.end(), [](const auto& program)
+		const auto it = std::remove_if(vector.begin(), vector.end(), [](const auto& thingy)
 		{
-			return program.use_count() <= 1;
+			return thingy.use_count() <= 1;
 		});
-		if (it != s_watchedPrograms.end())
-			s_watchedPrograms.erase(it, s_watchedPrograms.end());
-	}
+		if (it != vector.end())
+			vector.erase(it, vector.end());
+	};
 
-	// remove unused shader
-	{
-		for(auto it = s_watchedShader.begin(); it != s_watchedShader.end();)
-		{
-			if(it->second.use_count() <= 1)
-			{
-				it = s_watchedShader.erase(it);
-			}
-			else ++it;
-		}
-	}
+	removeSingleSharedPtr(s_watchedPrograms);
+	removeSingleSharedPtr(s_watchedShader);
+	removeSingleSharedPtr(s_usedFiles);
 
-	// remove unused files
-	{
-		const auto it = std::remove_if(s_usedFiles.begin(), s_usedFiles.end(), [](const auto& path)
-		{
-			return path.use_count() <= 1;
-		});
-		if (it != s_usedFiles.end())
-			s_usedFiles.erase(it, s_usedFiles.end());
-	}
-
-	for(const auto& path : s_usedFiles)
+	for (const auto& path : s_usedFiles)
 	{
 		const auto lastModified = getLastModified(path->path.string());
 		if (lastModified > path->lastModified)
@@ -83,18 +66,18 @@ void HotReloadShader::update()
 			// TODO maybe just mark shader for recompilation for the case that multiple files have changed
 
 			// do a hot reload for all affected shader
-			for(const auto& shader : s_watchedShader)
+			for (const auto& shader : s_watchedShader)
 			{
-				if(!shader.second->hasDependency(path->path))
+				if (!shader->hasDependency(path->path))
 					continue;
 
 				// file was modified
 				// try a hot reload
-				std::cerr << "attempting hot reload for " << shader.first << "\n";
+				std::cerr << "attempting hot reload for " << shader->getDescription() << "\n";
 
 				try
 				{
-					loadShader(*shader.second);
+					loadShader(*shader);
 					// TODO check if binary has changed?
 					std::cerr << "shader reload was succesfull\n";
 				}
@@ -107,16 +90,17 @@ void HotReloadShader::update()
 
 				for (auto& program : s_watchedPrograms)
 				{
-					if (program->hasShader(*shader.second)) try
-					{
-						// relink
-						loadProgram(*program);
-					}
-					catch (const std::exception& e)
-					{
-						std::cerr << "program relink failed for " << program->getDescription() << "\n";
-						std::cerr << e.what() << "\n";
-					}
+					if (program->hasShader(*shader))
+						try
+						{
+							// relink
+							loadProgram(*program);
+						}
+						catch (const std::exception& e)
+						{
+							std::cerr << "program relink failed for " << program->getDescription() << "\n";
+							std::cerr << e.what() << "\n";
+						}
 				}
 				std::cerr << "finished program reload\n";
 			}
@@ -124,19 +108,24 @@ void HotReloadShader::update()
 	}
 }
 
-std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::Shader::Type type, const fs::path& filename)
+std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::Shader::Type type,
+                                                                            const fs::path& filename, size_t glVersion,
+                                                                            std::string preamble)
 {
-	const auto it = s_watchedShader.find(filename.string());
+	const auto it = std::find_if(s_watchedShader.begin(), s_watchedShader.end(), [=](const auto& shader)
+	{
+		return shader->matches(filename, glVersion, preamble);
+	});
 	if (it != s_watchedShader.end())
-		return it->second;
+		return *it;
 
-	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, filename));
+	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, filename, glVersion, std::move(preamble)));
 
 	// load shader source
 	loadShader(*newShader);
 
 	// add entry
-	s_watchedShader[filename.string()] = newShader;
+	s_watchedShader.push_back(newShader);
 
 	return newShader;
 }
@@ -165,7 +154,8 @@ fs::path cleanPath(const fs::path& path)
 	auto string = path.wstring();
 
 	// replace \\ with /
-	for (auto& c : string) {
+	for (auto& c : string)
+	{
 		if (c == wchar_t('\\'))
 			c = wchar_t('/');
 	}
@@ -219,16 +209,13 @@ std::string loadShaderSource(fs::path filename, HotReloadShader::WatchedShader::
 		return "\n"; // already included
 	// TODO warning for circular dependencies?
 
-	const auto fileNumber = usedFiles.size();
+	const auto fileNumber = usedFiles.size() + 1;
 	usedFiles[filename] = fileNumber;
 
 	std::ifstream file;
 	file.open(filename);
 
-	std::string output;
-	
-	if(fileNumber != 0) // dont put this in the first file because: the first statement must be the version number
-		output = "#line 1 " + std::to_string(fileNumber) + "\n";
+	std::string output = "#line 1 " + std::to_string(fileNumber) + "\n";
 
 	std::string line;
 
@@ -236,7 +223,7 @@ std::string loadShaderSource(fs::path filename, HotReloadShader::WatchedShader::
 		throw std::runtime_error("could not open file " + filename.string());
 
 	size_t lineNumber = 0;
-	while(file.good())
+	while (file.good())
 	{
 		std::getline(file, line);
 		++lineNumber;
@@ -288,8 +275,13 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	auto lastModified = getLastModified(path.string());
 
 	WatchedShader::PathMap usedFiles;
+	usedFiles["<preamble>"] = 0;
 
-	auto output = loadShaderSource(path, usedFiles);
+	auto output =
+		"#version " + std::to_string(dest.getVersion()) + "\n" +
+		"#line 1" +
+		dest.getPreamble() + "\n" +		
+		loadShaderSource(path, usedFiles);
 
 	// compile shader
 	const char* source = output.c_str();
@@ -298,7 +290,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		auto string = path.string();
 		shader.compile(1, &source, string.c_str());
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		// convert error information with used files table
 		// errors are like \n5(20): => error in file 5 line 20
@@ -309,7 +301,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		std::string error;
 		std::string remaining = e.what();
 
-		while(std::regex_search(remaining, m, expr))
+		while (std::regex_search(remaining, m, expr))
 		{
 			error += m.prefix();
 
@@ -319,9 +311,9 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 			const auto fileNumber = m.str().substr(0, parOpen);
 
 			const size_t num = std::stoi(fileNumber);
-			for(const auto& file : usedFiles)
+			for (const auto& file : usedFiles)
 			{
-				if(file.second == num)
+				if (file.second == num)
 				{
 					// thats the match
 					error += file.first.string();
@@ -343,14 +335,14 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	// update dependencies
 	dest.m_usedFiles.clear();
-	for(const auto& file : usedFiles)
+	for (const auto& file : usedFiles)
 	{
 		// path already in used paths?
 		const auto it = std::find_if(s_usedFiles.begin(), s_usedFiles.end(), [&file](const auto& pathPtr)
 		{
 			return pathPtr->path == file.first;
 		});
-		if(it != s_usedFiles.end())
+		if (it != s_usedFiles.end())
 		{
 			dest.m_usedFiles.push_back(*it);
 		}

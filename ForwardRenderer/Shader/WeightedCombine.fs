@@ -1,5 +1,3 @@
-#version 440 core
-
 layout(binding = 0) uniform sampler2D tex_opaque;
 layout(binding = 1) uniform sampler2D tex_transparent1;
 layout(binding = 2) uniform sampler2D tex_transparent2;

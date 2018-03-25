@@ -1,5 +1,3 @@
-#version 430 core
-
 layout(binding = 7) uniform sampler3D tex_fragments; // .x = depth, .y = color (rgba as uint)
 
 vec4 unpackColor(float f)
