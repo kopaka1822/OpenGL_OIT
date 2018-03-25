@@ -7,9 +7,9 @@
 
 SimpleForwardRenderer::SimpleForwardRenderer()
 {
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
 
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, geometry, fragment}));

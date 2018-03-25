@@ -10,19 +10,19 @@ static const int ELEM_PER_THREAD_SCAN = 8;
 DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 {
 	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
 
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, geometry, fragment}));
 
-	auto countFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicCountFragment.fs");
-	auto storeFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicStoreFragment.fs");
-	auto sortBlendShader = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DynamicSortBlendFragment.fs");
+	auto countFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DynamicCountFragment.fs");
+	auto storeFragments = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DynamicStoreFragment.fs");
+	auto sortBlendShader = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DynamicSortBlendFragment.fs");
 
-	auto scanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader", "Scan.comp");
-	auto pushScanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader", "ScanPush.comp");
+	auto scanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader/Scan.comp");
+	auto pushScanShader = HotReloadShader::loadShader(gl::Shader::Type::COMPUTE, "Shader/ScanPush.comp");
 
 	m_scanShader = HotReloadShader::loadProgram({ scanShader });
 	m_pushScanShader = HotReloadShader::loadProgram({ pushScanShader });

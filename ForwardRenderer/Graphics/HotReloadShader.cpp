@@ -124,23 +124,19 @@ void HotReloadShader::update()
 	}
 }
 
-std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::Shader::Type type,
-	const std::string& directory, const std::string& filename)
+std::shared_ptr<HotReloadShader::WatchedShader> HotReloadShader::loadShader(gl::Shader::Type type, const fs::path& filename)
 {
-	const auto fullFilename = directory + "/" + filename;
-	// is directory being watched?
-
-	const auto it = s_watchedShader.find(fullFilename);
+	const auto it = s_watchedShader.find(filename.string());
 	if (it != s_watchedShader.end())
 		return it->second;
-	
-	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, fullFilename));
+
+	auto newShader = std::shared_ptr<WatchedShader>(new WatchedShader(type, filename));
 
 	// load shader source
 	loadShader(*newShader);
 
 	// add entry
-	s_watchedShader[fullFilename] = newShader;
+	s_watchedShader[filename.string()] = newShader;
 
 	return newShader;
 }

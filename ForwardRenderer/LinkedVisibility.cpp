@@ -10,17 +10,17 @@ static const size_t NODES_PER_PIXEL = 16;
 LinkedVisibility::LinkedVisibility()
 {
 	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
 	
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, geometry, fragment}));
 
-	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "LinkedBuildVisibility.fs");
-	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "LinkedUseVisibility.fs");
+	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/LinkedBuildVisibility.fs");
+	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/LinkedUseVisibility.fs");
 
-	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "LinkedDarkenBackground.fs");
+	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/LinkedDarkenBackground.fs");
 
 	m_shaderBuildVisz = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, buildVisz}));

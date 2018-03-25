@@ -94,11 +94,10 @@ struct HotReloadShader
 	/**
 	 * \brief 
 	 * \param type shader type
-	 * \param directory directory (without / at the end)
-	 * \param filename shader file in directory
+	 * \param filename shader directory + filename
 	 * \return 
 	 */
-	static std::shared_ptr<WatchedShader> loadShader(gl::Shader::Type type, const std::string& directory, const std::string& filename);
+	static std::shared_ptr<WatchedShader> loadShader(gl::Shader::Type type, const fs::path& filename);
 	static std::shared_ptr<WatchedProgram> loadProgram(std::initializer_list<std::shared_ptr<WatchedShader>> shader);
 
 

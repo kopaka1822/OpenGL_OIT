@@ -17,16 +17,16 @@ m_visibilityClearColor(glm::vec2(
 ))
 {
 	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
 	m_defaultShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveBuildVisibility.fs");
-	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveUseVisibility.fs");
+	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs");
+	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs");
 
-	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "AdaptiveDarkenBackground.fs");
+	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs");
 
 	m_shaderBuildVisz = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, buildVisz}));

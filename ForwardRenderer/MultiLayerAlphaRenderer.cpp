@@ -9,14 +9,14 @@ static const int SAMPLES_PER_PIXEL = 8;
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer()
 {
 	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader", "DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader", "DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "DefaultShader.fs");
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
 	m_opaqueShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "MultiLayerAlphaBuild.fs");
-	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader", "MultiLayerAlphaResolve.fs");
+	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs");
+	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs");
 
 	m_transparentShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, build }));
