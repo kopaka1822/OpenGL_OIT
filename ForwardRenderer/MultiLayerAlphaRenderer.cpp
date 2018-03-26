@@ -93,7 +93,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 			}
 		}
 
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 	}
 
 	{

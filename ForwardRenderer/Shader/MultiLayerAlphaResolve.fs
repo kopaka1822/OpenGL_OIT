@@ -5,6 +5,8 @@ vec4 unpackColor(float f)
 	return unpackUnorm4x8(floatBitsToUint(f));
 }
 
+#define STORE_UNSORTED
+
 out vec4 out_fragColor;
 
 void main()

@@ -12,7 +12,14 @@ public:
 	void render(const IModel* model, const ICamera* camera) override;
 
 private:
-	GpuTimer m_timer;
 	std::unique_ptr<IShader> m_defaultShader;
+
+	enum Timer
+	{
+		T_OPAQUE,
+		T_TRANSPARENT,
+		SIZE
+	};
+	std::array<GpuTimer, SIZE> m_timer;
 };
 
