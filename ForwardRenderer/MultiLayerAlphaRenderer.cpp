@@ -17,8 +17,10 @@ m_samplesPerPixel(samplesPerPixel)
 
 	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450, 
 		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
-		);
-	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs");
+	);
+	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs", 450,
+		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+	);
 
 	m_transparentShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, build }));
