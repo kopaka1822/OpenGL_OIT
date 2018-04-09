@@ -38,6 +38,8 @@ public:
 	};
 
 	static void init();
+	// resets all timers
+	static void reset();
 	static void set(const std::string& name, Profile time);
 	static double get(const std::string& name);
 	static std::tuple<std::string, double> getActive();

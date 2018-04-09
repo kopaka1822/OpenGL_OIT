@@ -32,6 +32,14 @@ void Profiler::init()
 			std::cout << args.at(0).getString() << ": " << get(args.at(0).getString()) << "\n";
 		}
 	});
+	ScriptEngine::addFunction("getProfileTimes", [](const auto& args)
+	{
+		// print out all profiles
+		for(const auto& p : m_profiles)
+		{
+			std::cout << p.first << ": " << get(p.first) << "\n";
+		}
+	});
 	ScriptEngine::addProperty("profileType", []() {std::cout << "profileType: " << s_activeType << '\n'; }, [](const std::vector<Token>& args)
 	{
 		if (args.empty())
@@ -41,6 +49,11 @@ void Profiler::init()
 			s_activeType = val;
 		else std::cerr << "type must be min, max, average or latest\n";
 	});
+}
+
+void Profiler::reset()
+{
+	m_profiles.clear();
 }
 
 void Profiler::set(const std::string& name, Profile time)

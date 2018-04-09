@@ -88,6 +88,8 @@ Application::Application()
 	{
 		this->m_renderer = makeRenderer(args);
 		s_rendererName = args[0].getString();
+		// reset profiler times
+		Profiler::reset();
 	});
 
 	ScriptEngine::addProperty("camera", []()
