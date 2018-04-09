@@ -3,11 +3,15 @@
 #include "Framework/IWindowReceiver.h"
 #include "FullscreenQuadShader.h"
 #include "Graphics/GpuTimer.h"
+#include "Dependencies/gl/buffer.hpp"
+
+#define MULTI_LAYER_SSBO
 
 class MultiLayerAlphaRenderer : public IRenderer, public IWindowReceiver
 {
 public:
 	explicit MultiLayerAlphaRenderer(size_t samplesPerPixel);
+	virtual ~MultiLayerAlphaRenderer();
 	void render(const IModel* model, const ICamera* camera) override;
 	void onSizeChange(int width, int height) override;
 
@@ -16,6 +20,7 @@ private:
 	std::unique_ptr<IShader> m_transparentShader;
 	std::unique_ptr<FullscreenQuadShader> m_resolveShader;
 
+	gl::StaticShaderStorageBuffer m_storageBuffer;
 	gl::Texture3D m_storageTex;
 	gl::Texture2D m_mutexTexture;
 
@@ -30,4 +35,5 @@ private:
 	std::array<GpuTimer, SIZE> m_timer;
 
 	const size_t m_samplesPerPixel;
+	bool m_useTextureBuffer = true;
 };

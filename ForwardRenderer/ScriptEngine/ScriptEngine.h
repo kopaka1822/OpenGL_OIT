@@ -25,6 +25,10 @@ public:
 		GetterT get
 	);
 
+	static void removeProperty(const std::string& str);
+
+	static void removeFunction(const std::string& str);
+
 	// executes a single command
 	static void executeCommand(const std::string& command);
 	

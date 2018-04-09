@@ -3,31 +3,65 @@
 #include <mutex>
 #include <glad/glad.h>
 #include <glm/detail/func_packing.inl>
+#include "ScriptEngine/ScriptEngine.h"
+#include <iostream>
 
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
 	:
 m_samplesPerPixel(samplesPerPixel)
 {
-	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
-	m_opaqueShader = std::make_unique<SimpleShader>(
-		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
+	auto loadShader = [this, samplesPerPixel]()
+	{
+		// build the shaders
+		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+		auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+		auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
+		m_opaqueShader = std::make_unique<SimpleShader>(
+			HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
-	auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450, 
-		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
-	);
-	auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs", 450,
-		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
-	);
+		std::string additionalShaderParams;
+		if (!m_useTextureBuffer)
+			additionalShaderParams = "\n#define SSBO_STORAGE";
 
-	m_transparentShader = std::make_unique<SimpleShader>(
-		HotReloadShader::loadProgram({ vertex, geometry, build }));
+		auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450,
+			"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+			+ additionalShaderParams
+		);
+		auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs", 450,
+			"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+			+ additionalShaderParams
+		);
 
-	m_resolveShader = std::make_unique<FullscreenQuadShader>(resolve);
+		m_transparentShader = std::make_unique<SimpleShader>(
+			HotReloadShader::loadProgram({ vertex, geometry, build }));
 
-	MultiLayerAlphaRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
+		m_resolveShader = std::make_unique<FullscreenQuadShader>(resolve);
+
+		// delete old buffer/texture
+		m_storageTex = gl::Texture3D();
+		m_storageBuffer = gl::StaticShaderStorageBuffer();
+
+		MultiLayerAlphaRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
+	};
+
+	loadShader();
+
+	ScriptEngine::addProperty("multilayer_use_texture", [this]()
+	{
+		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		bool b = args.at(0).getString() != "false";
+		Profiler::reset();
+		m_useTextureBuffer = b;
+		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
+		loadShader();
+	});
+}
+
+MultiLayerAlphaRenderer::~MultiLayerAlphaRenderer()
+{
+	ScriptEngine::removeProperty("multilayer_use_texture");
 }
 
 void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
@@ -69,14 +103,23 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 			glm::uintBitsToFloat(glm::packUnorm4x8(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))) 
 		};
 
-		m_storageTex.clear(f, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+		
+
+		if (m_useTextureBuffer)
+			m_storageTex.clear(f, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+		else
+			m_storageBuffer.fill(f, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
 	}
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_TRANSPARENT]);
 
 		// bind storage
-		m_storageTex.bindAsImage(0, gl::ImageAccess::READ_WRITE);
+		if(m_useTextureBuffer)
+			m_storageTex.bindAsImage(0, gl::ImageAccess::READ_WRITE);
+		else
+			m_storageBuffer.bind(7);
+
 		// bind the atomic counters
 		m_mutexTexture.bindAsImage(1, gl::ImageAccess::READ_WRITE);
 		
@@ -102,7 +145,11 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		std::lock_guard<GpuTimer> g(m_timer[T_RESOLVE]);
 
 		// bind storage as texture
-		m_storageTex.bind(7);
+		if(m_useTextureBuffer)
+			// TODO bind as texture view
+			m_storageTex.bind(7);
+		else
+			m_storageBuffer.bind(7);
 
 		// enable colors
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -131,7 +178,10 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 
 void MultiLayerAlphaRenderer::onSizeChange(int width, int height)
 {
-	m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
+	if(m_useTextureBuffer)
+		m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
+	else
+		m_storageBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, width * height * m_samplesPerPixel);
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

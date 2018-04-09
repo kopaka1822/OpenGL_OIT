@@ -13,7 +13,26 @@ layout(location = 0) out vec4 out_fragColor;
 //#define STORE_UNSORTED
 
 // visibility function (xy = fragment xy, z = depth index)
+
+#ifdef SSBO_STORAGE
+layout(binding = 7, std430) coherent restrict buffer ssbo_fragmentBuffer
+{
+	vec2 buf_fragments[];
+};
+
+int getIndexFromVec(ivec3 c)
+{
+	return c.y * int(u_screenWidth) * int(MAX_SAMPLES) + c.x * int(MAX_SAMPLES) + c.z;
+}
+
+#define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
+#define STORE(coord, value) buf_fragments[getIndexFromVec(coord)] = value
+#else
 layout(binding = 0, rg32f) coherent uniform image3D tex_fragments; // .x = depth, .y = color (rgba as uint)
+#define LOAD(coord) imageLoad(tex_fragments, coord).xy
+#define STORE(coord, value) imageStore(tex_fragments, coord, vec4(value, 0.0, 0.0))
+#endif
+
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 
 float packColor(vec4 color)
@@ -49,7 +68,7 @@ void insertFragment(vec4 color, float depth)
 	
 	// load function
 	for(int i = 0; i < size; ++i){
-		fragments[i] = imageLoad(tex_fragments, ivec3(gl_FragCoord.xy, i)).xy;
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 	}
 	
 	/*
@@ -118,20 +137,20 @@ void insertFragment(vec4 color, float depth)
 	{
 		// high index is in range
 		fragments[highIdx] = merge(fragments[shighIdx], fragments[highIdx]);
-		imageStore(tex_fragments, ivec3(gl_FragCoord.xy, highIdx), vec4(fragments[highIdx], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, highIdx), fragments[highIdx]);
 		// add the new item?
 		if(shighIdx != MAX_SAMPLES) // highIdx != MAX_SAMPLES => new value must be stored
 		{
 			// this slot is now free
 			fragments[shighIdx] =  vec2(depth, packColor(color));
-			imageStore(tex_fragments, ivec3(gl_FragCoord.xy, shighIdx), vec4(fragments[shighIdx], 0.0, 0.0));
+			STORE(ivec3(gl_FragCoord.xy, shighIdx), fragments[shighIdx]);
 		}
 	}
 	else // highIdx == MAX_SAMPLES
 	{
 		// only shighIdx is in range and the new inserted value was merged into the highest value
 		fragments[shighIdx] = merge(fragments[shighIdx], fragments[highIdx]);
-		imageStore(tex_fragments, ivec3(gl_FragCoord.xy, shighIdx), vec4(fragments[shighIdx], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, shighIdx), fragments[shighIdx]);
 	}
 	
 #else
@@ -140,7 +159,7 @@ void insertFragment(vec4 color, float depth)
 	
 	// load function
 	for(int i = 0; i < size; ++i){
-		fragments[i + 1] = imageLoad(tex_fragments, ivec3(gl_FragCoord.xy, i)).xy;
+		fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
 	}
 
 	// 1-pass bubble sort to insert fragment
@@ -161,7 +180,7 @@ void insertFragment(vec4 color, float depth)
 	
 	// write back function
 	for(int i = 0; i < size; ++i)
-		imageStore(tex_fragments, ivec3(gl_FragCoord.xy, i), vec4(fragments[i], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
 
 #endif
 }

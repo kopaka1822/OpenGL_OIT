@@ -1,4 +1,20 @@
+#ifdef SSBO_STORAGE
+#include "uniforms/transform.glsl"
+layout(binding = 7, std430) readonly buffer ssbo_fragmentBuffer
+{
+	vec2 buf_fragments[];
+};
+
+int getIndexFromVec(ivec3 c)
+{
+	return c.y * int(u_screenWidth) * int(MAX_SAMPLES) + c.x * int(MAX_SAMPLES) + c.z;
+}
+
+#define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
+#else
 layout(binding = 7) uniform sampler3D tex_fragments; // .x = depth, .y = color (rgba as uint)
+#define LOAD(coord) texelFetch(tex_fragments, coord, 0).xy
+#endif
 
 vec4 unpackColor(float f)
 {
@@ -21,7 +37,7 @@ void main()
 	vec2 fragments[MAX_SAMPLES];
 	// load function
 	for(int i = 0; i < size; ++i)
-		fragments[i] = texelFetch(tex_fragments, ivec3(gl_FragCoord.xy, i), 0).xy;
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i);
 		
 	// sort (insertion sort)
 	for(int i = 1; i < size; ++i)
@@ -46,7 +62,7 @@ void main()
 #else
 	for(int i = 0; i < size; ++i)
 	{
-		vec4 color = unpackColor(texelFetch(tex_fragments, ivec3(gl_FragCoord.xy, i), 0).y);
+		vec4 color = unpackColor(LOAD(ivec3(gl_FragCoord.xy, i)).y);
 		mergedColor += mergedAlpha * color.rgb;
 		mergedAlpha *= color.a;
 	}

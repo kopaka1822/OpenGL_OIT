@@ -14,25 +14,49 @@ std::queue<std::pair<std::string, std::string>> s_commandQueue;
 void ScriptEngine::addFunction(const std::string& name, SetterT callback)
 {
 	if (s_functions.find(name) != s_functions.end())
-		std::cerr << "WAR: function " << name << " will be overwrittern" << std::endl;
+		std::cerr << "WAR: function " << name << " will be overwrittern\n";
 	s_functions[name] = callback;
 }
 
 void ScriptEngine::addProperty(const std::string& name, GetterT get, SetterT set)
 {
 	if (s_properties.find(name) != s_properties.end())
-		std::cerr << "WAR: property " << name << " will be overwrittern" << std::endl;
+		std::cerr << "WAR: property " << name << " will be overwrittern\n";
 	s_properties[name] = std::make_pair(get, set);
 }
 
 void ScriptEngine::addProperty(const std::string& name, GetterT get)
 {
 	if (s_properties.find(name) != s_properties.end())
-		std::cerr << "WAR: property " << name << " will be overwrittern" << std::endl;
+		std::cerr << "WAR: property " << name << " will be overwrittern\n";
 	s_properties[name] = std::make_pair(get, SetterT([name](std::vector<Token>)
 	{
 		std::cerr << name << " is read only" << std::endl;
 	}));
+}
+
+void ScriptEngine::removeProperty(const std::string& str)
+{
+	auto it = s_properties.find(str);
+	if (it == s_properties.end())
+	{
+		std::cerr << "WAR: property " << str << " cannot be erased (not found)\n";
+		return;
+	}
+
+	s_properties.erase(it);
+}
+
+void ScriptEngine::removeFunction(const std::string& str)
+{
+	auto it = s_functions.find(str);
+	if (it == s_functions.end())
+	{
+		std::cerr << "WAR: function " << str << " cannot be erased (not found)\n";
+		return;
+	}
+
+	s_functions.erase(it);
 }
 
 static Token makeTokenFromString(const std::string& str)
