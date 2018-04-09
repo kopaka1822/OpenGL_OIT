@@ -1,5 +1,7 @@
 layout(early_fragment_tests) in;
 
+#pragma optionNV (unroll all)
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_texcoord;
@@ -50,7 +52,9 @@ void insertFragment(vec4 color, float depth)
 		fragments[i] = imageLoad(tex_fragments, ivec3(gl_FragCoord.xy, i)).xy;
 	}
 	
-	/*int startIdx = fragments[0].x > fragments[1].x ? 0 : 1;
+	/*
+	int begin = 2;
+	int startIdx = fragments[0].x > fragments[1].x ? 0 : 1;
 	// search highest index
 	int highIdx = startIdx;
 	// search second highest index
@@ -60,6 +64,9 @@ void insertFragment(vec4 color, float depth)
 	int shighIdx = 1 - startIdx;
 	float shighDepth = fragments[1 - startIdx].x;
 	*/
+	
+	// this is faster (probably because of less branching)
+	int begin = 0;
 	// search highest index
 	int highIdx = 0;
 	// search second highest index
@@ -69,21 +76,42 @@ void insertFragment(vec4 color, float depth)
 	int shighIdx = 0;
 	float shighDepth = -1.0;
 	
-	for(int i = 0; i < size; ++i)
+	//for(int i = 0; i <= size; ++i)
+	//{
+	//	if(fragments[i].x >= highDepth)
+	//	{
+	//		shighDepth = highDepth;
+	//		shighIdx = highIdx;
+	//		highIdx = i;
+	//		highDepth = fragments[i].x;
+	//	}
+	//	else if(fragments[i].x > shighDepth)
+	//	{
+	//		shighDepth = fragments[i].x;
+	//		shighIdx = i;
+	//	}
+	//}
+	for(int i = 0; i <= size; ++i)
 	{
-		if(fragments[i].x >= highDepth)
+		// search max
+		if(fragments[i].x > highDepth)
 		{
-			shighDepth = highDepth;
-			shighIdx = highIdx;
 			highIdx = i;
 			highDepth = fragments[i].x;
 		}
-		else if(fragments[i].x > shighDepth)
+	}
+	
+	// search second max
+	for(int i = 0; i <= size; ++i)
+	{
+		// search max
+		if(i != highIdx && fragments[i].x > shighDepth)
 		{
-			shighDepth = fragments[i].x;
 			shighIdx = i;
+			shighDepth = fragments[i].x;
 		}
 	}
+	
 	
 	// merge the two lowest
 	if(highIdx < MAX_SAMPLES)
