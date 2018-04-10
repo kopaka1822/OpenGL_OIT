@@ -1,3 +1,5 @@
+#include "MultiLayerAlphaSettings.glsl"
+
 #ifdef SSBO_STORAGE
 #include "uniforms/transform.glsl"
 layout(binding = 7, std430) readonly buffer ssbo_fragmentBuffer
@@ -21,8 +23,6 @@ vec4 unpackColor(float f)
 	return unpackUnorm4x8(floatBitsToUint(f));
 }
 
-#define STORE_UNSORTED
-
 out vec4 out_fragColor;
 
 void main()
@@ -34,7 +34,7 @@ void main()
 	int size = MAX_SAMPLES;
 	
 #ifdef STORE_UNSORTED
-	vec2 fragments[MAX_SAMPLES];
+	vec2 fragments[MAX_SAMPLES_C];
 	// load function
 	for(int i = 0; i < size; ++i)
 		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));

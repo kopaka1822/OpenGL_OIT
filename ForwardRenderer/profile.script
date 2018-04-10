@@ -1,3 +1,3 @@
 resetProfiles()
-waitIterations(60)
+waitIterations(10)
 getProfileTimes()

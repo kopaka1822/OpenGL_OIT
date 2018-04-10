@@ -1,6 +1,6 @@
 layout(early_fragment_tests) in;
 
-//#pragma optionNV (unroll all)
+#include "MultiLayerAlphaSettings.glsl"
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -10,9 +10,7 @@ layout(location = 0) out vec4 out_fragColor;
 
 #include "light/light.glsl"
 
-#define STORE_UNSORTED
-
-// visibility function (xy = fragment xy, z = depth index)
+// visibility function (x = depth, y = color)
 
 #ifdef SSBO_STORAGE
 layout(binding = 7, std430) coherent restrict buffer ssbo_fragmentBuffer
@@ -63,7 +61,7 @@ void insertFragment(vec4 color, float depth)
 	int size = MAX_SAMPLES;
 	
 #ifdef STORE_UNSORTED
-	vec2 fragments[MAX_SAMPLES + 1];
+	vec2 fragments[MAX_SAMPLES_C + 1];
 	fragments[MAX_SAMPLES] = vec2(depth, packColor(color));
 	
 	// load function
@@ -154,7 +152,7 @@ void insertFragment(vec4 color, float depth)
 	}
 	
 #else
-	vec2 fragments[MAX_SAMPLES + 1];
+	vec2 fragments[MAX_SAMPLES_C + 1];
 	fragments[0] = vec2(depth, packColor(color));
 	
 	// load function
@@ -173,8 +171,18 @@ void insertFragment(vec4 color, float depth)
 			fragments[i + 1] = temp;
 		}
 		// list is sorted
-		else break;
+		//else break;
 	}
+	// while
+	/*int i = 0;
+	while(i < size && fragments[i].x > fragments[i + 1].x)
+	{
+		// swap
+		vec2 temp = fragments[i];
+		fragments[i] = fragments[i + 1];
+		fragments[i + 1] = temp;
+		++i;
+	}*/
 	
 	fragments[size - 1] = merge(fragments[size - 1], fragments[size]);
 	
