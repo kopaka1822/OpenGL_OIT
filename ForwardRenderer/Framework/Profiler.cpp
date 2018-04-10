@@ -40,6 +40,10 @@ void Profiler::init()
 			std::cout << p.first << ": " << get(p.first) << "\n";
 		}
 	});
+	ScriptEngine::addFunction("resetProfiles", [](const auto&)
+	{
+		Profiler::reset();
+	});
 	ScriptEngine::addProperty("profileType", []() {std::cout << "profileType: " << s_activeType << '\n'; }, [](const std::vector<Token>& args)
 	{
 		if (args.empty())

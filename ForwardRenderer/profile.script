@@ -1,7 +1,3 @@
-renderer
-profileType
-getProfileTime("time")
-getProfileTime("clear")
-getProfileTime("opaque")
-getProfileTime("build_vis")
-getProfileTime("use_vis")
+resetProfiles()
+waitIterations(60)
+getProfileTimes()
