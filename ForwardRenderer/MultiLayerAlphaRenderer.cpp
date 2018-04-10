@@ -89,7 +89,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		glEnable(GL_DEPTH_TEST);
 		
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		model->prepareDrawing();
 		for (const auto& s : model->getShapes())
@@ -139,6 +139,11 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
+		// create Stencil Mask (1's for transparent particles)
+		//glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 		model->prepareDrawing();
 		for (const auto& s : model->getShapes())
 		{
@@ -174,11 +179,17 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		// add final color and darken the background
 		glBlendFunc(GL_ONE, GL_SRC_ALPHA);
 
+		// only draw if a 1 is in the stencil buffer
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
 		m_resolveShader->draw();
 
 		glDisable(GL_BLEND);
 		// enable depth write
 		glDepthMask(GL_TRUE);
+
+		glDisable(GL_STENCIL_TEST);
 	}
 
 	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
