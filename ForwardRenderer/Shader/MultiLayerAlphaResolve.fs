@@ -21,7 +21,7 @@ vec4 unpackColor(float f)
 	return unpackUnorm4x8(floatBitsToUint(f));
 }
 
-//#define STORE_UNSORTED
+#define STORE_UNSORTED
 
 out vec4 out_fragColor;
 
@@ -37,7 +37,7 @@ void main()
 	vec2 fragments[MAX_SAMPLES];
 	// load function
 	for(int i = 0; i < size; ++i)
-		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i);
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 		
 	// sort (insertion sort)
 	for(int i = 1; i < size; ++i)

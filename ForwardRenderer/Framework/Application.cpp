@@ -87,6 +87,10 @@ Application::Application()
 	}, [this](std::vector<Token>& args)
 	{
 		this->m_renderer = makeRenderer(args);
+		
+		if(this->m_renderer)
+			this->m_renderer->init();
+
 		s_rendererName = args[0].getString();
 		// reset profiler times
 		Profiler::reset();

@@ -12,6 +12,8 @@ class MultiLayerAlphaRenderer : public IRenderer, public IWindowReceiver
 public:
 	explicit MultiLayerAlphaRenderer(size_t samplesPerPixel);
 	virtual ~MultiLayerAlphaRenderer();
+
+	void init() override;
 	void render(const IModel* model, const ICamera* camera) override;
 	void onSizeChange(int width, int height) override;
 

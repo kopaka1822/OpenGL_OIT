@@ -9,8 +9,16 @@
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
 	:
 m_samplesPerPixel(samplesPerPixel)
+{}
+
+MultiLayerAlphaRenderer::~MultiLayerAlphaRenderer()
 {
-	auto loadShader = [this, samplesPerPixel]()
+	ScriptEngine::removeProperty("multilayer_use_texture");
+}
+
+void MultiLayerAlphaRenderer::init()
+{
+	auto loadShader = [this]()
 	{
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -24,11 +32,11 @@ m_samplesPerPixel(samplesPerPixel)
 			additionalShaderParams = "\n#define SSBO_STORAGE";
 
 		auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450,
-			"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+			"#define MAX_SAMPLES " + std::to_string(m_samplesPerPixel)
 			+ additionalShaderParams
 		);
 		auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs", 450,
-			"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+			"#define MAX_SAMPLES " + std::to_string(m_samplesPerPixel)
 			+ additionalShaderParams
 		);
 
@@ -57,11 +65,6 @@ m_samplesPerPixel(samplesPerPixel)
 		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
 		loadShader();
 	});
-}
-
-MultiLayerAlphaRenderer::~MultiLayerAlphaRenderer()
-{
-	ScriptEngine::removeProperty("multilayer_use_texture");
 }
 
 void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
@@ -138,7 +141,11 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 			}
 		}
 
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+		if(m_useTextureBuffer)
+			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+		else
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		
 	}
 
 	{
