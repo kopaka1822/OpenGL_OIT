@@ -153,6 +153,32 @@ void insertFragment(vec4 color, float depth)
 	
 #else
 	vec2 fragments[MAX_SAMPLES_C + 1];
+	
+#define INSERTION
+#ifdef INSERTION
+	// 1 pass insertion sort
+	
+	vec2 fragment = vec2(depth, packColor(color));
+		
+	// load function
+	for(int i = 0; i < size; ++i){
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+	}
+	
+	// 1-pass insertion sort
+	int j = size;
+	int i = j;
+	for(; j > 0; --j)
+	{
+		if(fragments[j - 1].x > fragment.x)
+		{
+			fragments[j] = fragments[j - 1];
+			--i;
+		}
+	}
+	fragments[i] = fragment;
+	
+#else	
 	fragments[0] = vec2(depth, packColor(color));
 	
 	// load function
@@ -161,6 +187,7 @@ void insertFragment(vec4 color, float depth)
 	}
 
 	// 1-pass bubble sort to insert fragment
+	
 	for(int i = 0; i < size; ++i)
 	{
 		if(fragments[i].x > fragments[i + 1].x)
@@ -174,7 +201,7 @@ void insertFragment(vec4 color, float depth)
 		//else break;
 	}
 	// while
-	/*int i = 0;
+	int i = 0;
 	while(i < size && fragments[i].x > fragments[i + 1].x)
 	{
 		// swap
@@ -182,7 +209,8 @@ void insertFragment(vec4 color, float depth)
 		fragments[i] = fragments[i + 1];
 		fragments[i + 1] = temp;
 		++i;
-	}*/
+	}
+#endif
 	
 	fragments[size - 1] = merge(fragments[size - 1], fragments[size]);
 	

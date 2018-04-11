@@ -38,8 +38,10 @@ void main()
 	// load function
 	for(int i = 0; i < size; ++i)
 		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
-		
-	// sort (insertion sort)
+	
+#if MAX_SAMPLES > 32
+	
+	// insertion sort (faster for bigger lists)
 	for(int i = 1; i < size; ++i)
 	{
 		vec2 cur = fragments[i];
@@ -50,6 +52,25 @@ void main()
 		}
 		fragments[j] = cur;
 	}
+	
+#else
+	// bubble sort (faster for smaller lists)
+	for(int n = size; n > 1; --n)
+	{
+		bool swapped = false;
+		for(int i = 0; i < n - 1; ++i)
+		{
+			if(fragments[i].x > fragments[i + 1].x)
+			{
+				vec2 tmp = fragments[i];
+				fragments[i] = fragments[i + 1];
+				fragments[i + 1] = tmp;
+				swapped = true;
+			}
+		}
+		if(!swapped) break;
+	}
+#endif
 	
 	// now blend together
 	for(int i = 0; i < size; ++i)
