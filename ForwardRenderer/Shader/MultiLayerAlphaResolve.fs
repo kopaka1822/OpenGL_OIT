@@ -39,7 +39,7 @@ void main()
 	for(int i = 0; i < size; ++i)
 		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 	
-#if MAX_SAMPLES > 32
+#if MAX_SAMPLES >= 32
 	
 	// insertion sort (faster for bigger lists)
 	for(int i = 1; i < size; ++i)

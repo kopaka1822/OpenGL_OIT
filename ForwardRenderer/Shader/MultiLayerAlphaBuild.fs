@@ -151,7 +151,7 @@ void insertFragment(vec4 color, float depth)
 		STORE(ivec3(gl_FragCoord.xy, shighIdx), fragments[shighIdx]);
 	}
 	
-#else
+#else // Store sorted
 	vec2 fragments[MAX_SAMPLES_C + 1];
 	
 #define INSERTION
@@ -160,12 +160,21 @@ void insertFragment(vec4 color, float depth)
 	
 	vec2 fragment = vec2(depth, packColor(color));
 		
-	// load function
-	for(int i = 0; i < size; ++i){
-		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
-	}
+	// load function	
+	// Version 1 (Standart)	
+	//for(int i = 0; i < size; ++i)
+	//	fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+	//
+	//int j = size;
+	//for(; j > 0 && fragments[j - 1].x > fragment.x; --j)
+	//{
+	//	fragments[j] = fragments[j - 1];
+	//}
+	//fragments[j] = fragment;
 	
-	// 1-pass insertion sort
+	// Version 2 (No early out)
+	for(int i = 0; i < size; ++i)
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 	int j = size;
 	int i = j;
 	for(; j > 0; --j)
@@ -177,6 +186,56 @@ void insertFragment(vec4 color, float depth)
 		}
 	}
 	fragments[i] = fragment;
+	
+	
+	// Version 3 better conditional move
+	//for(int i = 0; i < size; ++i)
+	//	fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+	//int j = size;
+	//int i = j;
+	//for(; j > 0; --j)
+	//{
+	//	bool c = bool(fragments[j - 1].x > fragment.x);
+	//	i -= int(c);
+	//	if(c)
+	//	{
+	//		fragments[j] = fragments[j - 1];
+	//	}
+	//}
+	//fragments[i] = fragment;
+	//
+	//// Version 4 2-loop in positive direction
+	//for(int i = 0; i < size; ++i)
+	//	fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
+	//
+	//int j = 0;
+	//int i = j;
+	//for(; j < size; ++j)
+	//{
+	//	if(fragments[j + 1].x <= fragment.x)
+	//	{
+	//		fragments[j] = fragments[j + 1];
+	//		++i;
+	//	}
+	//}
+	//fragments[i] = fragment;
+	//
+	//// Version 5 3-loop in positive direction
+	//for(int i = 0; i < size; ++i)
+	//	fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
+	//
+	//int j = 0;
+	//int i = j;
+	//for(; j < size; ++j)
+	//{
+	//	bool c = bool(fragments[j + 1].x <= fragment.x);
+	//	i += int(c);
+	//	if(c)
+	//	{
+	//		fragments[j] = fragments[j + 1];
+	//	}
+	//}
+	//fragments[i] = fragment;
 	
 #else	
 	fragments[0] = vec2(depth, packColor(color));
@@ -201,7 +260,7 @@ void insertFragment(vec4 color, float depth)
 		//else break;
 	}
 	// while
-	int i = 0;
+	/*int i = 0;
 	while(i < size && fragments[i].x > fragments[i + 1].x)
 	{
 		// swap
@@ -209,7 +268,7 @@ void insertFragment(vec4 color, float depth)
 		fragments[i] = fragments[i + 1];
 		fragments[i + 1] = temp;
 		++i;
-	}
+	}*/
 #endif
 	
 	fragments[size - 1] = merge(fragments[size - 1], fragments[size]);
