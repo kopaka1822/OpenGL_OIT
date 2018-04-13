@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <regex>
+#include "../ScriptEngine/ScriptEngine.h"
 namespace fs = std::experimental::filesystem;
 
 #ifndef WIN32
@@ -32,10 +33,59 @@ static std::vector<std::shared_ptr<HotReloadShader::WatchedProgram>> s_watchedPr
 
 static std::chrono::steady_clock::time_point s_lastUpdate = std::chrono::steady_clock::now();
 
-void HotReloadShader::update()
+void HotReloadShader::initScripts()
+{
+	ScriptEngine::addFunction("getActiveShader", [](const auto&)
+	{
+		update(true);
+		std::cout << "shader:\n";
+		for(const auto& s : s_watchedShader)
+		{
+			std::cout << "\t" << s->getFilename() << "\n";
+		}
+	});
+	ScriptEngine::addFunction("saveShaderBinary", [](const std::vector<Token>& args)
+	{
+		if (args.size() < 2)
+			throw std::runtime_error("expected shader name and destination filename as arguments");
+
+		// force update current shaders
+		update(true);
+
+		// find the shader
+		auto shader = std::find_if(s_watchedShader.begin(), s_watchedShader.end(), [name = args.at(0).getString()](const auto& shader)
+		{
+			return shader->getFilename() == name;
+		});
+		if (shader == s_watchedShader.end())
+			throw std::runtime_error("could not find shader with filename: " + args.at(0).getString());
+
+		// find the program in which this shader is used
+		auto program = std::find_if(s_watchedPrograms.begin(), s_watchedPrograms.end(), [&shader](const auto& program)
+		{
+			return program->hasShader(**shader);
+		});
+		if (program == s_watchedPrograms.end())
+			throw std::runtime_error("could not find any associated programs for the shader");
+
+		// obtain binary
+		auto binary = (*program)->getProgram().getBinary();
+
+		// save binary in file
+		std::fstream file;
+		file.open(args.at(1).getString(), std::ios::out | std::ios::binary | std::ios::trunc);
+		if (!file.is_open())
+			throw std::runtime_error("could not open destination file");
+
+		file << binary;
+	});
+}
+
+
+void HotReloadShader::update(bool force)
 {
 	const auto now = std::chrono::steady_clock::now();
-	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastUpdate).count() < 500)
+	if (!force && std::chrono::duration_cast<std::chrono::milliseconds>(now - s_lastUpdate).count() < 500)
 		return; // dont spam updates
 
 	s_lastUpdate = now;

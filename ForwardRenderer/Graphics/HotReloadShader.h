@@ -111,7 +111,7 @@ struct HotReloadShader
 		std::vector<std::shared_ptr<WatchedShader>> m_usedShader;
 	};
 
-	static void update();
+	static void update(bool force = false);
 
 	/**
 	 * \brief 
@@ -124,7 +124,7 @@ struct HotReloadShader
 	static std::shared_ptr<WatchedShader> loadShader(gl::Shader::Type type, const fs::path& filename, size_t glVersion = 430, std::string preamble = "");
 	static std::shared_ptr<WatchedProgram> loadProgram(std::initializer_list<std::shared_ptr<WatchedShader>> shader);
 
-
+	static void initScripts();
 private:
 	static void loadShader(WatchedShader& dest);
 	static void loadProgram(WatchedProgram& program);

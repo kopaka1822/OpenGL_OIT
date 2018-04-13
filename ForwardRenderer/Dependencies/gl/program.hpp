@@ -69,6 +69,20 @@ namespace gl
 			}
 			return *this;
 		}
+
+		std::string getBinary() const
+		{
+			assert(m_id);
+			GLint size = 0;
+			glGetProgramiv(m_id, GL_PROGRAM_BINARY_LENGTH, &size);
+			GLsizei bytesWritten = 0;
+			GLenum binaryFormat = 0;
+			std::string res;
+			res.resize(size);
+			glGetProgramBinary(m_id, size, &bytesWritten, &binaryFormat, res.data());
+
+			return res;
+		}
 	private:
 		unique<GLuint> m_id;
 		std::vector<GLuint> m_attachments;
