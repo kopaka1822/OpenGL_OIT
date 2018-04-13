@@ -154,7 +154,7 @@ void insertFragment(vec4 color, float depth)
 #else // Store sorted
 	vec2 fragments[MAX_SAMPLES_C + 1];
 	
-#define INSERTION
+//#define INSERTION
 #ifdef INSERTION
 	// 1 pass insertion sort
 	
@@ -185,8 +185,19 @@ void insertFragment(vec4 color, float depth)
 			--i;
 		}
 	}
-	fragments[i] = fragment;
 	
+	//fragments[i] = fragment;
+	
+	// insert at i
+	for(j = 0; j <= size; ++j)
+	{
+		if(i == j)
+		{
+			fragments[j] = fragment;
+		}
+	}
+	
+	//fragments[i] = fragment;
 	
 	// Version 3 better conditional move
 	//for(int i = 0; i < size; ++i)
@@ -204,13 +215,12 @@ void insertFragment(vec4 color, float depth)
 	//}
 	//fragments[i] = fragment;
 	//
-	//// Version 4 2-loop in positive direction
+	// Version 4 2-loop in positive direction
 	//for(int i = 0; i < size; ++i)
 	//	fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
 	//
-	//int j = 0;
-	//int i = j;
-	//for(; j < size; ++j)
+	//int i = 0;
+	//for(int j = 0; j < size; ++j)
 	//{
 	//	if(fragments[j + 1].x <= fragment.x)
 	//	{
@@ -218,9 +228,22 @@ void insertFragment(vec4 color, float depth)
 	//		++i;
 	//	}
 	//}
+	//
+	////fragments[i] = fragment;
+	//
+	//for(int j = 0; j <= size; ++j)
+	//{
+	//	if(i == j)
+	//	{
+	//		fragments[j] = fragment;
+	//	}
+	//}
+	
+	//for(int j = 0; j < size;)
+	
 	//fragments[i] = fragment;
 	//
-	//// Version 5 3-loop in positive direction
+	// Version 5 3-loop in positive direction
 	//for(int i = 0; i < size; ++i)
 	//	fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
 	//
@@ -235,8 +258,31 @@ void insertFragment(vec4 color, float depth)
 	//		fragments[j] = fragments[j + 1];
 	//	}
 	//}
-	//fragments[i] = fragment;
+	//
 	
+	//fragments[i] = fragment;
+	//for(j = 0; j <= size; ++j)
+	//	if(i == j)
+	//		fragments[j] = fragment;
+	
+	// Version 6 wie version 2 mit einem loop
+
+	//for(int i = 0; i < size; ++i)
+	//	fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+	//	
+	//fragments[MAX_SAMPLES] = fragment;
+	//
+	//int j = size;
+	//for(; j > 0; --j)
+	//{
+	//	if(fragments[j - 1].x > fragment.x)
+	//	{
+	//		fragments[j] = fragments[j - 1];
+	//		fragments[j - 1] = fragment;
+	//	}
+	//}
+	
+
 #else	
 	fragments[0] = vec2(depth, packColor(color));
 	

@@ -1,4 +1,4 @@
-renderer = multilayer_alpha8
+renderer = adaptive16
 camera = projection
 //debugOutput = false
 profileType = latest

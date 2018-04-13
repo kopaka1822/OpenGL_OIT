@@ -1,4 +1,4 @@
-//#pragma optionNV (unroll none)
+//#pragma optionNV (unroll all)
 
 //#define STORE_UNSORTED
 

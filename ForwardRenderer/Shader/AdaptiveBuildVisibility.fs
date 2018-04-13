@@ -18,8 +18,103 @@ float getRectArea(vec2 pos1, vec2 pos2)
 	return (pos2.x - pos1.x) * (pos1.y - pos2.y);
 }
 
+void insertAlphaReference(float one_minus_alpha, float depth)
+{
+	vec2 fragments[MAX_SAMPLES + 1];
+	
+	// load values Upack AOIT Data
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		fragments[i] = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+	}
+	
+	// 1 pass bubble for new value
+	int insertPosition = 0;
+	float prevAlpha = 1.0;
+	
+	// find insert index
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(fragments[i].x < depth)
+		{
+			insertPosition = i + 1;
+			prevAlpha = fragments[i].y;
+		}
+
+	}
+	
+	// Make space for the new fragment
+	for(int i = MAX_SAMPLES - 1; i >= 0; --i)
+	{
+		if(insertPosition <= i)
+		{
+			fragments[i + 1].x = fragments[i].x;
+			fragments[i + 1].y = fragments[i].y * one_minus_alpha;
+		}
+	}
+	
+	// insert new fragment
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	{
+		if(insertPosition == i)
+		{
+			fragments[i].x = depth;
+			fragments[i].y = one_minus_alpha * prevAlpha;
+		}
+	}
+	//fragments[insertPosition].x = depth;
+	//fragments[insertPosition].y = one_minus_alpha * prevAlpha;
+	
+	float nodeUnderError[MAX_SAMPLES];
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		nodeUnderError[i] = abs(getRectArea(fragments[i], fragments[i+1]));
+	}
+	
+	// find the node that generates the smallest removal error
+	int smallestErrorIndex = 0;
+	float smallestError = nodeUnderError[0];
+	
+	for(int i = 1; i < MAX_SAMPLES; ++i)
+	{
+		if(nodeUnderError[i] < smallestError)
+		{
+			smallestError = nodeUnderError[i];
+			smallestErrorIndex = i;
+		}
+	}
+	
+	// Remove that node
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestErrorIndex < i)
+		{
+			// adjust depth
+			fragments[i].x = fragments[i + 1].x;
+		}
+	}
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestErrorIndex <= i)
+		{
+			// adjust alpha
+			fragments[i].y = fragments[i + 1].y;
+		}
+	}
+	
+	// pack aoit data
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(fragments[i], 0.0, 0.0));
+	}
+}
+
 void insertAlpha(float one_minus_alpha, float depth)
 {	
+	insertAlphaReference(one_minus_alpha, depth);
+	return;
+
 	vec2 fragments[MAX_SAMPLES + 1];
 	// load values
 	fragments[0] = vec2(depth, one_minus_alpha);
@@ -28,9 +123,9 @@ void insertAlpha(float one_minus_alpha, float depth)
 		fragments[i + 1] = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
 	}
 	
-	// 1 pass bubble for new value
+		// 1 pass bubble for new value
 	int insertPosition = 0;
-	
+		
 	while(insertPosition < MAX_SAMPLES && fragments[insertPosition].x > fragments[insertPosition + 1].x)
 	{
 		vec2 tmp = fragments[insertPosition];
@@ -39,41 +134,11 @@ void insertAlpha(float one_minus_alpha, float depth)
 		fragments[insertPosition + 1].y = fragments[insertPosition].y * one_minus_alpha;
 		++insertPosition;
 	}
-	/*for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		if(fragments[i].x > fragments[i + 1].x)
-		{
-			vec2 tmp = fragments[i];
-			fragments[i] = fragments[i + 1];
-			fragments[i + 1] = tmp;
-			fragments[i + 1].y = fragments[i].y * one_minus_alpha;
-			insertPosition = i + 1;
-		} else break;
-	}*/
-	//insertPosition--;
 	
 	for(int i = insertPosition + 1; i <= MAX_SAMPLES; ++i)
 	{
 		fragments[i].y *= one_minus_alpha;
 	}
-	/*for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		if(fragments[i].x > fragments[i + 1].x)
-		{
-			// fragment is not on correct position
-			vec2 tmp = fragments[i];
-			fragments[i] = fragments[i + 1];
-			fragments[i + 1] = tmp;
-			// adjust one minus alpha
-			fragments[i + 1].y = fragments[i].y * one_minus_alpha;
-			++insertPosition;
-		}
-		else
-		{
-			// fragment was already inserted (adjust other values)
-			fragments[i + 1].y *= one_minus_alpha;
-		}
-	}*/
 	
 	// find smallest rectangle
 	// find smallest rectangle to insert
