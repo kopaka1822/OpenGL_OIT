@@ -4,56 +4,56 @@
 
 profileType = average
 
-//renderer=adaptive4
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive8
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive16
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive32
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive48
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive64
-//waitIterations(20)
-//getProfileTime(build_vis)
-//
-//renderer=adaptive16
-//profileType = latest
-
-renderer=multilayer_alpha4
+renderer=adaptive4
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha8
+renderer=adaptive8
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha16
+renderer=adaptive16
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha32
+renderer=adaptive32
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha48
+renderer=adaptive48
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha64
+renderer=adaptive64
 waitIterations(20)
-getProfileTime(transparent)
+getProfileTime(build_vis)
 
-renderer=multilayer_alpha8
+renderer=adaptive16
 profileType = latest
+
+//renderer=multilayer_alpha4
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha8
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha16
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha32
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha48
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha64
+//waitIterations(20)
+//getProfileTime(transparent)
+//
+//renderer=multilayer_alpha8
+//profileType = latest

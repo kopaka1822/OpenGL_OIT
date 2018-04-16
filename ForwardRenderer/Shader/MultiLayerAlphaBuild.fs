@@ -108,6 +108,7 @@ void insertFragment(vec4 color, float depth)
 	//		shighIdx = i;
 	//	}
 	//}
+
 	for(int i = 0; i <= size; ++i)
 	{
 		// search max
@@ -129,26 +130,26 @@ void insertFragment(vec4 color, float depth)
 		}
 	}
 	
-	
 	// merge the two lowest
 	if(highIdx < MAX_SAMPLES)
 	{
 		// high index is in range
-		fragments[highIdx] = merge(fragments[shighIdx], fragments[highIdx]);
-		STORE(ivec3(gl_FragCoord.xy, highIdx), fragments[highIdx]);
+		//fragments[highIdx] = merge(fragments[shighIdx], fragments[highIdx]);
+		vec2 highValue = merge(fragments[shighIdx], fragments[highIdx]);
+		STORE(ivec3(gl_FragCoord.xy, highIdx), highValue);
 		// add the new item?
 		if(shighIdx != MAX_SAMPLES) // highIdx != MAX_SAMPLES => new value must be stored
 		{
 			// this slot is now free
-			fragments[shighIdx] =  vec2(depth, packColor(color));
-			STORE(ivec3(gl_FragCoord.xy, shighIdx), fragments[shighIdx]);
+			vec2 shighValue =  vec2(depth, packColor(color));
+			STORE(ivec3(gl_FragCoord.xy, shighIdx), shighValue);
 		}
 	}
 	else // highIdx == MAX_SAMPLES
 	{
 		// only shighIdx is in range and the new inserted value was merged into the highest value
-		fragments[shighIdx] = merge(fragments[shighIdx], fragments[highIdx]);
-		STORE(ivec3(gl_FragCoord.xy, shighIdx), fragments[shighIdx]);
+		vec2 shighValue = merge(fragments[shighIdx], fragments[highIdx]);
+		STORE(ivec3(gl_FragCoord.xy, shighIdx), shighValue);
 	}
 	
 #else // Store sorted
@@ -305,6 +306,7 @@ void insertFragment(vec4 color, float depth)
 		// list is sorted
 		//else break;
 	}
+	
 	// while
 	/*int i = 0;
 	while(i < size && fragments[i].x > fragments[i + 1].x)

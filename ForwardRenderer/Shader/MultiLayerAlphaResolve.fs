@@ -39,25 +39,67 @@ void main()
 	for(int i = 0; i < size; ++i)
 		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 	
-#if MAX_SAMPLES >= 32
-	
-	// insertion sort (faster for bigger lists)
-	for(int i = 1; i < size; ++i)
+	// insertion sort (faster)
+	/*for(int i = 1; i < size; ++i)
 	{
 		vec2 cur = fragments[i];
+#pragma optionNV (unroll all)
 		int j = i;
 		for(; j > 0 && fragments[j - 1].x > cur.x; --j)
 		{
 			fragments[j] = fragments[j - 1];
 		}
-		fragments[j] = cur;
+		
+
+		for(int k = 0; k < size; ++k)
+			if( k == j)
+				fragments[k] = cur;
+#pragma optionNV (unroll)
+	}*/
+	
+	/*for(int i = 1; i < size; ++i)
+	{
+		vec2 cur = fragments[i];
+#pragma optionNV (unroll all)
+		int j = i;
+		int m = j;
+		for(; j > 0; --j)
+		{
+			if(fragments[j - 1].x > cur.x)
+			{
+				fragments[j] = fragments[j - 1];
+				--m;
+			}
+		}
+		
+
+		for(int k = 0; k < size; ++k)
+			if( k == m)
+				fragments[k] = cur;
+#pragma optionNV (unroll)
+	}*/
+
+	// modified insertion sort
+	for(int i = 1; i < size; ++i)
+	{
+		// i - 1 elements are sorted
+#pragma optionNV (unroll all)	
+		for(int j = i; j > 0 && fragments[j - 1].x > fragments[j].x; --j)
+		{
+			vec2 tmp = fragments[j];
+			fragments[j] = fragments[j - 1];
+			fragments[j - 1] = tmp;
+		}
+#pragma optionNV (unroll)
 	}
 	
-#else
-	// bubble sort (faster for smaller lists)
+	
+	
+	// bubble sort
+/*#pragma optionNV (unroll all)
 	for(int n = size; n > 1; --n)
 	{
-		bool swapped = false;
+		bool swapped = true;
 		for(int i = 0; i < n - 1; ++i)
 		{
 			if(fragments[i].x > fragments[i + 1].x)
@@ -65,13 +107,13 @@ void main()
 				vec2 tmp = fragments[i];
 				fragments[i] = fragments[i + 1];
 				fragments[i + 1] = tmp;
-				swapped = true;
+				swapped = false;
 			}
 		}
-		if(!swapped) break;
+		if(swapped) break;
 	}
-#endif
-	
+#pragma optionNV (unroll)
+*/	
 	// now blend together
 	for(int i = 0; i < size; ++i)
 	{
@@ -80,7 +122,7 @@ void main()
 		mergedAlpha *= color.a;
 	}
 	
-#else
+#else // sorted
 	for(int i = 0; i < size; ++i)
 	{
 		vec4 color = unpackColor(LOAD(ivec3(gl_FragCoord.xy, i)).y);
