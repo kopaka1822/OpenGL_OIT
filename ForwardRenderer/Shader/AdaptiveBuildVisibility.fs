@@ -107,9 +107,101 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	}
 }
 
+void insertAlphaSep(float one_minus_alpha, float depthv)
+{	
+	//insertAlphaReference(one_minus_alpha, depth);
+	//return;
+	
+	float depth[MAX_SAMPLES + 1];
+	float alpha[MAX_SAMPLES + 1];
+	// load values
+	depth[0] = depthv;
+	alpha[0] = one_minus_alpha;
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		vec2 v = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+		depth[i + 1] = v.x;
+		alpha[i + 1] = v.y;
+	}
+	
+	// 1 pass bubble sort for new value
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		float newAlpha = alpha[i + 1] * one_minus_alpha;
+		if(depth[i] > depth[i + 1])
+		{
+			// shift lower value and insert new value at i + 1
+			depth[i] = depth[i + 1];
+			alpha[i] = alpha[i + 1];
+			depth[i + 1] = depthv;
+			alpha[i + 1] = newAlpha;
+		}
+		else
+		{
+			// adjust values after the insert position
+			alpha[i + 1] = newAlpha;
+		}
+	}
+	
+	
+	// find smallest rectangle
+	// find smallest rectangle to insert
+	int smallestRectPos = 0;
+	float minRectArea = 1.0 / 0.0;
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		float area = getRectArea(	vec2(depth[i], alpha[i]),
+									vec2(depth[i + 1], alpha[i + 1]) );
+		if(area < minRectArea)
+		{
+			minRectArea = area;
+			smallestRectPos = i;
+		}
+	}
+	
+	// Remove that node
+	//for(int i = 0; i < MAX_SAMPLES; ++i)
+	//{
+	//	if(smallestRectPos < i)
+	//	{
+	//		// adjust depth
+	//		depth[i] = depth[i + 1];
+	//	}
+	//}
+	//
+	//for(int i = 0; i < MAX_SAMPLES; ++i)
+	//{
+	//	if(smallestRectPos <= i)
+	//	{
+	//		// adjust alpha
+	//		alpha[i] = alpha[i + 1];
+	//	}
+	//}
+
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestRectPos <= i)
+		{
+			alpha[i] = alpha[i + 1];
+		}
+		if(smallestRectPos < i)
+		{
+			depth[i] = depth[i + 1];
+		}
+	}
+	
+	// pack aoit data
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(depth[i], alpha[i], 0.0, 0.0));
+	}
+}
+
 void insertAlpha(float one_minus_alpha, float depth)
 {	
 	//insertAlphaReference(one_minus_alpha, depth);
+	//insertAlphaSep(one_minus_alpha, depth);
 	//return;
 	
 	vec2 fragments[MAX_SAMPLES + 1];
