@@ -12,7 +12,7 @@ float visz(float depth)
 {
 	float previousTransmittance = 1.0;
 	
-	int maxZ = textureSize(tex_visz, 0).z;
+	int maxZ = MAX_SAMPLES;
 	for(int i = 0; i < maxZ; ++i)
 	{
 		vec2 val = texelFetch(tex_visz, ivec3(gl_FragCoord.xy, i), 0).xy;

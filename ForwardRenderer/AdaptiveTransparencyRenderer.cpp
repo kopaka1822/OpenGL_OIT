@@ -25,9 +25,14 @@ m_samplesPerPixel(samplesPerPixel)
 	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450,
 		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
 		);
-	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs");
+	
+	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs", 450,
+		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+		);
 
-	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs");
+	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs", 450,
+		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+		);
 
 	m_shaderBuildVisz = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({vertex, buildVisz}));
