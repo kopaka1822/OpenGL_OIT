@@ -47,6 +47,20 @@ float visz(float depth)
 		previousTransmittance = val.y;
 	}
 	return previousTransmittance;
+	
+	/*float previousTransmittance = 1.0;
+	vec2 fragments[MAX_SAMPLES];
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(depth <= fragments[i].x)
+			return previousTransmittance;
+			
+		previousTransmittance = fragments[i].y;
+	}
+	return previousTransmittance;*/
 }
 
 void main()
