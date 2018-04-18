@@ -6,20 +6,26 @@
 #include <array>
 #include "Graphics/GpuTimer.h"
 #include "Dependencies/gl/texture.hpp"
+#include "Dependencies/gl/buffer.hpp"
 
 class AdaptiveTransparencyRenderer : public IRenderer, public IWindowReceiver
 {
 public:
 	
 	AdaptiveTransparencyRenderer(size_t samplesPerPixel);
+	virtual ~AdaptiveTransparencyRenderer();
 
+	void init() override;
 	void render(const IModel* model, const ICamera* camera) override;
 	void onSizeChange(int width, int height) override;
 private:
 	std::unique_ptr<IShader> m_defaultShader;
 	std::unique_ptr<IShader> m_shaderBuildVisz;
 	std::unique_ptr<IShader> m_shaderApplyVisz;
-	gl::Texture3D m_visibilityFunc;
+	gl::Texture3D m_visibilityTex;
+	gl::StaticShaderStorageBuffer m_visibilityBuffer;
+	gl::TextureBuffer m_visibilityBufferView;
+
 	gl::Texture2D m_mutexTexture;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
 	const glm::vec2 m_visibilityClearColor;
@@ -35,4 +41,8 @@ private:
 	std::array<GpuTimer, SIZE> m_timer;
 
 	const size_t m_samplesPerPixel;
+
+	// ssbo is faster
+	bool m_useTextureBuffer = false;
+	bool m_useTextureBufferView = false;
 };

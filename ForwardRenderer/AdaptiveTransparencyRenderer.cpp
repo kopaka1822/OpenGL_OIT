@@ -6,6 +6,8 @@
 #include "Framework/Profiler.h"
 #include <numeric>
 #include <mutex>
+#include "ScriptEngine/Token.h"
+#include "ScriptEngine/ScriptEngine.h"
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -14,33 +16,84 @@ m_visibilityClearColor(glm::vec2(
 	1.0f // visibility is still 1
 )),
 m_samplesPerPixel(samplesPerPixel)
+{}
+
+AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 {
-	// build the shaders
-	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
-	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
-	m_defaultShader = std::make_unique<SimpleShader>(
-		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
+	ScriptEngine::removeProperty("adaptive_use_texture");
+	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
+}
 
-	auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450,
-		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+void AdaptiveTransparencyRenderer::init()
+{
+	auto loadShader = [this]()
+	{
+		std::string shaderParams = "#define MAX_SAMPLES " + std::to_string(m_samplesPerPixel);
+		if (!m_useTextureBuffer)
+			shaderParams += "\n#define SSBO_STORAGE";
+		if (m_useTextureBufferView)
+			shaderParams += "\n#define SSBO_TEX_VIEW";
+
+		// build the shaders
+		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+		auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+		auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
+		m_defaultShader = std::make_unique<SimpleShader>(
+			HotReloadShader::loadProgram({ vertex, geometry, fragment }));
+
+		auto buildVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveBuildVisibility.fs", 450,
+			shaderParams
 		);
-	
-	auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs", 450,
-		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+
+		auto useVisz = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveUseVisibility.fs", 450,
+			shaderParams
 		);
 
-	auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs", 450,
-		"#define MAX_SAMPLES " + std::to_string(samplesPerPixel)
+		auto adjustBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/AdaptiveDarkenBackground.fs", 450,
+			shaderParams
 		);
 
-	m_shaderBuildVisz = std::make_unique<SimpleShader>(
-		HotReloadShader::loadProgram({vertex, buildVisz}));
-	m_shaderApplyVisz = std::make_unique<SimpleShader>(
-		HotReloadShader::loadProgram({vertex, geometry, useVisz}));
-	m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
+		m_shaderBuildVisz = std::make_unique<SimpleShader>(
+			HotReloadShader::loadProgram({ vertex, buildVisz }));
+		m_shaderApplyVisz = std::make_unique<SimpleShader>(
+			HotReloadShader::loadProgram({ vertex, geometry, useVisz }));
+		m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
 
-	AdaptiveTransparencyRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
+		// delete old buffer/texture
+		m_visibilityTex = gl::Texture3D();
+		m_visibilityBufferView = gl::TextureBuffer();
+		m_visibilityBuffer = gl::StaticShaderStorageBuffer();
+
+		AdaptiveTransparencyRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
+	};
+
+	loadShader();
+
+	ScriptEngine::addProperty("adaptive_use_texture", [this]()
+	{
+		std::cout << "adaptive_use_texture: " << m_useTextureBuffer << "\n";
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		bool b = args.at(0).getString() != "false";
+		// reset timer
+		m_timer = std::array<GpuTimer, SIZE>();
+		m_useTextureBuffer = b;
+		std::cout << "adaptive_use_texture: " << m_useTextureBuffer << "\n";
+		loadShader();
+	});
+
+	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", [this]()
+	{
+		std::cout << "adaptive_use_texture_buffer_view: " << m_useTextureBufferView << "\n";
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		bool b = args.at(0).getString() != "false";
+		// reset timer
+		m_timer = std::array<GpuTimer, SIZE>();
+		m_useTextureBufferView = b;
+		std::cout << "adaptive_use_texture_buffer_view: " << m_useTextureBufferView << "\n";
+		loadShader();
+	});
 }
 
 void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera)
@@ -74,14 +127,22 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 	// reset visibility function data
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
-		m_visibilityFunc.clear(m_visibilityClearColor, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+
+		if (m_useTextureBuffer)
+			m_visibilityTex.clear(m_visibilityClearColor, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+		else
+			m_visibilityBuffer.fill(m_visibilityClearColor, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
 	}
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
 
 		// bind as image for building func
-		m_visibilityFunc.bindAsImage(0, gl::ImageAccess::READ_WRITE);
+		if (m_useTextureBuffer)
+			m_visibilityTex.bindAsImage(0, gl::ImageAccess::READ_WRITE);
+		else
+			m_visibilityBuffer.bind(7);
+
 		// bind the atomic counters
 		m_mutexTexture.bindAsImage(1, gl::ImageAccess::READ_WRITE);
 
@@ -105,7 +166,11 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 				//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			}
 		}
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+
+		if (m_useTextureBuffer)
+			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+		else
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 	
 	{
@@ -118,7 +183,12 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// apply visibility function
-		m_visibilityFunc.bind(7);
+		if (m_useTextureBuffer)
+			m_visibilityTex.bind(7);
+		else if (m_useTextureBufferView)
+			m_visibilityBufferView.bind(7);
+		else
+			m_visibilityBuffer.bind(7);
 
 		// darken the background
 		glEnable(GL_BLEND);
@@ -157,7 +227,13 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 void AdaptiveTransparencyRenderer::onSizeChange(int width, int height)
 {
 	// create visibility function storage
-	m_visibilityFunc = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
+	if (m_useTextureBuffer)
+		m_visibilityTex = gl::Texture3D(gl::InternalFormat::RG32F, GLsizei(width), GLsizei(height), GLsizei(m_samplesPerPixel));
+	else
+	{
+		m_visibilityBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, GLsizei(width * height * m_samplesPerPixel));
+		m_visibilityBufferView = gl::TextureBuffer(gl::TextureBufferFormat::RG32F, m_visibilityBuffer);
+	}
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

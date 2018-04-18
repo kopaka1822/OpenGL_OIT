@@ -47,12 +47,12 @@ void MultiLayerAlphaRenderer::init()
 			HotReloadShader::loadProgram({ vertex, geometry, build }));
 
 		m_transparentShader->bind();
-		glUniform1i(10, m_samplesPerPixel);
+		glUniform1i(10, GLint(m_samplesPerPixel));
 
 		m_resolveShader = std::make_unique<FullscreenQuadShader>(resolve);
 
 		m_resolveShader->bind();
-		glUniform1i(10, m_samplesPerPixel);
+		glUniform1i(10, GLint(m_samplesPerPixel));
 
 		// delete old buffer/texture
 		m_storageTex = gl::Texture3D();
@@ -69,7 +69,8 @@ void MultiLayerAlphaRenderer::init()
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		bool b = args.at(0).getString() != "false";
-		Profiler::reset();
+		// reset timer
+		m_timer = std::array<GpuTimer, SIZE>();
 		m_useTextureBuffer = b;
 		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
 		loadShader();
