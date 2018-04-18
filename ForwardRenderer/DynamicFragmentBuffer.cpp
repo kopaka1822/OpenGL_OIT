@@ -3,6 +3,7 @@
 #include "SimpleShader.h"
 #include <iostream>
 #include <glad/glad.h>
+#include "ScriptEngine/ScriptEngine.h"
 
 static const int WORKGROUP_SIZE = 1024;
 static const int ELEM_PER_THREAD_SCAN = 8;
@@ -37,6 +38,25 @@ DynamicFragmentBufferRenderer::DynamicFragmentBufferRenderer()
 
 	// staging resource for the fragment count
 	m_scanStageBuffer = gl::StaticClientShaderStorageBuffer(sizeof uint32_t);
+}
+
+DynamicFragmentBufferRenderer::~DynamicFragmentBufferRenderer()
+{
+	ScriptEngine::removeProperty("dynamic_max_fragments");
+	ScriptEngine::removeProperty("dynamic_last_fragments");
+}
+
+void DynamicFragmentBufferRenderer::init()
+{
+	ScriptEngine::addProperty("dynamic_max_fragments", [this]()
+	{
+		std::cerr << "dynamic_max_fragments: " << m_fragmentStorage.getNumElements() << '\n';
+	});
+
+	ScriptEngine::addProperty("dynamic_last_fragments", [this]()
+	{
+		std::cerr << "dynamic_last_fragments: " << m_lastFragmentCount << '\n';
+	});
 }
 
 void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* camera)
@@ -102,11 +122,11 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 		// resize
 		std::lock_guard<GpuTimer> g(m_timer[T_RESIZE]);
 
-		auto newSize = m_scanStageBuffer.getElement<uint32_t>(0);
+		m_lastFragmentCount = m_scanStageBuffer.getElement<uint32_t>(0);
 
-		if (newSize > m_fragmentStorage.getNumElements())
+		if (m_lastFragmentCount > m_fragmentStorage.getNumElements())
 		{
-			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, newSize);
+			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, m_lastFragmentCount);
 		}
 	}
 

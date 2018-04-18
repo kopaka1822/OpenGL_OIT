@@ -9,6 +9,9 @@ class DynamicFragmentBufferRenderer : public IRenderer, public IWindowReceiver
 {
 public:
 	DynamicFragmentBufferRenderer();
+	virtual ~DynamicFragmentBufferRenderer();
+
+	void init() override;
 	void render(const IModel* model, const ICamera* camera) override;
 
 	void onSizeChange(int width, int height) override;
@@ -34,6 +37,7 @@ private:
 	std::shared_ptr<HotReloadShader::WatchedProgram> m_pushScanShader;
 	GLsizei m_curScanSize = 0;
 	GLsizei m_curLastIndex = 0;
+	size_t m_lastFragmentCount = 0;
 
 	enum Timer
 	{
