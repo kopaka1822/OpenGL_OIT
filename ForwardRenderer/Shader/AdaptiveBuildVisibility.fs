@@ -10,7 +10,25 @@ layout(location = 0) out vec4 out_fragColor;
 #include "light/light.glsl"
 
 // visibility function (xy = fragment xy, z = depth index)
-layout(binding = 0, rg32f) volatile uniform image3D tex_visz; // .x = depth, .y = transmittance
+#ifdef SSBO_STORAGE
+layout(binding = 7, std430) coherent restrict buffer ssbo_fragmentBuffer
+{
+	vec2 buf_fragments[];
+};
+
+int getIndexFromVec(ivec3 c)
+{
+	return c.y * int(u_screenWidth) * int(MAX_SAMPLES) + c.x * int(MAX_SAMPLES) + c.z;
+}
+
+#define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
+#define STORE(coord, value) buf_fragments[getIndexFromVec(coord)] = value
+#else
+layout(binding = 0, rg32f) coherent uniform image3D tex_vis; // .x = depth, .y = transmittance
+#define LOAD(coord) imageLoad(tex_vis, coord).xy
+#define STORE(coord, value) imageStore(tex_vis, coord, vec4(value, 0.0, 0.0))
+#endif
+
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 
 float getRectArea(vec2 pos1, vec2 pos2)
@@ -25,7 +43,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	// load values Upack AOIT Data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		fragments[i] = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
 	}
 	
 	int insertPosition = 0;
@@ -65,7 +83,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	float nodeUnderError[MAX_SAMPLES];
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		nodeUnderError[i] = abs(getRectArea(fragments[i], fragments[i+1]));
+		nodeUnderError[i] = getRectArea(fragments[i], fragments[i+1]);
 	}
 	
 	// find the node that generates the smallest removal error
@@ -103,7 +121,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(fragments[i], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
 	}
 }
 
@@ -119,7 +137,7 @@ void insertAlphaSep(float one_minus_alpha, float depthv)
 	alpha[0] = one_minus_alpha;
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		vec2 v = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+		vec2 v = LOAD(ivec3(gl_FragCoord.xy, i));
 		depth[i + 1] = v.x;
 		alpha[i + 1] = v.y;
 	}
@@ -194,7 +212,7 @@ void insertAlphaSep(float one_minus_alpha, float depthv)
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(depth[i], alpha[i], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, i), vec2(depth[i], alpha[i]));
 	}
 }
 
@@ -209,7 +227,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	fragments[0] = vec2(depth, one_minus_alpha);
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		fragments[i + 1] = imageLoad(tex_visz, ivec3(gl_FragCoord.xy, i)).xy;
+		fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
 	}
 	
 	// 1 pass bubble sort for new value
@@ -299,7 +317,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		imageStore(tex_visz, ivec3(gl_FragCoord.xy, i), vec4(fragments[i], 0.0, 0.0));
+		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
 	}
 }
 
@@ -320,8 +338,11 @@ void main()
 				
 				insertAlpha(1.0 - dissolve, dist); 
 				
+#ifdef SSBO_STORAGE
+				memoryBarrierBuffer();
+#else				
 				memoryBarrierImage();
-				
+#endif
 				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
 				keepWaiting = false;
 			}
