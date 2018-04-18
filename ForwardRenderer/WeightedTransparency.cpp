@@ -38,7 +38,7 @@ void WeightedTransparency::render(const IModel * model, const ICamera * camera)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_defaultShader->applyCamera(*camera);
-		model->prepareDrawing();
+		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
@@ -57,7 +57,7 @@ void WeightedTransparency::render(const IModel * model, const ICamera * camera)
 		glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
 
 		m_transShader->applyCamera(*camera);
-		model->prepareDrawing();
+		model->prepareDrawing(*m_transShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())

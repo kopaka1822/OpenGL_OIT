@@ -93,7 +93,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_opaqueShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
@@ -146,7 +146,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_transparentShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())

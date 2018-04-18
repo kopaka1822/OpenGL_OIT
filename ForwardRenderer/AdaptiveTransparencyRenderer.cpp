@@ -114,7 +114,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
@@ -156,7 +156,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderBuildVisz);
 		int shapeCount = 0;
 		for (const auto& s : model->getShapes())
 		{
@@ -198,7 +198,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 
 		// add all values
 		glBlendFunc(GL_ONE, GL_ONE);
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderApplyVisz);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())

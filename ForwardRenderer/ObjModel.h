@@ -13,7 +13,7 @@ public:
 	explicit ObjModel(const std::string& filename);
 	~ObjModel();
 
-	void prepareDrawing() const override;
+	void prepareDrawing(IShader& shader) const override;
 	const std::vector<std::unique_ptr<IShape>>& getShapes() const override;
 
 private:

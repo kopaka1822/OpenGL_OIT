@@ -78,7 +78,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
@@ -103,7 +103,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderCountFragments);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())
@@ -142,7 +142,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 		m_fragmentStorage.bind(7);
 
 		// colors are still diabled
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderStoreFragments);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())

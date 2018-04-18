@@ -118,7 +118,7 @@ ObjModel::~ObjModel()
 {
 }
 
-void ObjModel::prepareDrawing() const
+void ObjModel::prepareDrawing(IShader& shader) const
 {
 	
 

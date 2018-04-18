@@ -56,7 +56,7 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 		{
 			if (!s->isTransparent())
@@ -71,7 +71,7 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera)
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderBuildVisz);
 
 		m_counter.bind(4);
 		m_mutexTexture.bindAsImage(0, gl::ImageAccess::READ_WRITE);
@@ -102,7 +102,7 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera)
 		// add all values
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
-		model->prepareDrawing();
+		model->prepareDrawing(*m_shaderApplyVisz);
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())

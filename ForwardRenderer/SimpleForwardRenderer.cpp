@@ -35,7 +35,7 @@ void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera)
 
 		m_defaultShader->applyCamera(*camera);
 
-		model->prepareDrawing();
+		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 			if (!s->isTransparent())
 				s->draw(m_defaultShader.get());
@@ -49,7 +49,7 @@ void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDepthMask(GL_FALSE);
-			model->prepareDrawing();
+			model->prepareDrawing(*m_defaultShader);
 			for (const auto& s : model->getShapes())
 				if (s->isTransparent())
 					s->draw(m_defaultShader.get());
