@@ -335,7 +335,7 @@ void main()
 	
 	float dist = distance(u_cameraPosition, in_position);
 	
-	if(dissolve > 0.0 && !gl_HelperInvocation) // is it event visible?
+	if(dissolve > 0.0 && !gl_HelperInvocation) // is it even visible?
 	{
 		
 		bool keepWaiting = true;

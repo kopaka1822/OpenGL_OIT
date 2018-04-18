@@ -5,6 +5,7 @@
 #include <glm/detail/func_packing.inl>
 #include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
+#include <glad/glad.h>
 
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
 	:
@@ -105,7 +106,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		struct Fragment
 		{
 			float depth;
-			uint32_t color;
+			float color;
 		};
 
 		// max depth and (alpha - 1) = 1.0 => alpha = 0.0
@@ -140,7 +141,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		glDepthMask(GL_FALSE);
 
 		// create Stencil Mask (1's for transparent particles)
-		//glEnable(GL_STENCIL_TEST);
+		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 

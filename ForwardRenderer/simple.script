@@ -3,16 +3,16 @@ camera = projection
 //debugOutput = false
 profileType = latest
 
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
-//loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//camSpeed = 0.001
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
+loadObj("Scene/miguel/san-miguel-low-poly.obj")
+camSpeed = 0.001
 
-loadObj("Scene/powerplant/powerplant.obj")
-camSpeed = 40
-camPos = 107055, 86794.4, 116970
-camDir = -0.747132, -0.179029, -0.640115
-camNear = 10
+//loadObj("Scene/powerplant/powerplant.obj")
+//camSpeed = 40
+//camPos = 107055, 86794.4, 116970
+//camDir = -0.747132, -0.179029, -0.640115
+//camNear = 10
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637

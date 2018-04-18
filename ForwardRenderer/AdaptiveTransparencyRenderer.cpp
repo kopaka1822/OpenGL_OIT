@@ -59,7 +59,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glEnable(GL_DEPTH_TEST);
 		//glDisable(GL_POLYGON_SMOOTH);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		model->prepareDrawing();
 		for (const auto& s : model->getShapes())
@@ -90,6 +90,11 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
+		// create Stencil Mask (1's for transparent particles)
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 		model->prepareDrawing();
 		int shapeCount = 0;
 		for (const auto& s : model->getShapes())
@@ -107,6 +112,10 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
 		// enable colors
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		// only draw if a 1 is in the stencil buffer
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// apply visibility function
 		m_visibilityFunc.bind(7);
@@ -132,6 +141,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 
 		// enable depth write
 		glDepthMask(GL_TRUE);
+		glDisable(GL_STENCIL_TEST);
 	}
 
 	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
