@@ -41,8 +41,4 @@ private:
 	std::array<GpuTimer, SIZE> m_timer;
 
 	const size_t m_samplesPerPixel;
-
-	// ssbo is faster
-	bool m_useTextureBuffer = false;
-	bool m_useTextureBufferView = false;
 };

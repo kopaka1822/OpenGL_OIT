@@ -37,5 +37,4 @@ private:
 	std::array<GpuTimer, SIZE> m_timer;
 
 	const size_t m_samplesPerPixel;
-	bool m_useTextureBuffer = true;
 };

@@ -5,7 +5,8 @@
 #include <glm/detail/func_packing.inl>
 #include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
-#include <glad/glad.h>
+
+static bool s_useTextureBuffer = true;
 
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
 	:
@@ -29,7 +30,7 @@ void MultiLayerAlphaRenderer::init()
 			HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
 		std::string additionalShaderParams;
-		if (!m_useTextureBuffer)
+		if (!s_useTextureBuffer)
 			additionalShaderParams = "\n#define SSBO_STORAGE";
 
 		auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450,
@@ -65,14 +66,13 @@ void MultiLayerAlphaRenderer::init()
 
 	ScriptEngine::addProperty("multilayer_use_texture", [this]()
 	{
-		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
+		std::cout << "multilayer_use_texture: " << s_useTextureBuffer << "\n";
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
-		bool b = args.at(0).getString() != "false";
+		s_useTextureBuffer = args.at(0).getBool();
+
 		// reset timer
 		m_timer = std::array<GpuTimer, SIZE>();
-		m_useTextureBuffer = b;
-		std::cout << "multilayer_use_texture: " << m_useTextureBuffer << "\n";
 		loadShader();
 	});
 }
@@ -118,7 +118,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 
 		
 
-		if (m_useTextureBuffer)
+		if (s_useTextureBuffer)
 			m_storageTex.clear(f, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
 		else
 			m_storageBuffer.fill(f, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
@@ -128,7 +128,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		std::lock_guard<GpuTimer> g(m_timer[T_TRANSPARENT]);
 
 		// bind storage
-		if(m_useTextureBuffer)
+		if(s_useTextureBuffer)
 			m_storageTex.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		else
 			m_storageBuffer.bind(7);
@@ -156,7 +156,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 			}
 		}
 
-		if(m_useTextureBuffer)
+		if(s_useTextureBuffer)
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 		else
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -167,7 +167,7 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 		std::lock_guard<GpuTimer> g(m_timer[T_RESOLVE]);
 
 		// bind storage as texture
-		if(m_useTextureBuffer)
+		if(s_useTextureBuffer)
 			// TODO bind as texture view
 			m_storageTex.bind(7);
 		else
@@ -206,10 +206,10 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
 
 void MultiLayerAlphaRenderer::onSizeChange(int width, int height)
 {
-	if(m_useTextureBuffer)
-		m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, m_samplesPerPixel);
+	if(s_useTextureBuffer)
+		m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, GLsizei(m_samplesPerPixel));
 	else
-		m_storageBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, width * height * m_samplesPerPixel);
+		m_storageBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, GLsizei(width * height * m_samplesPerPixel));
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

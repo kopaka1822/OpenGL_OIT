@@ -126,7 +126,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 
 		if (m_lastFragmentCount > m_fragmentStorage.getNumElements())
 		{
-			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, m_lastFragmentCount);
+			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, GLsizei(m_lastFragmentCount));
 		}
 	}
 
