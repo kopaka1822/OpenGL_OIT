@@ -36,6 +36,95 @@ float getRectArea(vec2 pos1, vec2 pos2)
 	return (pos2.x - pos1.x) * (pos1.y - pos2.y);
 }
 
+#ifdef UNSORTED_LIST
+
+struct Fragment
+{
+	float depth;
+	float alpha;
+	int oldPosition;
+};
+
+void insertAlpha(float one_minus_alpha, float depth)
+{
+	Fragment fragments[MAX_SAMPLES + 1];
+	fragments[0] = Fragment(depth, one_minus_alpha, -1);
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		vec2 val = LOAD(ivec3(gl_FragCoord.xy, i));
+		fragments[i + 1] = Fragment(val.x, val.y, i);
+	}
+	
+	// sort values depending on depth
+	// modified insertion sort
+	for(int i = 1; i <= MAX_SAMPLES; ++i)
+	{
+		// i - 1 elements are sorted
+#pragma optionNV (unroll all)	
+		for(int j = i; j > 0 && fragments[j - 1].depth > fragments[j].depth; --j)
+		{
+			Fragment tmp = fragments[j];
+			fragments[j] = fragments[j - 1];
+			fragments[j - 1] = tmp;
+		}
+#pragma optionNV (unroll)
+	}
+	
+	// find smallest rectangle
+	// find smallest rectangle to insert
+	float minRectArea = 1.0 / 0.0;
+	Fragment smallestRectValue = fragments[0];
+	Fragment nextSmallestRectValue = fragments[0];
+	
+	float prevAlpha = 1.0;
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		prevAlpha *= fragments[i].alpha;
+		float nextAlpha = fragments[i + 1].alpha;
+		float area = getRectArea( vec2(fragments[i].depth, prevAlpha),
+								  vec2(fragments[i + 1].depth, prevAlpha * nextAlpha));
+		if(area < minRectArea)
+		{
+			minRectArea = area;
+			smallestRectValue = fragments[i];
+			nextSmallestRectValue = fragments[i + 1];
+		}
+	}
+	
+	// adjust smallestRectValue
+	smallestRectValue.alpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
+	bool storeSecond = true;
+
+	if(nextSmallestRectValue.oldPosition == -1)
+	{
+		// the inserted value should not be stored
+		storeSecond = false;
+		// store same value twice
+		nextSmallestRectValue = smallestRectValue;
+	}
+	else if(smallestRectValue.oldPosition == -1)
+	{
+		// overwrite nextSmallestRectValue.oldPosition
+		smallestRectValue.oldPosition = nextSmallestRectValue.oldPosition;
+		storeSecond = false;
+		nextSmallestRectValue = smallestRectValue;
+	} 
+	else
+	{
+		// the inserted value should overwrite the nextSmallestRect
+		nextSmallestRectValue.depth = depth;
+		nextSmallestRectValue.alpha = one_minus_alpha;
+	}
+	
+	STORE(ivec3(gl_FragCoord.xy, smallestRectValue.oldPosition),
+		vec2(smallestRectValue.depth, smallestRectValue.alpha));
+	
+	//if(storeSecond)
+		STORE(ivec3(gl_FragCoord.xy, nextSmallestRectValue.oldPosition),
+			vec2(nextSmallestRectValue.depth, nextSmallestRectValue.alpha));
+}
+
+#else
 void insertAlphaReference(float one_minus_alpha, float depth)
 {
 	vec2 fragments[MAX_SAMPLES + 1];
@@ -125,97 +214,6 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	}
 }
 
-void insertAlphaSep(float one_minus_alpha, float depthv)
-{	
-	//insertAlphaReference(one_minus_alpha, depth);
-	//return;
-	
-	float depth[MAX_SAMPLES + 1];
-	float alpha[MAX_SAMPLES + 1];
-	// load values
-	depth[0] = depthv;
-	alpha[0] = one_minus_alpha;
-	for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		vec2 v = LOAD(ivec3(gl_FragCoord.xy, i));
-		depth[i + 1] = v.x;
-		alpha[i + 1] = v.y;
-	}
-	
-	// 1 pass bubble sort for new value
-	for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		float newAlpha = alpha[i + 1] * one_minus_alpha;
-		if(depth[i] > depth[i + 1])
-		{
-			// shift lower value and insert new value at i + 1
-			depth[i] = depth[i + 1];
-			alpha[i] = alpha[i + 1];
-			depth[i + 1] = depthv;
-			alpha[i + 1] = newAlpha;
-		}
-		else
-		{
-			// adjust values after the insert position
-			alpha[i + 1] = newAlpha;
-		}
-	}
-	
-	
-	// find smallest rectangle
-	// find smallest rectangle to insert
-	int smallestRectPos = 0;
-	float minRectArea = 1.0 / 0.0;
-	
-	for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		float area = getRectArea(	vec2(depth[i], alpha[i]),
-									vec2(depth[i + 1], alpha[i + 1]) );
-		if(area < minRectArea)
-		{
-			minRectArea = area;
-			smallestRectPos = i;
-		}
-	}
-	
-	// Remove that node
-	//for(int i = 0; i < MAX_SAMPLES; ++i)
-	//{
-	//	if(smallestRectPos < i)
-	//	{
-	//		// adjust depth
-	//		depth[i] = depth[i + 1];
-	//	}
-	//}
-	//
-	//for(int i = 0; i < MAX_SAMPLES; ++i)
-	//{
-	//	if(smallestRectPos <= i)
-	//	{
-	//		// adjust alpha
-	//		alpha[i] = alpha[i + 1];
-	//	}
-	//}
-
-	for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		if(smallestRectPos <= i)
-		{
-			alpha[i] = alpha[i + 1];
-		}
-		if(smallestRectPos < i)
-		{
-			depth[i] = depth[i + 1];
-		}
-	}
-	
-	// pack aoit data
-	for(int i = 0; i < MAX_SAMPLES; ++i)
-	{
-		STORE(ivec3(gl_FragCoord.xy, i), vec2(depth[i], alpha[i]));
-	}
-}
-
 void insertAlpha(float one_minus_alpha, float depth)
 {	
 	//insertAlphaReference(one_minus_alpha, depth);
@@ -248,25 +246,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 		}
 	}
 	
-	//float nodeUnderError[MAX_SAMPLES];
-	//for(int i = 0; i < MAX_SAMPLES; ++i)
-	//{
-	//	nodeUnderError[i] = getRectArea(fragments[i], fragments[i+1]);
-	//}
-	//
-	//// find the node that generates the smallest removal error
-	//int smallestRectPos = 0;
-	//float smallestError = nodeUnderError[0];
-	//
-	//for(int i = 1; i < MAX_SAMPLES; ++i)
-	//{
-	//	if(nodeUnderError[i] < smallestError)
-	//	{
-	//		smallestError = nodeUnderError[i];
-	//		smallestRectPos = i;
-	//	}
-	//}
-	
 	// find smallest rectangle
 	// find smallest rectangle to insert
 	int smallestRectPos = 0;
@@ -283,25 +262,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 		}
 	}
 	
-	// Remove that node
-	//for(int i = 0; i < MAX_SAMPLES; ++i)
-	//{
-	//	if(smallestRectPos < i)
-	//	{
-	//		// adjust depth
-	//		fragments[i].x = fragments[i + 1].x;
-	//	}
-	//}
-	//
-	//for(int i = 0; i < MAX_SAMPLES; ++i)
-	//{
-	//	if(smallestRectPos <= i)
-	//	{
-	//		// adjust alpha
-	//		fragments[i].y = fragments[i + 1].y;
-	//	}
-	//}
-
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
 		if(smallestRectPos <= i)
@@ -320,6 +280,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
 	}
 }
+#endif
+
 
 void main()
 {

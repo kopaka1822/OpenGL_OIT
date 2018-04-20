@@ -6,7 +6,8 @@
 #include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
 
-static bool s_useTextureBuffer = true;
+// shader storage is faster
+static bool s_useTextureBuffer = false;
 
 MultiLayerAlphaRenderer::MultiLayerAlphaRenderer(size_t samplesPerPixel)
 	:

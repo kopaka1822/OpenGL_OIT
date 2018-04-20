@@ -12,6 +12,7 @@
 // ssbo is faster
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
+static bool s_useUnsortedBuffer = true;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -26,6 +27,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 {
 	ScriptEngine::removeProperty("adaptive_use_texture");
 	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
+	ScriptEngine::removeProperty("adaptive_use_unsorted_buffer");
 }
 
 void AdaptiveTransparencyRenderer::init()
@@ -37,6 +39,8 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define SSBO_STORAGE";
 		if (s_useTextureBufferView)
 			shaderParams += "\n#define SSBO_TEX_VIEW";
+		if (s_useUnsortedBuffer)
+			shaderParams += "\n#define UNSORTED_LIST";
 
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -96,6 +100,18 @@ void AdaptiveTransparencyRenderer::init()
 		m_timer = std::array<GpuTimer, SIZE>();
 		loadShader();
 	});
+
+	ScriptEngine::addProperty("adaptive_use_unsorted_buffer", [this]()
+	{
+		std::cout << "adaptive_use_unsorted_buffer: " << s_useUnsortedBuffer << "\n";
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		s_useUnsortedBuffer = args.at(0).getBool();
+
+		// reset timer
+		m_timer = std::array<GpuTimer, SIZE>();
+		loadShader();
+	});
 }
 
 void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera)
@@ -136,14 +152,28 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			m_visibilityBuffer.fill(m_visibilityClearColor, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
 	}
 
+	auto bindFunctionReadWrite = [this]()
 	{
-		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
-
-		// bind as image for building func
 		if (s_useTextureBuffer)
 			m_visibilityTex.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		else
 			m_visibilityBuffer.bind(7);
+	};
+	auto bindFunctionRead = [this]()
+	{
+		if (s_useTextureBuffer)
+			m_visibilityTex.bind(7);
+		else if (s_useTextureBufferView)
+			m_visibilityBufferView.bind(7);
+		else
+			m_visibilityBuffer.bind(7);
+	};
+
+	{
+		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
+
+		// bind as image for building func
+		bindFunctionReadWrite();
 
 		// bind the atomic counters
 		m_mutexTexture.bindAsImage(1, gl::ImageAccess::READ_WRITE);
@@ -185,18 +215,24 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// apply visibility function
-		if (s_useTextureBuffer)
-			m_visibilityTex.bind(7);
-		else if (s_useTextureBufferView)
-			m_visibilityBufferView.bind(7);
+		if (s_useUnsortedBuffer)
+			bindFunctionReadWrite();
 		else
-			m_visibilityBuffer.bind(7);
+			bindFunctionRead();
 
 		// darken the background
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 		m_shaderAdjustBackground->draw();
 
+		if(s_useUnsortedBuffer)
+		{
+			if (s_useTextureBuffer)
+				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+			else
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			bindFunctionRead();
+		}
 
 		// add all values
 		glBlendFunc(GL_ONE, GL_ONE);
