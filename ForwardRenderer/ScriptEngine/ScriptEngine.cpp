@@ -346,10 +346,28 @@ void ScriptEngine::init()
 	{
 		// list everything
 		std::cout << "functions: " << '\n';
+
+		std::vector<std::string> names;
+		names.reserve(std::max(s_functions.size(), s_properties.size()));
 		for (const auto& f : s_functions)
-			std::cout << "   " << f.first << "(...)" << '\n';
+			names.push_back(f.first);
+
+		// sort names
+		std::sort(names.begin(), names.end());
+
+		for (const auto& n : names)
+			std::cout << "   " << n << "(...)" << '\n';
+		
 		std::cout << "properties: " << '\n';
+		
+		names.resize(0);
 		for (const auto& p : s_properties)
-			std::cout << "   " << p.first << '\n';
+			names.push_back(p.first);
+
+		// sort names
+		std::sort(names.begin(), names.end());
+		
+		for (const auto& n : names)
+			std::cout << "   " << n << '\n';
 	});
 }
