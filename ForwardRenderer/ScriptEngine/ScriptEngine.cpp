@@ -289,7 +289,7 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 			}
 
 			// TODO make complex setter?
-			if (tokens.size() != 4)
+			if (tokens.size() < 4)
 				throw std::runtime_error("expected variable assign (>name = value)");
 
 			// must be variable setter
@@ -297,7 +297,10 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 				throw std::runtime_error("expected variable assign");
 
 			// set variable
-			s_variables[tokens[1].getString()] = tokens[3];
+			auto args = getArgumentList(tokens, 3, Token::Type::UNDEFINED);
+			if (args.size() != 1)
+				throw std::runtime_error("expected only one argument for variable setter");
+			s_variables[tokens[1].getString()] = args[0];
 			return;
 		}
 	}

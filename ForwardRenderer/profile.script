@@ -2,85 +2,88 @@
 //waitIterations(10)
 //getProfileTimes()
 
+>waitCount = 20
+>profiler = transparent
+
 profileType = average
 
 //renderer=adaptive4
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive8
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive16
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive32
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive48
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive64
-//waitIterations(20)
-//getProfileTime(use_vis)
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 //
 //renderer=adaptive16
 //profileType = latest
 //
 //renderer=adaptive4
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 
 //renderer=adaptive8
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 //
 //renderer=adaptive16
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 //
 //renderer=adaptive32
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 //
 //renderer=adaptive48
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 //
 //renderer=adaptive64
-//waitIterations(20)
+//waitIterations(>waitCount)
 //getProfileTimes()
 //
 //renderer=adaptive16
 //profileType = latest
 
 renderer=multilayer_alpha4
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha8
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha16
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha32
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha48
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha64
-waitIterations(20)
-getProfileTime(time)
+waitIterations(>waitCount)
+getProfileTime(>profiler)
 
 renderer=multilayer_alpha8
 profileType = latest
