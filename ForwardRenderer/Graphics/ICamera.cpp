@@ -22,7 +22,7 @@ void ICamera::initScripts()
 	{
 		if (args.size() == 0)
 			throw std::runtime_error("please provide speed");
-		if (args[0].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide speed as number");
 		s_speed = args[0].getFloat();
 	});
@@ -34,7 +34,7 @@ void ICamera::initScripts()
 	{
 		if (args.size() == 0)
 			throw std::runtime_error("please provide fov degree");
-		if (args[0].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide fov degree");
 		s_fov = args[0].getFloat();
 	});
@@ -46,7 +46,7 @@ void ICamera::initScripts()
 	{
 		if (args.size() == 0)
 			throw std::runtime_error("please provide near plane distance");
-		if (args[0].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide near plane distance");
 		s_nearPlane = args[0].getFloat();
 	});
@@ -58,7 +58,7 @@ void ICamera::initScripts()
 	{
 		if (args.size() == 0)
 			throw std::runtime_error("please provide far plane distance");
-		if (args[0].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide far plane distance");
 		s_farPlane = args[0].getFloat();
 	});
@@ -73,9 +73,9 @@ void ICamera::initScripts()
 	{
 		if (args.size() != 3)
 			throw std::runtime_error("please provide 3 numbers");
-		if (args[0].getType() != Token::Type::Number
-			|| args[1].getType() != Token::Type::Number
-			|| args[2].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER
+			|| args[1].getType() != Token::Type::NUMBER
+			|| args[2].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide 3 numbers");
 		s_position.x = args[0].getFloat();
 		s_position.y = args[1].getFloat();
@@ -92,9 +92,9 @@ void ICamera::initScripts()
 	{
 		if (args.size() != 3)
 			throw std::runtime_error("please provide 3 numbers");
-		if (args[0].getType() != Token::Type::Number
-			|| args[1].getType() != Token::Type::Number
-			|| args[2].getType() != Token::Type::Number)
+		if (args[0].getType() != Token::Type::NUMBER
+			|| args[1].getType() != Token::Type::NUMBER
+			|| args[2].getType() != Token::Type::NUMBER)
 			throw std::runtime_error("please provide 3 numbers");
 		glm::vec3 dir;
 		dir.x = args[0].getFloat();

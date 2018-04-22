@@ -6,28 +6,38 @@ class Token
 public:
 	enum class Type
 	{
-		Number,
-		String,
-		Identifier,
-		Seperator,
-		BracketOpen,
-		BracketClose,
-		Assign,
-		Undefined
+		NUMBER,
+		STRING,
+		IDENTIFIER,
+		SEPERATOR,
+		BRACKET_OPEN,
+		BRACKET_CLOSE,
+		ASSIGN,
+		VARIABLE,
+		UNDEFINED
 	};
 
-	Token(Type type, const std::string& value = "")
+	Token() : m_value(""), m_type(Type::UNDEFINED) {}
+	explicit Token(Type type, std::string value = "")
 		:
-	m_value(value),
+	m_value(move(value)),
 	m_type(type)
 	{}
-	float getFloat() const
+	float getFloat() const try
 	{
-		return static_cast<float>(atof(m_value.c_str()));
+		return std::stof(m_value);
 	}
-	int getInt() const
+	catch(const std::exception&)
 	{
-		return atoi(m_value.c_str());
+		throw std::runtime_error("cannot convert " + m_value + " to float");
+	}
+	int getInt() const try
+	{
+		return std::stoi(m_value);
+	}
+	catch (const std::exception&)
+	{
+		throw std::runtime_error("cannot convert " + m_value + " to int");
 	}
 	const std::string& getString() const
 	{

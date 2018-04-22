@@ -4,12 +4,14 @@
 #include <regex>
 #include <fstream>
 #include <queue>
+#include <cassert>
 
-std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
-std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
+static std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
+static std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
 static size_t s_curIteration = 0;
 static size_t s_waitIterations = 0;
-std::queue<std::pair<std::string, std::string>> s_commandQueue;
+static std::queue<std::pair<std::string, std::string>> s_commandQueue;
+static std::unordered_map<std::string, Token> s_variables;
 
 void ScriptEngine::addFunction(const std::string& name, SetterT callback)
 {
@@ -61,11 +63,11 @@ void ScriptEngine::removeFunction(const std::string& str)
 
 static Token makeTokenFromString(const std::string& str)
 {
-	// this is either a number or identifier token
+	// this is either a number, variable or identifier token
 	static std::regex float_regex("[+-]?([0-9]*[.])?[0-9]+");
 	if (std::regex_match(str, float_regex))
-		return Token(Token::Type::Number, str);
-	return Token(Token::Type::Identifier, str);
+		return Token(Token::Type::NUMBER, str);
+	return Token(Token::Type::IDENTIFIER, str);
 }
 
 std::vector<Token> getTokens(const std::string& command)
@@ -79,14 +81,14 @@ std::vector<Token> getTokens(const std::string& command)
 	for (const auto& c : command)
 	{
 		bool finishLast = false;
-		Token currentToken = Token(Token::Type::Undefined);
+		Token currentToken = Token(Token::Type::UNDEFINED);
 		if (isString)
 		{
 			if (c == '\"')
 			{
 				// string end
 				isString = false;
-				currentToken = Token(Token::Type::String, current);
+				currentToken = Token(Token::Type::STRING, current);
 				current = "";
 			}
 			// append character
@@ -103,19 +105,23 @@ std::vector<Token> getTokens(const std::string& command)
 				break;
 			case '=':
 				finishLast = true;
-				currentToken = Token(Token::Type::Assign);
+				currentToken = Token(Token::Type::ASSIGN);
 				break;
 			case ',':
 				finishLast = true;
-				currentToken = Token(Token::Type::Seperator);
+				currentToken = Token(Token::Type::SEPERATOR);
 				break;
 			case '(':
 				finishLast = true;
-				currentToken = Token(Token::Type::BracketOpen);
+				currentToken = Token(Token::Type::BRACKET_OPEN);
 				break;
 			case ')':
 				finishLast = true;
-				currentToken = Token(Token::Type::BracketClose);
+				currentToken = Token(Token::Type::BRACKET_CLOSE);
+				break;
+			case '>':
+				finishLast = true;
+				currentToken = Token(Token::Type::VARIABLE);
 				break;
 			default:
 				if (isspace(static_cast<unsigned char>(c)))
@@ -126,14 +132,13 @@ std::vector<Token> getTokens(const std::string& command)
 			}
 		}
 
-
 		if (finishLast && current.length())
 		{
 			// make token from string
 			tokens.push_back(makeTokenFromString(current));
 			current = "";
 		}
-		if (currentToken.getType() != Token::Type::Undefined)
+		if (currentToken.getType() != Token::Type::UNDEFINED)
 			tokens.push_back(currentToken);
 	}
 
@@ -159,21 +164,21 @@ std::vector<Token> getArgumentList(const std::vector<Token>& tokens, size_t star
 {
 	std::vector<Token> args;
 	
-	if (start < tokens.size() && endType != Token::Type::Undefined
+	if (start < tokens.size() && endType != Token::Type::UNDEFINED
 		&& tokens[start].getType() == endType)
 		return args; // no arguments
 
 	while(start < tokens.size())
 	{
-		if (tokens[start].getType() != Token::Type::Identifier
-			&& tokens[start].getType() != Token::Type::Number
-			&& tokens[start].getType() != Token::Type::String)
+		if (tokens[start].getType() != Token::Type::IDENTIFIER
+			&& tokens[start].getType() != Token::Type::NUMBER
+			&& tokens[start].getType() != Token::Type::STRING)
 			throw std::runtime_error("expected number, string or identifier in argument list");
 		
 		args.push_back(tokens[start]);
 		if (start + 1 >= tokens.size())
 		{
-			if (endType == Token::Type::Undefined)
+			if (endType == Token::Type::UNDEFINED)
 				break;
 			throw std::runtime_error("argument list was not closed appropriately");
 		}
@@ -185,7 +190,7 @@ std::vector<Token> getArgumentList(const std::vector<Token>& tokens, size_t star
 			throw std::runtime_error("argument list was not closed appropriately");
 		}
 		// another element?
-		if (tokens[start + 1].getType() != Token::Type::Seperator)
+		if (tokens[start + 1].getType() != Token::Type::SEPERATOR)
 			throw std::runtime_error("missing , in argument list");
 		start += 2;
 	}
@@ -201,21 +206,21 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 	if (tokens.empty())
 		return;
 
-	if (tokens[0].getType() != Token::Type::Identifier)
-		throw std::runtime_error("expected identifier");
+	if (tokens[0].getType() != Token::Type::IDENTIFIER
+		&& tokens[0].getType() != Token::Type::VARIABLE)
+		throw std::runtime_error("expected identifier or variable");
 
 	if (s_waitIterations)
 	{
 		// just enqueue command
-		//std::cout << "script: queued " << command << '\n';
-		s_commandQueue.push(std::make_pair(prefix?(*prefix):("script "), command));
+		s_commandQueue.push(std::make_pair(prefix ? (*prefix) : ("script "), command));
 		return;
 	}
 	if (prefix)
 		std::cout << *prefix << " " << command << '\n';
 
 	// function, get or set?
-	if (tokens.size() == 1)
+	if (tokens.size() == 1 && tokens[0].getType() == Token::Type::IDENTIFIER)
 	{
 		// this is a getter
 		const auto it = s_properties.find(tokens[0].getString());
@@ -224,27 +229,59 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 		it->second.first();
 		return;
 	}
-	if (tokens[1].getType() == Token::Type::Assign)
+	if(tokens.size() >= 2)
 	{
-		// this is a property
-		auto it = s_properties.find(tokens[0].getString());
-		if (it == s_properties.end())
-			throw std::runtime_error("cannot find property " + tokens[0].getString());
+		if (tokens[0].getType() == Token::Type::IDENTIFIER && tokens[1].getType() == Token::Type::ASSIGN)
+		{
+			// this is a property assign
+			auto it = s_properties.find(tokens[0].getString());
+			if (it == s_properties.end())
+				throw std::runtime_error("cannot find property " + tokens[0].getString());
 
-		it->second.second(getArgumentList(tokens, 2, Token::Type::Undefined));
+			it->second.second(getArgumentList(tokens, 2, Token::Type::UNDEFINED));
 
-		return;
-	}
-	if (tokens[1].getType() == Token::Type::BracketOpen)
-	{
-		// this is a function
-		const auto it = s_functions.find(tokens[0].getString());
-		if (it == s_functions.end())
-			throw std::runtime_error("cannot find property " + tokens[0].getString());
+			return;
+		}
+		if (tokens[0].getType() == Token::Type::IDENTIFIER && tokens[1].getType() == Token::Type::BRACKET_OPEN)
+		{
+			// this is a function
+			const auto it = s_functions.find(tokens[0].getString());
+			if (it == s_functions.end())
+				throw std::runtime_error("cannot find property " + tokens[0].getString());
 
-		it->second(getArgumentList(tokens, 2, Token::Type::BracketClose));
+			it->second(getArgumentList(tokens, 2, Token::Type::BRACKET_CLOSE));
 
-		return;
+			return;
+		}
+		if (tokens[0].getType() == Token::Type::VARIABLE)
+		{
+			// variable getter or setter
+			if (tokens[1].getType() != Token::Type::IDENTIFIER)
+				throw std::runtime_error("expected variable identifier");
+
+			if (tokens.size() == 2)
+			{
+				// variable getter
+				const auto it = s_variables.find(tokens[1].getString());
+				if (it == s_variables.end())
+					std::cout << tokens[1].getString() << ":\n";
+				else
+					std::cout << it->first << ": " << it->second.getString() << "\n";
+				return;
+			}
+
+			// TODO make complex setter?
+			if (tokens.size() != 4)
+				throw std::runtime_error("expected variable assign (>name = value)");
+
+			// must be variable setter
+			if (tokens[2].getType() != Token::Type::ASSIGN)
+				throw std::runtime_error("expected variable assign");
+
+			// set variable
+			s_variables[tokens[1].getString()] = tokens[3];
+			return;
+		}
 	}
 
 	throw std::runtime_error("expected '=' or '(' but found: " + tokens[1].getString());
