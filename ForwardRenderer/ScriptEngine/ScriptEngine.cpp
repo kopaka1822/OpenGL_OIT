@@ -172,10 +172,28 @@ std::vector<Token> getArgumentList(const std::vector<Token>& tokens, size_t star
 	{
 		if (tokens[start].getType() != Token::Type::IDENTIFIER
 			&& tokens[start].getType() != Token::Type::NUMBER
-			&& tokens[start].getType() != Token::Type::STRING)
-			throw std::runtime_error("expected number, string or identifier in argument list");
+			&& tokens[start].getType() != Token::Type::STRING
+			&& tokens[start].getType() != Token::Type::VARIABLE)
+			throw std::runtime_error("expected number, string, variable or identifier in argument list");
 		
-		args.push_back(tokens[start]);
+		if(tokens[start].getType() == Token::Type::VARIABLE)
+		{
+			// fetch variable value
+			if (start + 1 == tokens.size() || tokens[start + 1].getType() != Token::Type::IDENTIFIER)
+				throw std::runtime_error("expected variable identifier");
+			++start;
+
+			// get variable value
+			const auto it = s_variables.find(tokens[start].getString());
+			if (it == s_variables.end())
+				args.emplace_back(Token::Type::STRING);
+			else
+				args.push_back(it->second);
+		}
+		else
+			args.push_back(tokens[start]);
+		
+		// next element
 		if (start + 1 >= tokens.size())
 		{
 			if (endType == Token::Type::UNDEFINED)
