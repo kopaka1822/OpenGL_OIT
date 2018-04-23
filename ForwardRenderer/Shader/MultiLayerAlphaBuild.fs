@@ -9,27 +9,8 @@ layout(location = 2) in vec2 in_texcoord;
 layout(location = 0) out vec4 out_fragColor;
 
 #include "light/light.glsl"
+#include "MultiLayerAlphaStorage.glsl"
 
-// visibility function (x = depth, y = color)
-
-#ifdef SSBO_STORAGE
-layout(binding = 7, std430) volatile buffer ssbo_fragmentBuffer
-{
-	vec2 buf_fragments[];
-};
-
-int getIndexFromVec(int c)
-{
-	return int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES) + c;
-}
-
-#define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
-#define STORE(coord, value) buf_fragments[getIndexFromVec(coord)] = value
-#else
-layout(binding = 0, rg32f) coherent uniform image3D tex_fragments; // .x = depth, .y = color (rgba as uint)
-#define LOAD(coord) imageLoad(tex_fragments, coord).xy
-#define STORE(coord, value) imageStore(tex_fragments, coord, vec4(value, 0.0, 0.0))
-#endif
 
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 

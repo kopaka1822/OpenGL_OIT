@@ -1,27 +1,6 @@
 #include "MultiLayerAlphaSettings.glsl"
-
-#ifdef SSBO_STORAGE
-#include "uniforms/transform.glsl"
-layout(binding = 7, std430) readonly buffer ssbo_fragmentBuffer
-{
-	vec2 buf_fragments[];
-};
-
-int getIndexFromVec(ivec3 c)
-{
-	return c.y * int(u_screenWidth) * int(MAX_SAMPLES) + c.x * int(MAX_SAMPLES) + c.z;
-}
-
-#define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
-#else
-layout(binding = 7) uniform sampler3D tex_fragments; // .x = depth, .y = color (rgba as uint)
-#define LOAD(coord) texelFetch(tex_fragments, coord, 0).xy
-#endif
-
-vec4 unpackColor(float f)
-{
-	return unpackUnorm4x8(floatBitsToUint(f));
-}
+#define STORAGE_READ_ONLY
+#include "MultiLayerAlphaStorage.glsl"
 
 out vec4 out_fragColor;
 
@@ -37,7 +16,7 @@ void main()
 	vec2 fragments[MAX_SAMPLES_C];
 	// load function
 	for(int i = 0; i < size; ++i)
-		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+		fragments[i] = LOAD(i);
 	
 	// insertion sort (faster)
 	/*for(int i = 1; i < size; ++i)
@@ -125,7 +104,7 @@ void main()
 #else // sorted
 	for(int i = 0; i < size; ++i)
 	{
-		vec4 color = unpackColor(LOAD(ivec3(gl_FragCoord.xy, i)).y);
+		vec4 color = unpackColor(LOAD(i).y);
 		mergedColor += mergedAlpha * color.rgb;
 		mergedAlpha *= color.a;
 	}
