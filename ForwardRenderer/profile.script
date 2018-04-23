@@ -60,27 +60,27 @@ profileType = average
 
 renderer=multilayer_alpha4
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha8
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha16
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha32
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha48
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha64
 waitIterations(20)
-getProfileTime(time)
+getProfileTime(transparent)
 
 renderer=multilayer_alpha8
 profileType = latest

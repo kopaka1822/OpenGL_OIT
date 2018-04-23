@@ -78,7 +78,7 @@ static std::unique_ptr<ICamera> makeCamera(const std::vector<Token>& args)
 
 Application::Application()
 	:
-	m_window(800, 600, "ForwardRenderer")
+	m_window(800, 800, "ForwardRenderer")
 {
 
 	ScriptEngine::addProperty("renderer", []()
