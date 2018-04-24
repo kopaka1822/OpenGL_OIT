@@ -3,8 +3,8 @@
 #include "uniforms/transform.glsl"
 
 #ifdef STORE_UNSORTED
-#define SSBO_GROUP_X 1
-#define SSBO_GROUP_Y 1
+#define SSBO_GROUP_X 2
+#define SSBO_GROUP_Y 4
 #else
 #define SSBO_GROUP_X 2
 #define SSBO_GROUP_Y 4
@@ -26,10 +26,21 @@ const uvec2 ssbo_local = uvec2(gl_FragCoord.xy) % uvec2(SSBO_GROUP_X, SSBO_GROUP
 const uint ssbo_local_id = ssbo_local.y * SSBO_GROUP_X + ssbo_local.x;
 const uint ssbo_stride = SSBO_GROUP_X * SSBO_GROUP_Y;
 
+#ifdef STORE_UNSORTED
+uint getIndexFromVec(int c)
+{
+	// alignment elements are packed together to avoid lost update
+	const uint alignment = 4u;
+	uint mc = uint(c) % alignment;
+	uint dc = uint(c) / alignment;
+	return ssbo_wg_offset + ssbo_local_id * alignment + dc * ssbo_stride * alignment + mc;
+}
+#else
 uint getIndexFromVec(int c)
 {
 	return ssbo_wg_offset + ssbo_local_id + uint(c) * ssbo_stride;
 }
+#endif
 #else
 const int ssbo_offset = int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES);
 int getIndexFromVec(int c)
@@ -61,7 +72,7 @@ vec4 unpackColor(float f)
 #else // STORAGE_READ_WRITE
 
 #ifdef SSBO_STORAGE
-layout(binding = 7, std430) volatile buffer ssbo_fragmentBuffer
+layout(binding = 7, std430) coherent buffer ssbo_fragmentBuffer
 {
 	vec2 buf_fragments[];
 };
