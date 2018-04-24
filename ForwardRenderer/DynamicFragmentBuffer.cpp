@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include "ScriptEngine/ScriptEngine.h"
+#include "Framework/alignment.h"
 
 static const int WORKGROUP_SIZE = 1024;
 static const int ELEM_PER_THREAD_SCAN = 8;
@@ -194,16 +195,10 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 	Profiler::set("sort", m_timer[T_SORT].get());
 }
 
-// alignment that works if alignment is a power of 2
-uint32_t alignPowerOfTwo(uint32_t size, uint32_t alignment)
-{
-	return (size + alignment - 1) & ~(alignment - 1);
-}
-
 void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 {
 	uint32_t alignment = WORKGROUP_SIZE * ELEM_PER_THREAD_SCAN;
-	m_curScanSize = alignPowerOfTwo(width * height, alignment);
+	m_curScanSize = alignPowerOfTwo<uint32_t>(width * height, alignment);
 	m_curLastIndex = width * height - 1;
 
 	// buffer for the fragment list length
@@ -219,7 +214,7 @@ void DynamicFragmentBufferRenderer::onSizeChange(int width, int height)
 	while (bs > 1)
 	{
 		// buffers for the scan
-		m_auxBuffer.emplace_back(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo(bs, 4)));
+		m_auxBuffer.emplace_back(GLsizei(sizeof uint32_t), GLsizei(alignPowerOfTwo<uint32_t>(bs, 4)));
 		m_auxTextureViews.emplace_back(gl::TextureBufferFormat::RGBA32UI, m_auxBuffer.back());
 		bs /= alignment;
 	}

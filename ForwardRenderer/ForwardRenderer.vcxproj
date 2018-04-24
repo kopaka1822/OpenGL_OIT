@@ -175,6 +175,7 @@
     <ClInclude Include="Dependencies\opengl.h" />
     <ClInclude Include="Dependencies\stbi_helper.h" />
     <ClInclude Include="DynamicFragmentBuffer.h" />
+    <ClInclude Include="Framework\alignment.h" />
     <ClInclude Include="Framework\Application.h" />
     <ClInclude Include="Framework\AsynchInput.h" />
     <ClInclude Include="Framework\DebugContext.h" />

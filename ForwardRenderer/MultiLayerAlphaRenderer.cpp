@@ -5,6 +5,7 @@
 #include <glm/detail/func_packing.inl>
 #include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
+#include "Framework/alignment.h"
 
 // shader storage is faster
 static bool s_useTextureBuffer = false;
@@ -210,7 +211,7 @@ void MultiLayerAlphaRenderer::onSizeChange(int width, int height)
 	if(s_useTextureBuffer)
 		m_storageTex = gl::Texture3D(gl::InternalFormat::RG32F, width, height, GLsizei(m_samplesPerPixel));
 	else
-		m_storageBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, GLsizei(width * height * m_samplesPerPixel));
+		m_storageBuffer = gl::StaticShaderStorageBuffer(sizeof(float) * 2, GLsizei(alignPowerOfTwo(width, 4) * alignPowerOfTwo(height, 4) * m_samplesPerPixel));
 
 	m_mutexTexture = gl::Texture2D(gl::InternalFormat::R32UI, width, height);
 }

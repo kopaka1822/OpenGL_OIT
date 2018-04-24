@@ -3,7 +3,7 @@
 //getProfileTimes()
 
 >waitCount = 20
->profiler = transparent
+>profiler = time
 
 profileType = average
 
@@ -61,9 +61,9 @@ profileType = average
 //renderer=adaptive16
 //profileType = latest
 
-renderer=multilayer_alpha4
-waitIterations(>waitCount)
-getProfileTime(>profiler)
+//renderer=multilayer_alpha4
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 
 renderer=multilayer_alpha8
 waitIterations(>waitCount)
@@ -77,9 +77,9 @@ renderer=multilayer_alpha32
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha48
-waitIterations(>waitCount)
-getProfileTime(>profiler)
+//renderer=multilayer_alpha48
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 
 renderer=multilayer_alpha64
 waitIterations(>waitCount)
