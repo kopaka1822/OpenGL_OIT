@@ -31,24 +31,24 @@ void Profiler::init()
 	{
 		if(args.empty())
 		{
-			std::cout << s_activeProfile << ": " << get(s_activeProfile) << "\n";
+			return std::to_string(get(s_activeProfile));
 		}
 		else
 		{
-			std::cout << args.at(0).getString() << ": " << get(args.at(0).getString()) << "\n";
+			return std::to_string(get(args.at(0).getString()));;
 		}
 	});
 	ScriptEngine::addFunction("getProfileTimes", [](const auto& args)
 	{
-		// print out all profiles
-		for(const auto& p : m_profiles)
+		return std::accumulate(m_profiles.begin(), m_profiles.end(), std::string(), [](const auto& prev, const auto& cur)
 		{
-			std::cout << p.first << ": " << get(p.first) << "\n";
-		}
+			return prev + cur.first + ": " + std::to_string(get(cur.first)) + "\n";
+		});
 	});
 	ScriptEngine::addFunction("resetProfiles", [](const auto&)
 	{
 		Profiler::reset();
+		return "";
 	});
 	ScriptEngine::addProperty("profileType", []() {return s_activeType; }, [](const std::vector<Token>& args)
 	{

@@ -6,6 +6,7 @@
 class ScriptEngine
 {
 public:
+	using FunctionT = std::function<std::string(std::vector<Token>)>;
 	using SetterT = std::function<void(std::vector<Token>)>;
 	using GetterT = std::function<std::string(void)>;
 
@@ -13,7 +14,7 @@ public:
 
 	static void addFunction(
 		const std::string& name,
-		SetterT callback
+		FunctionT callback
 	);
 	static void addProperty(
 		const std::string& name,

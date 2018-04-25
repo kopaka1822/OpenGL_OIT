@@ -38,11 +38,10 @@ void HotReloadShader::initScripts()
 	ScriptEngine::addFunction("getActiveShader", [](const auto&)
 	{
 		update(true);
-		std::cout << "shader:\n";
-		for(const auto& s : s_watchedShader)
+		return std::accumulate(s_watchedShader.begin(), s_watchedShader.end(), std::string(), [](const auto& prev, const auto& cur)
 		{
-			std::cout << "\t" << s->getFilename() << "\n";
-		}
+			return prev + "   " + cur->getFilename() + "\n";
+		});
 	});
 	ScriptEngine::addFunction("saveShaderBinary", [](const std::vector<Token>& args)
 	{
@@ -78,6 +77,8 @@ void HotReloadShader::initScripts()
 			throw std::runtime_error("could not open destination file");
 
 		file << binary;
+
+		return "";
 	});
 }
 

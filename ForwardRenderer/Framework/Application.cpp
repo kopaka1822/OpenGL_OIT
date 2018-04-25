@@ -111,6 +111,7 @@ Application::Application()
 			throw std::runtime_error("filename missing");
 
 		m_model = std::make_unique<ObjModel>(args[0].getString());
+		return "";
 	});
 
 	ScriptEngine::addFunction("makeScreenshot",[this](const std::vector<Token>& args)
@@ -119,6 +120,7 @@ Application::Application()
 			throw std::runtime_error("filename missing");
 
 		m_screenshotDestination = args.at(0).getString();
+		return "";
 	});
 
 	ScriptEngine::addFunction("makeDiff", [this](const std::vector<Token>& args)
@@ -130,6 +132,8 @@ Application::Application()
 			factor = args.at(3).getFloat();
 
 		makeDiff(args.at(0).getString(), args.at(1).getString(), args.at(2).getString(), factor);
+
+		return "";
 	});
 
 	ICamera::initScripts();

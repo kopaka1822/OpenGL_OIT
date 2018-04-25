@@ -7,14 +7,14 @@
 #include <cassert>
 #include <numeric>
 
-static std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
+static std::unordered_map<std::string, ScriptEngine::FunctionT> s_functions;
 static std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
 static size_t s_curIteration = 0;
 static size_t s_waitIterations = 0;
 static std::queue<std::pair<std::string, std::string>> s_commandQueue;
 static std::unordered_map<std::string, Token> s_variables;
 
-void ScriptEngine::addFunction(const std::string& name, SetterT callback)
+void ScriptEngine::addFunction(const std::string& name, FunctionT callback)
 {
 	if (s_functions.find(name) != s_functions.end())
 		std::cerr << "WAR: function " << name << " will be overwrittern\n";
@@ -268,7 +268,9 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 			if (it == s_functions.end())
 				throw std::runtime_error("cannot find property " + tokens[0].getString());
 
-			it->second(getArgumentList(tokens, 2, Token::Type::BRACKET_CLOSE));
+			auto res = it->second(getArgumentList(tokens, 2, Token::Type::BRACKET_CLOSE));
+			if (res.length())
+				std::cout << res << '\n';
 
 			return;
 		}
@@ -391,6 +393,7 @@ void ScriptEngine::init()
 	{
 		for (const auto& t : tokens)
 			openScriptFile(t.getString());
+		return "";
 	});
 
 	addFunction("waitIterations", [](const std::vector<Token> tokens)
@@ -399,6 +402,7 @@ void ScriptEngine::init()
 			throw std::runtime_error("expected iterations");
 
 		s_waitIterations = size_t(tokens.at(0).getInt());
+		return "";
 	});
 
 	addProperty("help", []()
