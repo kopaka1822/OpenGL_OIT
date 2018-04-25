@@ -51,12 +51,12 @@ void DynamicFragmentBufferRenderer::init()
 {
 	ScriptEngine::addProperty("dynamic_max_fragments", [this]()
 	{
-		std::cerr << "dynamic_max_fragments: " << m_fragmentStorage.getNumElements() << '\n';
+		return std::to_string(m_fragmentStorage.getNumElements());
 	});
 
 	ScriptEngine::addProperty("dynamic_last_fragments", [this]()
 	{
-		std::cerr << "dynamic_last_fragments: " << m_lastFragmentCount << '\n';
+		return std::to_string(m_lastFragmentCount);
 	});
 }
 

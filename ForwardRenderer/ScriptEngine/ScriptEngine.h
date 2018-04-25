@@ -7,7 +7,7 @@ class ScriptEngine
 {
 public:
 	using SetterT = std::function<void(std::vector<Token>)>;
-	using GetterT = std::function<void(void)>;
+	using GetterT = std::function<std::string(void)>;
 
 	static void init();
 

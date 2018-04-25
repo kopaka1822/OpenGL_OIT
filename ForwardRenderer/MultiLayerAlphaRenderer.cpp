@@ -68,7 +68,7 @@ void MultiLayerAlphaRenderer::init()
 
 	ScriptEngine::addProperty("multilayer_use_texture", [this]()
 	{
-		std::cout << "multilayer_use_texture: " << s_useTextureBuffer << "\n";
+		return std::to_string(s_useTextureBuffer);
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useTextureBuffer = args.at(0).getBool();

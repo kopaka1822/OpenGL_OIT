@@ -75,7 +75,7 @@ void DebugContext::Init()
 
 	ScriptEngine::addProperty("debugOutput", []()
 	{
-		std::cout << "debugOutput: " << (s_detailedOutput ? "true" : "false") << '\n';
+		return std::to_string(s_detailedOutput);
 	}, [](const std::vector<Token>& args)
 	{
 		s_detailedOutput = args.at(0).getString() != "false";

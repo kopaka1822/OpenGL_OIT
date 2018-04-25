@@ -17,7 +17,7 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camSpeed", []()
 	{
-		std::cout << "speed: " << s_speed << std::endl;
+		return std::to_string(s_speed);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() == 0)
@@ -29,7 +29,7 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camFov", []()
 	{
-		std::cout << "fov: " << s_fov << std::endl;
+		return std::to_string(s_fov);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() == 0)
@@ -41,7 +41,7 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camNear", []()
 	{
-		std::cout << "near: " << s_nearPlane << std::endl;
+		return std::to_string(s_nearPlane);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() == 0)
@@ -53,7 +53,7 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camFar", []()
 	{
-		std::cout << "far: " << s_farPlane << std::endl;
+		return std::to_string(s_farPlane);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() == 0)
@@ -65,10 +65,10 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camPos", []()
 	{
-		std::cout << "position: " << 
-			s_position.x << ", " << 
-			s_position.y << ", " <<
-			s_position.z << std::endl;
+		return  
+			std::to_string(s_position.x) + ", " + 
+			std::to_string(s_position.y) + ", " +
+			std::to_string(s_position.z);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() != 3)
@@ -84,10 +84,10 @@ void ICamera::initScripts()
 
 	ScriptEngine::addProperty("camDir", []()
 	{
-		std::cout << "direction: " <<
-			s_direction.x << ", " <<
-			s_direction.y << ", " <<
-			s_direction.z << std::endl;
+		return
+			std::to_string(s_direction.x) + ", " +
+			std::to_string(s_direction.y) + ", " +
+			std::to_string(s_direction.z);
 	}, [](std::vector<Token> args)
 	{
 		if (args.size() != 3)

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <queue>
 #include <cassert>
+#include <numeric>
 
 static std::unordered_map<std::string, ScriptEngine::SetterT> s_functions;
 static std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
@@ -244,14 +245,14 @@ static void s_executeCommand(const std::string& command, const std::string* cons
 		const auto it = s_properties.find(tokens[0].getString());
 		if (it == s_properties.end())
 			throw std::runtime_error("cannot find property " + tokens[0].getString());
-		it->second.first();
+		std::cout << tokens[0].getString() << ": " << it->second.first() << '\n';
 		return;
 	}
 	if(tokens.size() >= 2)
 	{
 		if (tokens[0].getType() == Token::Type::IDENTIFIER && tokens[1].getType() == Token::Type::ASSIGN)
 		{
-			// this is a property assign
+			// this is a property setter
 			auto it = s_properties.find(tokens[0].getString());
 			if (it == s_properties.end())
 				throw std::runtime_error("cannot find property " + tokens[0].getString());
@@ -403,7 +404,7 @@ void ScriptEngine::init()
 	addProperty("help", []()
 	{
 		// list everything
-		std::cout << "functions: " << '\n';
+		std::string res = "functions:\n";
 
 		std::vector<std::string> names;
 		names.reserve(std::max(s_functions.size(), s_properties.size()));
@@ -414,9 +415,9 @@ void ScriptEngine::init()
 		std::sort(names.begin(), names.end());
 
 		for (const auto& n : names)
-			std::cout << "   " << n << "(...)" << '\n';
+			res += "   " + n + "(...)\n";
 		
-		std::cout << "properties: " << '\n';
+		res += "properties:\n";
 		
 		names.resize(0);
 		for (const auto& p : s_properties)
@@ -426,6 +427,8 @@ void ScriptEngine::init()
 		std::sort(names.begin(), names.end());
 		
 		for (const auto& n : names)
-			std::cout << "   " << n << '\n';
+			res += "   " + n + "\n";
+
+		return res;
 	});
 }

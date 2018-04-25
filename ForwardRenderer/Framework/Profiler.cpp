@@ -2,6 +2,7 @@
 #include "../ScriptEngine/ScriptEngine.h"
 #include <unordered_map>
 #include <iostream>
+#include <numeric>
 
 static std::unordered_map<std::string, Profiler::Profile> m_profiles;
 static std::string s_activeProfile = "time";
@@ -9,7 +10,7 @@ static std::string s_activeType = "latest";
 
 void Profiler::init()
 {
-	ScriptEngine::addProperty("profiler", []() {std::cout << "profiler: " << s_activeProfile << '\n'; }, [](const std::vector<Token>& args)
+	ScriptEngine::addProperty("profiler", []() {return s_activeProfile; }, [](const std::vector<Token>& args)
 	{
 		if (args.empty())
 			throw std::runtime_error("profiler name missing");
@@ -20,6 +21,11 @@ void Profiler::init()
 	{
 		for (const auto& p : m_profiles)
 			std::cout << "   " << p.first << '\n';
+
+		return std::accumulate(m_profiles.begin(), m_profiles.end(), std::string(), [](const auto& prev, const auto& p)
+		{
+			return prev + "  " + p.first + "\n";
+		});
 	});
 	ScriptEngine::addFunction("getProfileTime", [](const std::vector<Token>& args)
 	{
@@ -44,7 +50,7 @@ void Profiler::init()
 	{
 		Profiler::reset();
 	});
-	ScriptEngine::addProperty("profileType", []() {std::cout << "profileType: " << s_activeType << '\n'; }, [](const std::vector<Token>& args)
+	ScriptEngine::addProperty("profileType", []() {return s_activeType; }, [](const std::vector<Token>& args)
 	{
 		if (args.empty())
 			throw std::runtime_error("profile type missing. Use min, max, average or latest");

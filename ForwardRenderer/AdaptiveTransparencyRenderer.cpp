@@ -79,7 +79,7 @@ void AdaptiveTransparencyRenderer::init()
 
 	ScriptEngine::addProperty("adaptive_use_texture", [this]()
 	{
-		std::cout << "adaptive_use_texture: " << s_useTextureBuffer << "\n";
+		return std::to_string(s_useTextureBuffer);
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useTextureBuffer = args.at(0).getBool();
@@ -91,7 +91,7 @@ void AdaptiveTransparencyRenderer::init()
 
 	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", [this]()
 	{
-		std::cout << "adaptive_use_texture_buffer_view: " << s_useTextureBufferView << "\n";
+		return std::to_string(s_useTextureBufferView);
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useTextureBufferView = args.at(0).getBool();
@@ -103,7 +103,7 @@ void AdaptiveTransparencyRenderer::init()
 
 	ScriptEngine::addProperty("adaptive_use_unsorted_buffer", [this]()
 	{
-		std::cout << "adaptive_use_unsorted_buffer: " << s_useUnsortedBuffer << "\n";
+		return std::to_string(s_useUnsortedBuffer);
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useUnsortedBuffer = args.at(0).getBool();

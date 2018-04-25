@@ -83,7 +83,7 @@ Application::Application()
 
 	ScriptEngine::addProperty("renderer", []()
 	{
-		std::cout << "renderer: " << s_rendererName << std::endl;
+		return s_rendererName;
 	}, [this](std::vector<Token>& args)
 	{
 		this->m_renderer = makeRenderer(args);
@@ -98,7 +98,7 @@ Application::Application()
 
 	ScriptEngine::addProperty("camera", []()
 	{
-		std::cout << "camera: " << s_cameraName << std::endl;
+		return s_cameraName;
 	}, [this](std::vector<Token>& args)
 	{
 		this->m_camera = makeCamera(args);
