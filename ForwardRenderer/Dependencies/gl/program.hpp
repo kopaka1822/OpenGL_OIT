@@ -59,15 +59,22 @@ namespace gl
 			GLint isLinked = 0;
 			glGetProgramiv(m_id, GL_LINK_STATUS, &isLinked);
 			if (isLinked == GL_FALSE)
-			{
-				GLint length = 0;
-				glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &length);
-				std::string errorLog;
-				errorLog.reserve(length);
-				glGetProgramInfoLog(m_id, length, &length, &errorLog[0]);
-				throw std::runtime_error(errorLog);
-			}
+				throw std::runtime_error(getInfoLog());
+			
 			return *this;
+		}
+
+		std::string getInfoLog() const
+		{
+			GLint length = 0;
+			glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &length);
+			if (!length)
+				return "";
+
+			std::string errorLog;
+			errorLog.reserve(length);
+			glGetProgramInfoLog(m_id, length, &length, &errorLog[0]);
+			return errorLog;
 		}
 
 		std::string getBinary() const

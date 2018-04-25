@@ -351,7 +351,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	{
 		auto string = path.string();
 		shader.compile(1, &source, string.c_str());
-		auto log = shader.getShaderInfoLog();
+		auto log = shader.getInfoLog();
 		if (log.length())
 			std::cerr << gl::Shader::convertLog(log, fileMatcher);
 	}
@@ -394,6 +394,9 @@ void HotReloadShader::loadProgram(WatchedProgram& program)
 		p.attach(s->getShader());
 
 	p.link();
+	auto log = p.getInfoLog();
+	if (log.length())
+		std::cerr << log;
 
 	// assign new program
 	program.m_program = std::move(p);

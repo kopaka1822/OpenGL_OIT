@@ -47,12 +47,12 @@ namespace gl
 			GLint isCompiled = 0;
 			glGetShaderiv(m_id, GL_COMPILE_STATUS, &isCompiled);
 			if (isCompiled == GL_FALSE)
-				throw std::runtime_error("failed to compile shader " + std::string(debugName) + "\n" + getShaderInfoLog());
+				throw std::runtime_error("failed to compile shader " + std::string(debugName) + "\n" + getInfoLog());
 			
 			return *this;
 		}
 
-		std::string getShaderInfoLog() const
+		std::string getInfoLog() const
 		{
 			GLint length = 0;
 			glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &length);
@@ -65,12 +65,19 @@ namespace gl
 			return errorLog;
 		}
 
+		
+		/**
+		 * \brief converts opengl file ids to custom strings
+		 * \param log the log returned by getInfoLog() or thrown by compile()
+		 * \param convertFunction function that converts opengl file numbers to strings
+		 * \return log with file numbers replaced by strings from the converter function
+		 */
 		static std::string convertLog(const std::string& log, const std::function<std::string(GLint)>& convertFunction)
 		{
 			// convert error information with used files table
-			// errors are like \n5(20): => error in file 5 line 20
+			// errors are like 5(20): => error in file 5 line 20
 			//const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\):");
-			const std::regex expr("[0-9][0-9]*\\([0-9][0-9]*\\)");
+			const std::regex expr("[0-9][0-9]*\\([1-9][0-9]*\\)");
 			std::smatch m;
 
 			std::string error;
