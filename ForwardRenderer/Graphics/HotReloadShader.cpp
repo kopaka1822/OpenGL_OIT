@@ -329,9 +329,21 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	auto output =
 		"#version " + std::to_string(dest.getVersion()) + "\n" +
+		"#pragma optionNV(strict on)\n"
 		"#line 1\n" +
 		dest.getPreamble() + "\n" +		
 		loadShaderSource(path, usedFiles);
+
+	// make the file map function
+	std::function<std::string(GLint)> fileMatcher = [usedFiles](GLint num) -> std::string
+	{
+		for (const auto& file : usedFiles)
+			if (file.second == num)
+				return file.first.string();
+		
+		return "?";
+	};
+
 
 	// compile shader
 	const char* source = output.c_str();
@@ -339,45 +351,13 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	{
 		auto string = path.string();
 		shader.compile(1, &source, string.c_str());
+		auto log = shader.getShaderInfoLog();
+		if (log.length())
+			std::cerr << gl::Shader::convertLog(log, fileMatcher);
 	}
 	catch (const std::exception& e)
 	{
-		// convert error information with used files table
-		// errors are like \n5(20): => error in file 5 line 20
-		//const std::regex expr("\n[0-9][0-9]*\\([0-9][0-9]*\\):");
-		const std::regex expr("[0-9][0-9]*\\([0-9][0-9]*\\)");
-		std::smatch m;
-
-		std::string error;
-		std::string remaining = e.what();
-
-		while (std::regex_search(remaining, m, expr))
-		{
-			error += m.prefix();
-
-			// append the correct filename
-			// extract number
-			const auto parOpen = m.str().find('(');
-			const auto fileNumber = m.str().substr(0, parOpen);
-
-			const size_t num = std::stoi(fileNumber);
-			for (const auto& file : usedFiles)
-			{
-				if (file.second == num)
-				{
-					// thats the match
-					error += file.first.string();
-					error += m.str().substr(parOpen);
-					break;
-				}
-			}
-
-			remaining = m.suffix().str();
-		}
-
-		error += remaining;
-
-		throw std::runtime_error(error);
+		throw std::runtime_error(gl::Shader::convertLog(e.what(), fileMatcher));
 	}
 
 	// set new shader
