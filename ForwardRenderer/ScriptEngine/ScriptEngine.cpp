@@ -435,4 +435,53 @@ void ScriptEngine::init()
 
 		return res;
 	});
+
+	// simple algebraic operations
+	addFunction("add", [](const std::vector<Token>& args)
+	{
+		if (args.at(0).isInt() && args.at(1).isInt())
+			// integer addition
+			return std::to_string(args.at(0).getInt() + args.at(1).getInt());
+
+		// assume floating point
+		return std::to_string(args.at(0).getFloat() + args.at(1).getFloat());
+	});
+	addFunction("subtract", [](const std::vector<Token>& args)
+	{
+		if (args.at(0).isInt() && args.at(1).isInt())
+			// integer addition
+			return std::to_string(args.at(0).getInt() - args.at(1).getInt());
+
+		// assume floating point
+		return std::to_string(args.at(0).getFloat() - args.at(1).getFloat());
+	});
+	addFunction("divide", [](const std::vector<Token>& args)
+	{
+		// assume floating point
+		return std::to_string(args.at(0).getFloat() / args.at(1).getFloat());
+	});
+	addFunction("multiply", [](const std::vector<Token>& args)
+	{
+		if (args.at(0).isInt() && args.at(1).isInt())
+			// integer addition
+			return std::to_string(args.at(0).getInt() * args.at(1).getInt());
+
+		// assume floating point
+		return std::to_string(args.at(0).getFloat() * args.at(1).getFloat());
+	});
+
+	// integer conversion
+	addFunction("int", [](const std::vector<Token>& args)
+	{
+		return std::to_string(args.at(0).getInt());
+	});
+
+	// string concatenation
+	addFunction("concat", [](const std::vector<Token>& args)
+	{
+		return std::accumulate(args.begin(), args.end(), std::string(), [](const auto& prev, const auto& token)
+		{
+			return prev + token.getString();
+		});
+	});
 }

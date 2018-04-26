@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <regex>
 
 class Token
 {
@@ -31,6 +32,17 @@ public:
 	{
 		throw std::runtime_error("cannot convert " + m_value + " to float");
 	}
+
+	bool isFloat() const try
+	{
+		std::stof(m_value);
+		return true;
+	}
+	catch(const std::exception&)
+	{
+		return false;
+	}
+
 	int getInt() const try
 	{
 		return std::stoi(m_value);
@@ -39,6 +51,21 @@ public:
 	{
 		throw std::runtime_error("cannot convert " + m_value + " to int");
 	}
+
+	bool isInt() const try
+	{
+		const std::regex rgx("[0-9][0-9]*");
+		if (!std::regex_match(m_value, rgx))
+			return false;
+
+		std::stoi(m_value);
+		return true;
+	}
+	catch(const std::exception&)
+	{
+		return false;
+	}
+
 	const std::string& getString() const
 	{
 		return m_value;
