@@ -12,8 +12,8 @@
 // ssbo is faster
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
-static bool s_useUnsortedBuffer = true;
-//static bool s_useArrayLinkedList = false;
+static bool s_useUnsortedBuffer = false;
+static bool s_useArrayLinkedList = true;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -42,6 +42,8 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define SSBO_TEX_VIEW";
 		if (s_useUnsortedBuffer)
 			shaderParams += "\n#define UNSORTED_LIST";
+		if (s_useArrayLinkedList)
+			shaderParams += "\n#define USE_ARRAY_LINKED_LIST";
 
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -108,14 +110,14 @@ void AdaptiveTransparencyRenderer::init()
 		loadShader();
 	});
 
-	//ScriptEngine::addProperty("adaptive_use_array_linked_list", [this]()
-	//{
-	//	return std::to_string(s_useArrayLinkedList);
-	//}, [this, loadShader](const std::vector<Token>& args)
-	//{
-	//	s_useArrayLinkedList = args.at(0).getBool();
-	//	loadShader();
-	//});
+	ScriptEngine::addProperty("adaptive_use_array_linked_list", [this]()
+	{
+		return std::to_string(s_useArrayLinkedList);
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		s_useArrayLinkedList = args.at(0).getBool();
+		loadShader();
+	});
 }
 
 void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera)

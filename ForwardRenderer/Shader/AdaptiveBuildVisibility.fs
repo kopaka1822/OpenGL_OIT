@@ -18,6 +18,73 @@ float getRectArea(vec2 pos1, vec2 pos2)
 	return (pos2.x - pos1.x) * (pos1.y - pos2.y);
 }
 
+#ifdef USE_ARRAY_LINKED_LIST
+
+
+void insertAlpha(float one_minus_alpha, float depth)
+{
+	vec2 fragments[MAX_SAMPLES + 1];
+	// load values
+	fragments[0] = vec2(depth, one_minus_alpha);
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		fragments[i + 1] = LOAD(i);
+	}
+	
+	// 1 pass bubble sort for new value
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		float newAlpha = fragments[i + 1].y * one_minus_alpha;
+		if(fragments[i].x > fragments[i + 1].x)
+		{
+			// shift lower value and insert new value at i + 1
+			fragments[i] = fragments[i + 1];
+			fragments[i + 1].x = depth;
+			fragments[i + 1].y = newAlpha;
+		}
+		else
+		{
+			// adjust values after the insert position
+			fragments[i + 1].y = newAlpha;
+		}
+	}
+	
+	// find smallest rectangle
+	// find smallest rectangle to insert
+	int smallestRectPos = 0;
+	float minRectArea = 1.0 / 0.0;
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		float area = getRectArea(	fragments[i],
+									fragments[i+1] );
+		if(area < minRectArea)
+		{
+			minRectArea = area;
+			smallestRectPos = i;
+		}
+	}
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestRectPos <= i)
+		{
+			fragments[i].y = fragments[i + 1].y;
+		}
+		if(smallestRectPos < i)
+		{
+			fragments[i] = fragments[i + 1];
+		}
+	}
+	
+	// pack aoit data
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		STORE(i, fragments[i]);
+	}
+}
+
+#else // NO ARRAY LINKED LIST
 #ifdef UNSORTED_LIST
 
 struct Fragment
@@ -106,7 +173,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 			vec2(nextSmallestRectValue.depth, nextSmallestRectValue.alpha));
 }
 
-#else
+#else // Default
 void insertAlphaReference(float one_minus_alpha, float depth)
 {
 	vec2 fragments[MAX_SAMPLES + 1];
@@ -262,8 +329,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 		STORE(i, fragments[i]);
 	}
 }
-#endif
-
+#endif // unsorted buffer
+#endif // array linked list
 
 void main()
 {
