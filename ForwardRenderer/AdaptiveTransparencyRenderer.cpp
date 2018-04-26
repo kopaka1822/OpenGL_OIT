@@ -13,6 +13,7 @@
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
 static bool s_useUnsortedBuffer = true;
+//static bool s_useArrayLinkedList = false;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -72,6 +73,9 @@ void AdaptiveTransparencyRenderer::init()
 		m_visibilityBufferView = gl::TextureBuffer();
 		m_visibilityBuffer = gl::StaticShaderStorageBuffer();
 
+		// reset timer
+		m_timer = std::array<GpuTimer, SIZE>();
+
 		AdaptiveTransparencyRenderer::onSizeChange(Window::getWidth(), Window::getHeight());
 	};
 
@@ -83,9 +87,6 @@ void AdaptiveTransparencyRenderer::init()
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useTextureBuffer = args.at(0).getBool();
-		
-		// reset timer
-		m_timer = std::array<GpuTimer, SIZE>();
 		loadShader();
 	});
 
@@ -95,9 +96,6 @@ void AdaptiveTransparencyRenderer::init()
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useTextureBufferView = args.at(0).getBool();
-
-		// reset timer
-		m_timer = std::array<GpuTimer, SIZE>();
 		loadShader();
 	});
 
@@ -107,11 +105,17 @@ void AdaptiveTransparencyRenderer::init()
 	}, [this, loadShader](const std::vector<Token>& args)
 	{
 		s_useUnsortedBuffer = args.at(0).getBool();
-
-		// reset timer
-		m_timer = std::array<GpuTimer, SIZE>();
 		loadShader();
 	});
+
+	//ScriptEngine::addProperty("adaptive_use_array_linked_list", [this]()
+	//{
+	//	return std::to_string(s_useArrayLinkedList);
+	//}, [this, loadShader](const std::vector<Token>& args)
+	//{
+	//	s_useArrayLinkedList = args.at(0).getBool();
+	//	loadShader();
+	//});
 }
 
 void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera)
