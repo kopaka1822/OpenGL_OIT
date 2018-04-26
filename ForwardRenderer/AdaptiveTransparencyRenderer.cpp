@@ -29,6 +29,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 	ScriptEngine::removeProperty("adaptive_use_texture");
 	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
 	ScriptEngine::removeProperty("adaptive_use_unsorted_buffer");
+	ScriptEngine::removeProperty("adaptive_use_array_linked_list");
 }
 
 void AdaptiveTransparencyRenderer::init()
