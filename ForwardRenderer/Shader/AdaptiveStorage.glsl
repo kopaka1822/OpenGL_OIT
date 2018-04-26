@@ -1,9 +1,9 @@
 
 #ifdef SSBO_STORAGE
 #include "uniforms/transform.glsl"
-int getIndexFromVec(ivec3 c)
+int getIndexFromVec(int c)
 {
-	return c.y * int(u_screenWidth) * int(MAX_SAMPLES) + c.x * int(MAX_SAMPLES) + c.z;
+	return int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES) + c;
 }
 #endif
 
@@ -25,7 +25,7 @@ layout(binding = 7, std430) restrict readonly buffer ssbo_fragmentBuffer
 #else
 
 layout(binding = 7) uniform sampler3D tex_vis; // .x = depth, .y = transmittance
-#define LOAD(coord) texelFetch(tex_vis, coord, 0).xy
+#define LOAD(coord) texelFetch(tex_vis, ivec3(gl_FragCoord.xy, coord), 0).xy
 
 #endif
 
@@ -42,8 +42,8 @@ layout(binding = 7, std430) coherent restrict buffer ssbo_fragmentBuffer
 #define STORE(coord, value) buf_fragments[getIndexFromVec(coord)] = value
 #else
 layout(binding = 0, rg32f) coherent uniform image3D tex_vis; // .x = depth, .y = transmittance
-#define LOAD(coord) imageLoad(tex_vis, coord).xy
-#define STORE(coord, value) imageStore(tex_vis, coord, vec4(value, 0.0, 0.0))
+#define LOAD(coord) imageLoad(tex_vis, ivec3(gl_FragCoord.xy, coord)).xy
+#define STORE(coord, value) imageStore(tex_vis, ivec3(gl_FragCoord.xy, coord), vec4(value, 0.0, 0.0))
 #endif
 
 #endif

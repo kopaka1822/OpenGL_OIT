@@ -16,7 +16,7 @@ float visz(float depth)
 	int maxZ = MAX_SAMPLES;
 	for(int i = 0; i < maxZ; ++i)
 	{
-		vec2 val = LOAD(ivec3(gl_FragCoord.xy, i)).xy;
+		vec2 val = LOAD(i).xy;
 		if ( depth <= val.x )
 			return previousTransmittance;
 		

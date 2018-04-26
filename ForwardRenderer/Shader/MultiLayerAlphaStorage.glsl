@@ -61,7 +61,7 @@ layout(binding = 7, std430) readonly buffer ssbo_fragmentBuffer
 #define LOAD(coord) buf_fragments[getIndexFromVec(coord)]
 #else
 layout(binding = 7) uniform sampler3D tex_fragments; // .x = depth, .y = color (rgba as uint)
-#define LOAD(coord) texelFetch(tex_fragments, coord, 0).xy
+#define LOAD(coord) texelFetch(tex_fragments, ivec3(gl_FragCoord.xy, coord), 0).xy
 #endif
 
 vec4 unpackColor(float f)
@@ -80,8 +80,8 @@ layout(binding = 7, std430) coherent buffer ssbo_fragmentBuffer
 #define STORE(coord, value) buf_fragments[getIndexFromVec(coord)] = value
 #else
 layout(binding = 0, rg32f) coherent uniform image3D tex_fragments; // .x = depth, .y = color (rgba as uint)
-#define LOAD(coord) imageLoad(tex_fragments, coord).xy
-#define STORE(coord, value) imageStore(tex_fragments, coord, vec4(value, 0.0, 0.0))
+#define LOAD(coord) imageLoad(tex_fragments, ivec3(gl_FragCoord.xy, coord)).xy
+#define STORE(coord, value) imageStore(tex_fragments, ivec3(gl_FragCoord.xy, coord), vec4(value, 0.0, 0.0))
 #endif
 
 #endif

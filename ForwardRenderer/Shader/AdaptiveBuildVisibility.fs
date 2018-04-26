@@ -33,7 +33,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	fragments[0] = Fragment(depth, one_minus_alpha, -1);
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		vec2 val = LOAD(ivec3(gl_FragCoord.xy, i));
+		vec2 val = LOAD(i);
 		fragments[i + 1] = Fragment(val.x, val.y, i);
 	}
 	
@@ -98,11 +98,11 @@ void insertAlpha(float one_minus_alpha, float depth)
 		nextSmallestRectValue.alpha = one_minus_alpha;
 	}
 	
-	STORE(ivec3(gl_FragCoord.xy, smallestRectValue.oldPosition),
+	STORE(smallestRectValue.oldPosition,
 		vec2(smallestRectValue.depth, smallestRectValue.alpha));
 	
 	//if(storeSecond)
-		STORE(ivec3(gl_FragCoord.xy, nextSmallestRectValue.oldPosition),
+		STORE(nextSmallestRectValue.oldPosition,
 			vec2(nextSmallestRectValue.depth, nextSmallestRectValue.alpha));
 }
 
@@ -114,7 +114,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	// load values Upack AOIT Data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+		fragments[i] = LOAD(i);
 	}
 	
 	int insertPosition = 0;
@@ -192,7 +192,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
+		STORE(i, fragments[i]);
 	}
 }
 
@@ -207,7 +207,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	fragments[0] = vec2(depth, one_minus_alpha);
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		fragments[i + 1] = LOAD(ivec3(gl_FragCoord.xy, i));
+		fragments[i + 1] = LOAD(i);
 	}
 	
 	// 1 pass bubble sort for new value
@@ -259,7 +259,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
+		STORE(i, fragments[i]);
 	}
 }
 #endif

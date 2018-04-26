@@ -15,7 +15,7 @@ void main()
 	
 	int maxZ = MAX_SAMPLES;
 	float transmittance = 
-		LOAD(ivec3(gl_FragCoord.xy, maxZ - 1)).y;
+		LOAD(maxZ - 1).y;
 
 	out_fragColor = vec4(0.0, 0.0, 0.0, transmittance);
 }
@@ -27,7 +27,7 @@ void main()
 	// load and sort function
 	vec2 fragments[MAX_SAMPLES];
 	for(int i = 0; i < MAX_SAMPLES; ++i)
-		fragments[i] = LOAD(ivec3(gl_FragCoord.xy, i));
+		fragments[i] = LOAD(i);
 		
 		// sort values depending on depth
 	// modified insertion sort
@@ -54,7 +54,7 @@ void main()
 	
 	// store values
 	for(int i = 0; i < MAX_SAMPLES; ++i)
-		STORE(ivec3(gl_FragCoord.xy, i), fragments[i]);
+		STORE(i, fragments[i]);
 		
 	out_fragColor = vec4(0.0, 0.0, 0.0, fragments[MAX_SAMPLES - 1].y);
 }
