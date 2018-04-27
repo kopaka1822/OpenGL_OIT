@@ -3,11 +3,14 @@ layout(location = 0) out vec4 out_fragColor;
 #include "uniforms/transform.glsl"
 
 #ifndef UNSORTED_LIST
+#ifndef USE_ARRAY_LINKED_LIST
 #define STORAGE_READ_ONLY
+#endif
 #endif
 
 #include "AdaptiveStorage.glsl"
 
+#ifndef USE_ARRAY_LINKED_LIST
 #ifndef UNSORTED_LIST
 
 void main()
@@ -30,6 +33,55 @@ void main()
 		fragments[i] = LOAD(i);
 		
 		// sort values depending on depth
+	// modified insertion sort
+	for(int i = 1; i < MAX_SAMPLES; ++i)
+	{
+		// i - 1 elements are sorted
+#pragma optionNV (unroll all)	
+		for(int j = i; j > 0 && fragments[j - 1].x > fragments[j].x; --j)
+		{
+			vec2 tmp = fragments[j];
+			fragments[j] = fragments[j - 1];
+			fragments[j - 1] = tmp;
+		}
+#pragma optionNV (unroll)
+	}
+	
+	float prevAlpha = 1.0;
+	// accumulate alpha
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		prevAlpha *= fragments[i].y;
+		fragments[i].y = prevAlpha;
+	}
+	
+	// store values
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+		STORE(i, fragments[i]);
+		
+	out_fragColor = vec4(0.0, 0.0, 0.0, fragments[MAX_SAMPLES - 1].y);
+}
+
+#endif
+#else // array linked list
+
+// for now just sort again
+// TODO just resolve linked list
+void main()
+{
+	// load and sort function
+	vec2 fragments[MAX_SAMPLES];
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+		fragments[i] = LOAD(i);
+		
+	// fix alpha values (they are mixed with the next pointer)
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		fragments[i].y = unpackLink(fragments[i]).alpha;
+	}
+	
+	// TODO dont sort -> use the linked list instead
+	// sort values depending on depth
 	// modified insertion sort
 	for(int i = 1; i < MAX_SAMPLES; ++i)
 	{

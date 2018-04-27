@@ -61,9 +61,13 @@ Link unpackLink(vec2 v)
 {
 	Link res;
 	res.depth = v.x;
-	vec2 alphaNext = unpackUnorm2x16( floatBitsToUint(v.y) );
+
+	// int important for arithmetical shift
+	int pcked = floatBitsToInt(v.y);
+	res.next = pcked >> 16;
+
+	vec2 alphaNext = unpackUnorm2x16(pcked);
 	res.alpha = alphaNext.x;
-	res.next = floatBitsToInt(alphaNext.y);
 	return res;
 }
 
@@ -74,8 +78,9 @@ vec2 packLink(Link l)
 {
 	vec2 res;
 	res.x = l.depth;
-	float nextInDisguise = intBitsToFloat(l.next);
-	res.y = uintBitsToFloat(packUnorm2x16(vec2(l.alpha, nextInDisguise)));
+	uint pcked = packUnorm2x16(vec2(l.alpha, 0.0f));
+	pcked |= l.next << 16;
+	res.y = uintBitsToFloat(pcked);
 	return res;
 }
 

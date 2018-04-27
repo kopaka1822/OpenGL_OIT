@@ -28,6 +28,7 @@ private:
 
 	gl::Texture2D m_mutexTexture;
 	std::unique_ptr<FullscreenQuadShader> m_shaderAdjustBackground;
+	std::unique_ptr<FullscreenQuadShader> m_shaderClearBackground;
 	const glm::vec2 m_visibilityClearColor;
 
 	enum Timer

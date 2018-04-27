@@ -8,6 +8,7 @@
 #include <mutex>
 #include "ScriptEngine/Token.h"
 #include "ScriptEngine/ScriptEngine.h"
+#include <glm/detail/func_packing.inl>
 
 // ssbo is faster
 static bool s_useTextureBuffer = false;
@@ -70,6 +71,13 @@ void AdaptiveTransparencyRenderer::init()
 		m_shaderApplyVisz = std::make_unique<SimpleShader>(
 			HotReloadShader::loadProgram({ vertex, geometry, useVisz }));
 		m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
+
+		if(s_useArrayLinkedList)
+		{
+			auto clearBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, 
+							"Shader/AdaptiveClearBuffer.fs", 450, shaderParams);
+			m_shaderClearBackground = std::make_unique<FullscreenQuadShader>(clearBg);
+		}
 
 		// delete old buffer/texture
 		m_visibilityTex = gl::Texture3D();
@@ -146,18 +154,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 				s->draw(m_defaultShader.get());
 		}
 	}
-		
-	// determine visibility function
-	
-	// reset visibility function data
-	{
-		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
-
-		if (s_useTextureBuffer)
-			m_visibilityTex.clear(m_visibilityClearColor, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
-		else
-			m_visibilityBuffer.fill(m_visibilityClearColor, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
-	}
 
 	auto bindFunctionReadWrite = [this]()
 	{
@@ -175,6 +171,67 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		else
 			m_visibilityBuffer.bind(7);
 	};
+	auto debugBuffer = [this]()
+	{
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+		auto buffer = m_visibilityBuffer.getData<glm::vec2>();
+		// put buffer into links
+		struct Link
+		{
+			float depth;
+			float alpha;
+			int next;
+		};
+
+		std::vector<Link> debugs;
+		debugs.resize(m_samplesPerPixel);
+		std::transform(buffer.begin(), buffer.begin() + m_samplesPerPixel, debugs.begin(), [=](const glm::vec2& v)
+		{
+			Link res;
+			res.depth = v.x;
+
+			// int important for arithmetical shift
+			int packed = glm::floatBitsToInt(v.y);
+			res.next = packed >> 16;
+
+			glm::vec2 alphaNext = glm::unpackUnorm2x16(packed);
+			res.alpha = alphaNext.x;
+			return res;
+		});
+
+		__debugbreak();
+	};
+		
+	// determine visibility function
+	
+	// reset visibility function data
+	{
+		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
+
+		if(s_useArrayLinkedList)
+		{
+			// disable colors
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+			// disable depth write
+			glDepthMask(GL_FALSE);
+			bindFunctionReadWrite();
+			m_shaderClearBackground->draw();
+
+			if (s_useTextureBuffer)
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			else
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		}
+		else
+		{
+			if (s_useTextureBuffer)
+				m_visibilityTex.clear(m_visibilityClearColor, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+			else
+				m_visibilityBuffer.fill(m_visibilityClearColor, gl::InternalFormat::RG32F, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+		}
+	}
+
+	//debugBuffer();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
@@ -187,22 +244,21 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 
 		// disable colors
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
 		// create Stencil Mask (1's for transparent particles)
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		//glEnable(GL_STENCIL_TEST);
+		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 		model->prepareDrawing(*m_shaderBuildVisz);
-		int shapeCount = 0;
 		for (const auto& s : model->getShapes())
 		{
 			if (s->isTransparent())
 			{
 				s->draw(m_shaderBuildVisz.get());
-				//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			}
 		}
 
@@ -212,6 +268,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 	
+	//debugBuffer();
+
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
 		// enable colors

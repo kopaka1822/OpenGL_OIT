@@ -20,67 +20,123 @@ float getRectArea(vec2 pos1, vec2 pos2)
 
 #ifdef USE_ARRAY_LINKED_LIST
 
+struct Fragment
+{
+	float depth;
+	float alpha;
+	int next;
+	int oldPosition;
+};
 
 void insertAlpha(float one_minus_alpha, float depth)
 {
-	vec2 fragments[MAX_SAMPLES + 1];
-	// load values
-	fragments[0] = vec2(depth, one_minus_alpha);
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+	// link storage in L1 cache (because it will be acessed randomly later)
+	Link links[MAX_SAMPLES];
+
+	// sum for i = 1 to i = MAX_SAMPLES - 1 from i
+	int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2;
+	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		fragments[i + 1] = LOAD(i);
+		Link l = unpackLink(LOAD(i));
+		if(l.next != -1)
+			currentLink -= l.next;
+		links[i] = l;
 	}
-	
-	// 1 pass bubble sort for new value
+
+	Fragment fragments[MAX_SAMPLES + 1];
+	fragments[0] = Fragment( depth, one_minus_alpha, -1, MAX_SAMPLES );
+
+	// unpack linked list into registers
+	for (int i = 1; i <= MAX_SAMPLES; ++i)
+	{
+		Link l = links[currentLink];
+		fragments[i] = Fragment( l.depth, l.alpha, l.next, currentLink );
+		currentLink = l.next;
+	}
+
+	// bubble sort for the new fragment
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		float newAlpha = fragments[i + 1].y * one_minus_alpha;
-		if(fragments[i].x > fragments[i + 1].x)
+		if(fragments[i].depth > fragments[i + 1].depth)
 		{
-			// shift lower value and insert new value at i + 1
+			Fragment tmp = fragments[i];
 			fragments[i] = fragments[i + 1];
-			fragments[i + 1].x = depth;
-			fragments[i + 1].y = newAlpha;
-		}
-		else
-		{
-			// adjust values after the insert position
-			fragments[i + 1].y = newAlpha;
+			fragments[i + 1] = tmp;
 		}
 	}
-	
+
+	// make a copy to detect the changed values
+	Fragment fragCopy[MAX_SAMPLES + 1];
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	{
+		fragCopy[i] = fragments[i];
+	}
+
+	// fix the next links (because of the inserted fragment)
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		fragments[i].next = fragments[i + 1].oldPosition;
+	}
+	fragments[MAX_SAMPLES].next = -1;
+
 	// find smallest rectangle
 	// find smallest rectangle to insert
-	int smallestRectPos = 0;
 	float minRectArea = 1.0 / 0.0;
-	
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+	Fragment smallestRectValue = fragments[0];
+	Fragment nextSmallestRectValue = fragments[0];
+
+	float prevAlpha = 1.0;
+	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		float area = getRectArea(	fragments[i],
-									fragments[i+1] );
-		if(area < minRectArea)
+		prevAlpha *= fragments[i].alpha;
+		float nextAlpha = fragments[i + 1].alpha;
+		float area = getRectArea(vec2(fragments[i].depth, prevAlpha),
+			vec2(fragments[i + 1].depth, prevAlpha * nextAlpha));
+		if (area < minRectArea)
 		{
 			minRectArea = area;
-			smallestRectPos = i;
+			smallestRectValue = fragments[i];
+			nextSmallestRectValue = fragments[i + 1];
 		}
 	}
-	
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+
+	// pseudo remove the next smallest rect value and adjust alpha
+	int removedPos = 0;
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
-		if(smallestRectPos <= i)
+		if(fragments[i].oldPosition == nextSmallestRectValue.oldPosition)
 		{
-			fragments[i].y = fragments[i + 1].y;
-		}
-		if(smallestRectPos < i)
+			// the pseudo remove
+			removedPos = fragments[i].oldPosition;
+			fragments[i].oldPosition = -1;
+		} 
+		else if(fragments[i].oldPosition == smallestRectValue.oldPosition)
 		{
-			fragments[i] = fragments[i + 1];
+			// adjust alpha and next pointer
+			fragments[i].alpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
+			fragments[i].next = nextSmallestRectValue.next;
 		}
 	}
-	
-	// pack aoit data
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
-		STORE(i, fragments[i]);
+		if(fragments[i].next != fragCopy[i].next 
+			|| fragments[i].alpha != fragCopy[i].alpha)
+		{
+			// store this
+			Fragment val = fragments[i];
+			// this was the inserted fragment (insert at removed node pos)
+			if (val.oldPosition == MAX_SAMPLES)
+				val.oldPosition = removedPos;
+			// this node points to the new inserted fragment (which will be stored at removed node pos)
+			if (val.next == MAX_SAMPLES)
+				val.next = removedPos;
+
+			// DEBUG:
+			fragments[i] = val;
+
+			STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
+		}
 	}
 }
 
@@ -95,7 +151,7 @@ struct Fragment
 };
 
 void insertAlpha(float one_minus_alpha, float depth)
-{
+{ dsfsdf
 	Fragment fragments[MAX_SAMPLES + 1];
 	fragments[0] = Fragment(depth, one_minus_alpha, -1);
 	for(int i = 0; i < MAX_SAMPLES; ++i)
@@ -175,7 +231,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 #else // Default
 void insertAlphaReference(float one_minus_alpha, float depth)
-{
+{ 
 	vec2 fragments[MAX_SAMPLES + 1];
 	
 	// load values Upack AOIT Data
@@ -264,7 +320,7 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 }
 
 void insertAlpha(float one_minus_alpha, float depth)
-{	
+{	 
 	//insertAlphaReference(one_minus_alpha, depth);
 	//insertAlphaSep(one_minus_alpha, depth);
 	//return;
@@ -348,7 +404,6 @@ void main()
 			{
 				
 				insertAlpha(1.0 - dissolve, dist); 
-				
 #ifdef SSBO_STORAGE
 				memoryBarrierBuffer();
 #else				
@@ -359,5 +414,6 @@ void main()
 			}
 		}
 	}
-	out_fragColor = vec4(0.0);
+	
+	out_fragColor = vec4(0.7);
 }
