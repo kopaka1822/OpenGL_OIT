@@ -351,7 +351,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	try
 	{
 		auto string = path.string();
-		shader.compile(1, &source, string.c_str());
+		shader.compile(source, string.c_str());
 		auto log = shader.getInfoLog();
 		if (log.length())
 			std::cerr << gl::Shader::convertLog(log, fileMatcher);

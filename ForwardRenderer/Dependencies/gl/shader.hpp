@@ -38,9 +38,11 @@ namespace gl
 		{
 			return m_id;
 		}
-		Shader& compile(GLsizei count, const char* const* source, const char* debugName = "")
+		Shader& compile(const std::string& source, const char* debugName = "")
 		{
-			glShaderSource(m_id, count, source, nullptr);
+			const char* ptr = source.c_str();
+			GLint length = GLint(source.length());
+			glShaderSource(m_id, 1, &ptr, &length);
 
 			glCompileShader(m_id);
 
