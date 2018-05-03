@@ -7,83 +7,83 @@
 
 profileType = average
 
-//renderer=adaptive4
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive8
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive16
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive32
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive48
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive64
-//waitIterations(>waitCount)
-//getProfileTime(>profiler)
-//
-//renderer=adaptive16
-//profileType = latest
-//
-//renderer=adaptive4
-//waitIterations(>waitCount)
-//getProfileTimes()
-
-//renderer=adaptive8
-//waitIterations(>waitCount)
-//getProfileTimes()
-//
-//renderer=adaptive16
-//waitIterations(>waitCount)
-//getProfileTimes()
-//
-//renderer=adaptive32
-//waitIterations(>waitCount)
-//getProfileTimes()
-//
-//renderer=adaptive48
-//waitIterations(>waitCount)
-//getProfileTimes()
-//
-//renderer=adaptive64
-//waitIterations(>waitCount)
-//getProfileTimes()
-//
-//renderer=adaptive16
-//profileType = latest
-
-renderer=multilayer_alpha4
+renderer=adaptive4
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha8
+renderer=adaptive8
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha16
+renderer=adaptive16
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha32
+renderer=adaptive32
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha48
+renderer=adaptive48
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha64
+renderer=adaptive64
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=multilayer_alpha8
+renderer=adaptive16
 profileType = latest
+//
+//renderer=adaptive4
+//waitIterations(>waitCount)
+//getProfileTimes()
+
+//renderer=adaptive8
+//waitIterations(>waitCount)
+//getProfileTimes()
+//
+//renderer=adaptive16
+//waitIterations(>waitCount)
+//getProfileTimes()
+//
+//renderer=adaptive32
+//waitIterations(>waitCount)
+//getProfileTimes()
+//
+//renderer=adaptive48
+//waitIterations(>waitCount)
+//getProfileTimes()
+//
+//renderer=adaptive64
+//waitIterations(>waitCount)
+//getProfileTimes()
+//
+//renderer=adaptive16
+//profileType = latest
+
+//renderer=multilayer_alpha4
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha8
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha16
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha32
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha48
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha64
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
+//
+//renderer=multilayer_alpha8
+//profileType = latest

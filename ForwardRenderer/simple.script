@@ -1,4 +1,4 @@
-renderer = multilayer_alpha16
+renderer = adaptive16
 camera = projection
 //debugOutput = false
 profileType = latest
@@ -8,11 +8,11 @@ profileType = latest
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
 //camSpeed = 0.001
 
-//loadObj("Scene/powerplant/powerplant.obj")
-//camSpeed = 40
-//camPos = 107055, 86794.4, 116970
-//camDir = -0.747132, -0.179029, -0.640115
-//camNear = 10
+loadObj("Scene/powerplant/powerplant.obj")
+camSpeed = 40
+camPos = 107055, 86794.4, 116970
+camDir = -0.747132, -0.179029, -0.640115
+camNear = 10
 //camPos = 353.751, 57420.4, 39287.2
 //camDir = -0.0120038, -0.247403, -0.968841
 
@@ -20,8 +20,8 @@ profileType = latest
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
 
-camSpeed = 0.01
-loadObj("Scene/test.obj")
+//camSpeed = 0.01
+//loadObj("Scene/test.obj")
 
 //camPos = 1708.72, 1501.76, -831.255
 //camDir = -0.83374, -0.352274, 0.425183
