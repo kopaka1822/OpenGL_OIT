@@ -120,8 +120,10 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
-		if(fragments[i].next != fragCopy[i].next 
+		if(((fragments[i].next != fragCopy[i].next
 			|| fragments[i].alpha != fragCopy[i].alpha)
+			&& fragments[i].oldPosition != -1)
+			|| fragments[i].oldPosition == MAX_SAMPLES)
 		{
 			// store this
 			Fragment val = fragments[i];
