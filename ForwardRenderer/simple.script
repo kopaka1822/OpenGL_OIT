@@ -1,4 +1,4 @@
-renderer = adaptive16
+renderer = adaptive8
 camera = projection
 //debugOutput = false
 profileType = latest

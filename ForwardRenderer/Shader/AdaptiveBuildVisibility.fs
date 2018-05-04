@@ -30,17 +30,12 @@ struct Fragment
 
 void insertAlpha(float one_minus_alpha, float depth)
 {
-	// link storage in L1 cache (because it will be acessed randomly later)
-	Link links[MAX_SAMPLES];
-
-	// sum for i = 1 to i = MAX_SAMPLES - 1 from i
 	int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2;
 	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
 		Link l = unpackLink(LOAD(i));
 		if(l.next != -1)
 			currentLink -= l.next;
-		links[i] = l;
 	}
 
 	Fragment fragments[MAX_SAMPLES + 1];
@@ -49,7 +44,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	// unpack linked list into registers
 	for (int i = 1; i <= MAX_SAMPLES; ++i)
 	{
-		Link l = links[currentLink];
+		Link l = unpackLink(LOAD(currentLink));
 		fragments[i] = Fragment( l.depth, l.alpha, l.next, currentLink );
 		currentLink = l.next;
 	}
