@@ -113,7 +113,11 @@ void insertAlpha(float one_minus_alpha, float depth)
 			fragments[i].next = nextSmallestRectValue.next;
 		}
 	}
-
+	
+	// write the (maximum) 3 values who have changed into the array
+	Fragment changed[3];
+	int numChanged = 0;
+	
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
 		bool isInList = fragments[i].oldPosition != -1; // is the value still in the list?
@@ -131,7 +135,25 @@ void insertAlpha(float one_minus_alpha, float depth)
 			// this node points to the new inserted fragment (which will be stored at removed node pos)
 			if (val.next == MAX_SAMPLES)
 				val.next = removedPos;
-
+			
+			// insert into numChanged
+			for(int j = 0; j < 3; ++j)
+			{
+				if(j == numChanged)
+				{
+					changed[j] = val;
+				}
+			}
+			++numChanged;
+			//STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
+		}
+	}
+	
+	for(int i = 0; i < 3; ++i)
+	{
+		if(i < numChanged)
+		{
+			Fragment val = changed[i];
 			STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}

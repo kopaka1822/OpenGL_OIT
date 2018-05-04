@@ -12,7 +12,7 @@
 #include <set>
 
 // ssbo is faster
-static bool s_useTextureBuffer = true;
+static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
 static bool s_useUnsortedBuffer = false;
 static bool s_useArrayLinkedList = true;
