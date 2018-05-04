@@ -41,6 +41,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	Fragment fragments[MAX_SAMPLES + 1];
 	fragments[0] = Fragment( depth, one_minus_alpha, -1, MAX_SAMPLES );
 
+#pragma optionNV (unroll all)
 	// unpack linked list into registers
 	for (int i = 1; i <= MAX_SAMPLES; ++i)
 	{
@@ -61,10 +62,10 @@ void insertAlpha(float one_minus_alpha, float depth)
 	}
 
 	// make a copy to detect the changed values
-	Fragment fragCopy[MAX_SAMPLES + 1];
+	int fragCopy[MAX_SAMPLES + 1];
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
-		fragCopy[i] = fragments[i];
+		fragCopy[i] = fragments[i].next;
 	}
 
 	// fix the next links (because of the inserted fragment)
@@ -117,8 +118,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 	{
 		bool isInList = fragments[i].oldPosition != -1; // is the value still in the list?
 		
-		if((isInList && fragments[i].next != fragCopy[i].next) || // the next pointer changed
-			(isInList && fragments[i].alpha != fragCopy[i].alpha) || // the alpha value changed
+		if((isInList && fragments[i].next != fragCopy[i]) || // the next pointer changed
+			(fragments[i].oldPosition == smallestRectValue.oldPosition) || // the alpha value changed
 			fragments[i].oldPosition == MAX_SAMPLES // this is the inserted element (it was not removed in the process)
 			)
 		{
@@ -134,6 +135,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 			STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}
+	
+#pragma optionNV (unroll)
 }
 
 #else // NO ARRAY LINKED LIST
