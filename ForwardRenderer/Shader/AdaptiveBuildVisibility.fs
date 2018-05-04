@@ -132,9 +132,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 			if (val.next == MAX_SAMPLES)
 				val.next = removedPos;
 
-			// DEBUG:
-			fragments[i] = val;
-
 			STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}

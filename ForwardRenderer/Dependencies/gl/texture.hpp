@@ -196,6 +196,22 @@ namespace gl
 			m_lastHandle = 0;
 		}
 #endif
+		GLsizei size() const
+		{
+			return std::accumulate(m_size.begin(), m_size.end(), GLsizei(1), [](GLsizei left, GLsizei right)
+			{
+				return left * right;
+			});
+		}
+		template<class T>
+		std::vector<T> getData(GLint mipLevel, SetDataFormat format, SetDataType type) const
+		{
+			glBindTexture(TType, m_id);
+			std::vector<T> data;
+			data.resize(size());
+			glGetTexImage(TType, mipLevel, GLenum(format), GLenum(type), data.data());
+			return data;
+		}
 	private:
 		void bind() const
 		{

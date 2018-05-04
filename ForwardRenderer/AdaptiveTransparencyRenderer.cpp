@@ -9,9 +9,10 @@
 #include "ScriptEngine/Token.h"
 #include "ScriptEngine/ScriptEngine.h"
 #include <glm/detail/func_packing.inl>
+#include <set>
 
 // ssbo is faster
-static bool s_useTextureBuffer = false;
+static bool s_useTextureBuffer = true;
 static bool s_useTextureBufferView = false;
 static bool s_useUnsortedBuffer = false;
 static bool s_useArrayLinkedList = true;
@@ -171,10 +172,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		else
 			m_visibilityBuffer.bind(7);
 	};
-	auto debugBuffer = [this]()
+	auto debugBuffer = [this](const std::vector<glm::vec2>& buffer, bool isTexture)
 	{
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		auto buffer = m_visibilityBuffer.getData<glm::vec2>();
 		// put buffer into links
 		struct Link
 		{
@@ -184,8 +183,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		};
 
 		std::vector<Link> debugs;
-		debugs.resize(m_samplesPerPixel);
-		std::transform(buffer.begin(), buffer.begin() + m_samplesPerPixel, debugs.begin(), [=](const glm::vec2& v)
+		debugs.resize(buffer.size());
+		std::transform(buffer.begin(), buffer.end(), debugs.begin(), [=](const glm::vec2& v)
 		{
 			Link res;
 			res.depth = v.x;
@@ -199,7 +198,56 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			return res;
 		});
 
-		__debugbreak();
+		std::cout << "testing for broken links:" << std::endl;
+		// test for broken links
+		if(isTexture)
+		{
+			size_t layerSize = Window::getWidth() * Window::getHeight();
+			for(auto it = debugs.begin(), end = debugs.begin() + layerSize; it != end; ++it)
+			{
+				std::set<int> set;
+				for(auto i = it, end = it + layerSize * m_samplesPerPixel; i != end; i += layerSize)
+				{
+					set.insert(i->next);
+				}
+				if (set.size() != m_samplesPerPixel)
+				{
+					std::cout << "invalid number of links" << set.size() << "\n";
+				}
+				for (const auto& item : set)
+				{
+					if (item < -1 || item >= int(m_samplesPerPixel))
+					{
+						std::cout << "invalid link: " << item << "\n";
+					}
+				}
+			}
+		}
+		else
+		{
+			for (auto it = debugs.begin(), end = debugs.end(); it != end; it += m_samplesPerPixel)
+			{
+				std::set<int> set;
+				for (auto i = it, end2 = it + m_samplesPerPixel; i != end2; ++i)
+				{
+					set.insert(i->next);
+				}
+				if (set.size() != m_samplesPerPixel)
+				{
+					std::cout << "invalid number of links" << set.size() << "\n";
+				}
+				for (const auto& item : set)
+				{
+					if (item < -1 || item >= int(m_samplesPerPixel))
+					{
+						std::cout << "invalid link: " << item << "\n";
+					}
+				}
+			}
+		}
+		
+
+		//__debugbreak();
 	};
 		
 	// determine visibility function
@@ -218,7 +266,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			m_shaderClearBackground->draw();
 
 			if (s_useTextureBuffer)
-				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			else
 				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		}
@@ -231,7 +279,18 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		}
 	}
 
-	//debugBuffer();
+	//if(s_useTextureBuffer)
+	//{
+	//	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	//	auto buffer = m_visibilityTex.getData<glm::vec2>(0, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
+	//	debugBuffer(buffer, true);
+	//}
+	//else
+	//{
+	//	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	//	auto buffer = m_visibilityBuffer.getData<glm::vec2>();
+	//	debugBuffer(buffer, false);
+	//}
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
