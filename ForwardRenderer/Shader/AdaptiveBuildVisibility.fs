@@ -120,10 +120,12 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
-		if(((fragments[i].next != fragCopy[i].next
-			|| fragments[i].alpha != fragCopy[i].alpha)
-			&& fragments[i].oldPosition != -1)
-			|| fragments[i].oldPosition == MAX_SAMPLES)
+		bool isInList = fragments[i].oldPosition != -1; // is the value still in the list?
+		
+		if((isInList && fragments[i].next != fragCopy[i].next) || // the next pointer changed
+			(isInList && fragments[i].alpha != fragCopy[i].alpha) || // the alpha value changed
+			fragments[i].oldPosition == MAX_SAMPLES // this is the inserted element (it was not removed in the process)
+			)
 		{
 			// store this
 			Fragment val = fragments[i];
