@@ -70,11 +70,20 @@ struct HotReloadShader
 		using PathMap = std::map<fs::path, size_t>;
 
 		const gl::Shader& getShader() const { return m_shader; }
+		gl::Shader::Type getType() const
+		{
+			return m_type;
+		}
+		const std::function<std::string(GLint)>& getConverter() const
+		{
+			return m_fileMatcher;
+		}
 	private:
 		gl::Shader m_shader;
 		gl::Shader::Type m_type;
 		fs::path m_path;
 		std::vector<std::shared_ptr<WatchedPath>> m_usedFiles;
+		std::function<std::string(GLint)> m_fileMatcher;
 		// glsl version
 		size_t m_glVersion;
 		// code block that will be inserted before the first file
@@ -106,6 +115,17 @@ struct HotReloadShader
 	public:
 
 		const gl::Program& getProgram() const { return m_program; }
+		std::function<std::string(gl::Shader::Type, GLint)> getConvertFunction()
+		{
+			return [this](gl::Shader::Type type, GLint id)
+			{
+				for(const auto& shader : m_usedShader)
+				{
+					if (shader->getType() == type)
+						return shader->getConverter()(id);
+				}
+			};
+		}
 	private:
 		gl::Program m_program;
 		std::vector<std::shared_ptr<WatchedShader>> m_usedShader;

@@ -335,6 +335,8 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		dest.getPreamble() + "\n" +		
 		loadShaderSource(path, usedFiles);
 
+
+
 	// make the file map function
 	std::function<std::string(GLint)> fileMatcher = [usedFiles](GLint num) -> std::string
 	{
@@ -365,6 +367,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 	dest.m_shader = std::move(shader);
 
 	// update dependencies
+	dest.m_fileMatcher = fileMatcher;
 	dest.m_usedFiles.clear();
 	for (const auto& file : usedFiles)
 	{
@@ -394,10 +397,17 @@ void HotReloadShader::loadProgram(WatchedProgram& program)
 	for (const auto& s : program.m_usedShader)
 		p.attach(s->getShader());
 
-	p.link();
-	auto log = p.getInfoLog();
-	if (log.length())
-		std::cerr << log;
+	try
+	{
+		p.link();
+		auto log = p.getInfoLog();
+		if (log.length())
+			std::cerr << gl::Program::convertLog(log, program.getConvertFunction());
+	}
+	catch(const std::exception& e)
+	{
+		throw std::runtime_error(gl::Program::convertLog(e.what(), program.getConvertFunction()));
+	}
 
 	// assign new program
 	program.m_program = std::move(p);

@@ -90,6 +90,63 @@ namespace gl
 
 			return res;
 		}
+
+		static std::string convertLog(const std::string& log, const std::function<std::string(Shader::Type, GLint)>& convertFunction)
+		{
+			std::unordered_map<Shader::Type, std::regex> regexs;
+			regexs[Shader::Type::FRAGMENT] = std::regex("Fragment info");
+			regexs[Shader::Type::VERTEX] = std::regex("Vertex info");
+			regexs[Shader::Type::GEOMETRY] = std::regex("Geometry info");
+			regexs[Shader::Type::COMPUTE] = std::regex("Compute info");
+			regexs[Shader::Type::TESS_CONTROL] = std::regex("Tess Control info");
+			regexs[Shader::Type::TESS_EVALUATION] = std::regex("Tess Evaluation info");
+
+			// search matches
+			std::vector<std::pair<Shader::Type, std::smatch>> matches;
+			matches.reserve(regexs.size());
+
+			std::smatch m;
+			for(const auto& rgx : regexs)
+			{
+				// assuming all matches can only happen once
+				if(std::regex_search(log, m, rgx.second))
+				{
+					matches.push_back({ rgx.first, m });
+				}
+			}
+
+			// sort matches
+			std::sort(matches.begin(), matches.end(), []
+			(const std::pair<Shader::Type, std::smatch>& left, const std::pair<Shader::Type, std::smatch>& right)
+			{
+				return left.second.prefix().str().length() < right.second.prefix().str().length();
+			});
+
+			if (matches.size() == 0) return log;
+			// obtain corrected info logs
+
+			std::string newLog = matches[0].second.prefix().str();
+			for(auto i = 0; i < matches.size(); ++i)
+			{
+				std::string logPart = matches[i].second.suffix().str();
+				// get the string
+				if(i != matches.size() - 1)
+				{
+					// only validate the part between this match and the next match
+					auto strlen = logPart.length() - matches[i + 1].second.suffix().length();
+					logPart = logPart.substr(0, strlen);
+				}
+
+				// use the shader conversion function
+				newLog += matches[i].second.str() + 
+					Shader::convertLog(logPart, [&convertFunction, type = matches[i].first](const auto& id)
+				{
+					return convertFunction(type, id);
+				});
+			}
+
+			return newLog;
+		}
 	private:
 		unique<GLuint> m_id;
 		std::vector<GLuint> m_attachments;
