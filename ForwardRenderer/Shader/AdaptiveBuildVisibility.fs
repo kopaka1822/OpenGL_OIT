@@ -98,20 +98,21 @@ void insertAlpha(float one_minus_alpha, float depth)
 
 	// pseudo remove the next smallest rect value and adjust alpha
 	int removedPos = 0;
+	float correctedAlpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
+		if(fragments[i].oldPosition == smallestRectValue.oldPosition)
+		{
+			// adjust alpha and next pointer
+			fragments[i].alpha = correctedAlpha;
+			fragments[i].next = nextSmallestRectValue.next;
+		}
 		if(fragments[i].oldPosition == nextSmallestRectValue.oldPosition)
 		{
 			// the pseudo remove
 			removedPos = fragments[i].oldPosition;
 			fragments[i].oldPosition = -1;
 		} 
-		else if(fragments[i].oldPosition == smallestRectValue.oldPosition)
-		{
-			// adjust alpha and next pointer
-			fragments[i].alpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
-			fragments[i].next = nextSmallestRectValue.next;
-		}
 	}
 	
 	// write the (maximum) 3 values who have changed into the array
@@ -122,7 +123,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 	{
 		bool isInList = fragments[i].oldPosition != -1; // is the value still in the list?
 		
-		if((isInList && fragments[i].next != fragCopy[i]) || // the next pointer changed
+		if(
+			(isInList && fragments[i].next != fragCopy[i]) || // the next pointer changed
 			(fragments[i].oldPosition == smallestRectValue.oldPosition) || // the alpha value changed
 			fragments[i].oldPosition == MAX_SAMPLES // this is the inserted element (it was not removed in the process)
 			)
@@ -144,6 +146,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 					changed[j] = val;
 				}
 			}
+			//changed[numChanged] = val;
 			++numChanged;
 			//STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
 		}
