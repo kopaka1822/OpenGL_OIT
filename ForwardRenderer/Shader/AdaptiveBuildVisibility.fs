@@ -97,7 +97,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	}
 
 	// pseudo remove the next smallest rect value and adjust alpha
-	int removedPos = 0;
+	int removedPos = nextSmallestRectValue.oldPosition;
 	float correctedAlpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
 	for(int i = 0; i <= MAX_SAMPLES; ++i)
 	{
@@ -107,12 +107,18 @@ void insertAlpha(float one_minus_alpha, float depth)
 			fragments[i].alpha = correctedAlpha;
 			fragments[i].next = nextSmallestRectValue.next;
 		}
-		if(fragments[i].oldPosition == nextSmallestRectValue.oldPosition)
+		if(fragments[i].oldPosition == removedPos)
 		{
-			// the pseudo remove
-			removedPos = fragments[i].oldPosition;
 			fragments[i].oldPosition = -1;
 		} 
+		if(fragments[i].oldPosition == MAX_SAMPLES)
+		{
+			fragments[i].oldPosition = removedPos;
+		}
+		if(fragments[i].next == MAX_SAMPLES)
+		{
+			fragments[i].next = removedPos;
+		}
 	}
 	
 	// write the (maximum) 3 values who have changed into the array
@@ -126,29 +132,12 @@ void insertAlpha(float one_minus_alpha, float depth)
 		if(
 			(isInList && fragments[i].next != fragCopy[i]) || // the next pointer changed
 			(fragments[i].oldPosition == smallestRectValue.oldPosition) || // the alpha value changed
-			fragments[i].oldPosition == MAX_SAMPLES // this is the inserted element (it was not removed in the process)
+			fragments[i].oldPosition == removedPos // this is the inserted element (it was not removed in the process)
 			)
 		{
-			// store this
-			Fragment val = fragments[i];
-			// this was the inserted fragment (insert at removed node pos)
-			if (val.oldPosition == MAX_SAMPLES)
-				val.oldPosition = removedPos;
-			// this node points to the new inserted fragment (which will be stored at removed node pos)
-			if (val.next == MAX_SAMPLES)
-				val.next = removedPos;
-			
-			// insert into numChanged
-			for(int j = 0; j < 3; ++j)
-			{
-				if(j == numChanged)
-				{
-					changed[j] = val;
-				}
-			}
-			//changed[numChanged] = val;
+			// insert into changed
+			changed[numChanged] = fragments[i];
 			++numChanged;
-			//STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}
 	
