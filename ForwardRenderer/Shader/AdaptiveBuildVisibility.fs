@@ -110,41 +110,39 @@ void insertAlpha(float one_minus_alpha, float depth)
 	Fragment changed[3];
 	int numChanged = 1;
 	
+	// insert the node with modified alpha
 	changed[0] = smFrag;
 	changed[0].alpha = smFrag.alpha * nsFrag.alpha;
 	changed[0].next = nsFrag.next;
-
-	// inserted node != removed node
-	if (insertPos != smallestRectPos + 1)
+	
+	if (insertPos == smallestRectPos)
 	{
-		if (insertPos == smallestRectPos)
-		{
-			changed[0].oldPosition = nsFrag.oldPosition;
-		}	
-		else if (insertPos == 0 || insertPos == smallestRectPos + 2)
-		{
-			// inserted fragment
-			changed[1] = isFrag;
-			changed[1].oldPosition = nsFrag.oldPosition;
-			numChanged = 2;
-
-			if (insertPos == smallestRectPos + 2)
-				changed[0].next = nsFrag.oldPosition;
-		}
-		// insert all 3 nodes
-		else
-		{
-			// inserted node
-			changed[1] = isFrag;
-			changed[1].oldPosition = nsFrag.oldPosition;
-
-			// node pointing to inserted node
-			changed[2] = piFrag;
-			changed[2].next = nsFrag.oldPosition;
-
-			numChanged = 3;
-		}
+		changed[0].oldPosition = nsFrag.oldPosition;
 	}
+	else if (insertPos == 0 || insertPos == smallestRectPos + 2)
+	{
+		// inserted fragment
+		changed[1] = isFrag;
+		changed[1].oldPosition = nsFrag.oldPosition;
+		numChanged = 2;
+
+		if (insertPos == smallestRectPos + 2)
+			changed[0].next = nsFrag.oldPosition;
+	}
+	// insert all 3 nodes
+	else if (insertPos != smallestRectPos + 1)
+	{
+		// inserted node
+		changed[1] = isFrag;
+		changed[1].oldPosition = nsFrag.oldPosition;
+
+		// node pointing to inserted node
+		changed[2] = piFrag;
+		changed[2].next = nsFrag.oldPosition;
+
+		numChanged = 3;
+	}
+	
 	
 	for(int i = 0; i < 3; ++i)
 	{
@@ -427,6 +425,7 @@ void main()
 #else				
 				memoryBarrierImage();
 #endif
+				
 				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
 				keepWaiting = false;
 			}
