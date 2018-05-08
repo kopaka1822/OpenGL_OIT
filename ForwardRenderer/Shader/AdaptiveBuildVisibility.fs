@@ -50,36 +50,45 @@ void insertAlpha(float one_minus_alpha, float depth)
 		currentLink = l.next;
 	}
 
-	// bubble sort for the new fragment
-	for(int i = 0; i < MAX_SAMPLES; ++i)
+	// the value that is before the inserted value
+	int insertPos = 0;
+	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		if(fragments[i].depth > fragments[i + 1].depth)
+		if (fragments[i].depth > fragments[i + 1].depth)
 		{
-			Fragment tmp = fragments[i];
-			fragments[i] = fragments[i + 1];
-			fragments[i + 1] = tmp;
+			const Fragment tmp = fragments[i + 1];
+			fragments[i + 1] = fragments[i];
+			fragments[i] = tmp;
+			insertPos = i + 1;
 		}
 	}
 
-	// make a copy to detect the changed values
-	int fragCopy[MAX_SAMPLES + 1];
-	for(int i = 0; i <= MAX_SAMPLES; ++i)
-	{
-		fragCopy[i] = fragments[i].next;
-	}
+	// fix links and otain insert and prev insert
 
-	// fix the next links (because of the inserted fragment)
+	// inserted fragment
+	Fragment isFrag = fragments[MAX_SAMPLES];
+	// previous to inserted fragment
+	Fragment piFrag = fragments[0];;
+	
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
 		fragments[i].next = fragments[i + 1].oldPosition;
+		if (i + 1 == insertPos)
+			piFrag = fragments[i];
+		if (i == insertPos)
+			isFrag = fragments[i];
 	}
-	fragments[MAX_SAMPLES].next = -1;
+	// insertpos == MAX_SAMPLES is handled by isFrag initialization
+
 
 	// find smallest rectangle
 	// find smallest rectangle to insert
 	float minRectArea = 1.0 / 0.0;
-	Fragment smallestRectValue = fragments[0];
-	Fragment nextSmallestRectValue = fragments[0];
+	int smallestRectPos = 0;
+	// smallest rect fragment
+	Fragment smFrag = fragments[0];
+	// next to smallest rect fragment
+	Fragment nsFrag = fragments[1];
 
 	float prevAlpha = 1.0;
 	for (int i = 0; i < MAX_SAMPLES; ++i)
@@ -91,53 +100,49 @@ void insertAlpha(float one_minus_alpha, float depth)
 		if (area < minRectArea)
 		{
 			minRectArea = area;
-			smallestRectValue = fragments[i];
-			nextSmallestRectValue = fragments[i + 1];
+			smallestRectPos = i;
+			smFrag = fragments[i];
+			nsFrag = fragments[i + 1];
 		}
 	}
 
-	// pseudo remove the next smallest rect value and adjust alpha
-	int removedPos = nextSmallestRectValue.oldPosition;
-	float correctedAlpha = smallestRectValue.alpha * nextSmallestRectValue.alpha;
-	for(int i = 0; i <= MAX_SAMPLES; ++i)
-	{
-		if(fragments[i].oldPosition == smallestRectValue.oldPosition)
-		{
-			// adjust alpha and next pointer
-			fragments[i].alpha = correctedAlpha;
-			fragments[i].next = nextSmallestRectValue.next;
-		}
-		if(fragments[i].oldPosition == removedPos)
-		{
-			fragments[i].oldPosition = -1;
-		} 
-		if(fragments[i].oldPosition == MAX_SAMPLES)
-		{
-			fragments[i].oldPosition = removedPos;
-		}
-		if(fragments[i].next == MAX_SAMPLES)
-		{
-			fragments[i].next = removedPos;
-		}
-	}
-	
 	// write the (maximum) 3 values who have changed into the array
 	Fragment changed[3];
-	int numChanged = 0;
+	int numChanged = 1;
 	
-	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	changed[0] = smFrag;
+	changed[0].alpha = smFrag.alpha * nsFrag.alpha;
+	changed[0].next = nsFrag.next;
+
+	// inserted node != removed node
+	if (insertPos != smallestRectPos + 1)
 	{
-		bool isInList = fragments[i].oldPosition != -1; // is the value still in the list?
-		
-		if(
-			(isInList && fragments[i].next != fragCopy[i]) || // the next pointer changed
-			(fragments[i].oldPosition == smallestRectValue.oldPosition) || // the alpha value changed
-			fragments[i].oldPosition == removedPos // this is the inserted element (it was not removed in the process)
-			)
+		if (insertPos == smallestRectPos)
 		{
-			// insert into changed
-			changed[numChanged] = fragments[i];
-			++numChanged;
+			changed[0].oldPosition = nsFrag.oldPosition;
+		}	
+		else if (insertPos == 0 || insertPos == smallestRectPos + 2)
+		{
+			// inserted fragment
+			changed[1] = isFrag;
+			changed[1].oldPosition = nsFrag.oldPosition;
+			numChanged = 2;
+
+			if (insertPos == smallestRectPos + 2)
+				changed[0].next = nsFrag.oldPosition;
+		}
+		// insert all 3 nodes
+		else
+		{
+			// inserted node
+			changed[1] = isFrag;
+			changed[1].oldPosition = nsFrag.oldPosition;
+
+			// node pointing to inserted node
+			changed[2] = piFrag;
+			changed[2].next = nsFrag.oldPosition;
+
+			numChanged = 3;
 		}
 	}
 	
