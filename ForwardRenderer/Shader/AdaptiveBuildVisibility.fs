@@ -30,26 +30,56 @@ struct Fragment
 
 void insertAlpha(float one_minus_alpha, float depth)
 {
-	int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2;
+#pragma optionNV (unroll all)
+	// n * (n + 1) and -1 because one link is -1
+	/*int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2 - 1;
 	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		Link l = unpackLink(LOAD(i));
-		if(l.next != -1)
-			currentLink -= l.next;
+		Link l = unpackLink(LOAD(i % MAX_SAMPLES));
+		currentLink -= l.next;
 	}
-
+	//int currentLink = 0;
+	
 	Fragment fragments[MAX_SAMPLES + 1];
 	fragments[0] = Fragment( depth, one_minus_alpha, -1, MAX_SAMPLES );
 
-#pragma optionNV (unroll all)
 	// unpack linked list into registers
 	for (int i = 1; i <= MAX_SAMPLES; ++i)
 	{
-		Link l = unpackLink(LOAD(currentLink));
+		Link l = unpackLink(LOAD(currentLink % MAX_SAMPLES));
 		fragments[i] = Fragment( l.depth, l.alpha, l.next, currentLink );
 		currentLink = l.next;
-	}
+	}*/
 
+	Link links[MAX_SAMPLES];
+	int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2 - 1;
+	for (int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		Link l = unpackLink(LOAD(i % MAX_SAMPLES));
+		links[i] = l;
+		currentLink -= l.next;
+	}
+	
+	Fragment fragments[MAX_SAMPLES + 1];
+	fragments[0] = Fragment( depth, one_minus_alpha, -1, MAX_SAMPLES );
+	
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		int nextLink = currentLink;
+		
+		for(int j = 0; j < MAX_SAMPLES; ++j)
+		{
+			Link l = links[j];
+			if(currentLink == j)
+			{
+				fragments[i + 1] = Fragment( l.depth, l.alpha, l.next, j );
+				nextLink = l.next;
+				break;
+			}
+		}
+		currentLink = nextLink;
+	}
+	
 	// the value that is before the inserted value
 	int insertPos = 0;
 	for (int i = 0; i < MAX_SAMPLES; ++i)
@@ -149,7 +179,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 		if(i < numChanged)
 		{
 			Fragment val = changed[i];
-			STORE(val.oldPosition, packLink(Link( val.depth, val.alpha, val.next )));
+			STORE(val.oldPosition % MAX_SAMPLES, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}
 	
@@ -167,7 +197,7 @@ struct Fragment
 };
 
 void insertAlpha(float one_minus_alpha, float depth)
-{ dsfsdf
+{
 	Fragment fragments[MAX_SAMPLES + 1];
 	fragments[0] = Fragment(depth, one_minus_alpha, -1);
 	for(int i = 0; i < MAX_SAMPLES; ++i)
@@ -178,7 +208,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	
 	// sort values depending on depth
 	// modified insertion sort
-	for(int i = 1; i <= MAX_SAMPLES; ++i)
+	/*for(int i = 1; i <= MAX_SAMPLES; ++i)
 	{
 		// i - 1 elements are sorted
 #pragma optionNV (unroll all)	
@@ -189,7 +219,26 @@ void insertAlpha(float one_minus_alpha, float depth)
 			fragments[j - 1] = tmp;
 		}
 #pragma optionNV (unroll)
+	}*/
+	
+	// early out bubble sort
+#pragma optionNV (unroll all)
+	for(int n = MAX_SAMPLES + 1; n > 1; --n)
+	{
+		bool swapped = false;
+		for(int i = 0; i < n - 1; ++i)
+		{
+			if(fragments[i].depth > fragments[i + 1].depth)
+			{
+				Fragment tmp = fragments[i];
+				fragments[i] = fragments[i + 1];
+				fragments[i + 1] = tmp;
+				swapped = true;
+			}
+		}
+		if(!swapped) break;
 	}
+
 	
 	// find smallest rectangle
 	// find smallest rectangle to insert

@@ -14,8 +14,8 @@
 // ssbo is faster
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
-static bool s_useUnsortedBuffer = false;
-static bool s_useArrayLinkedList = true;
+static bool s_useUnsortedBuffer = true;
+static bool s_useArrayLinkedList = false;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:

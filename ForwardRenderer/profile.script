@@ -23,13 +23,13 @@ renderer=adaptive32
 waitIterations(>waitCount)
 getProfileTime(>profiler)
 
-renderer=adaptive48
-waitIterations(>waitCount)
-getProfileTime(>profiler)
+//renderer=adaptive48
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 
-renderer=adaptive64
-waitIterations(>waitCount)
-getProfileTime(>profiler)
+//renderer=adaptive64
+//waitIterations(>waitCount)
+//getProfileTime(>profiler)
 
 renderer=adaptive16
 profileType = latest
