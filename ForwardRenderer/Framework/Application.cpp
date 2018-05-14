@@ -136,6 +136,14 @@ Application::Application()
 		return "";
 	});
 
+	ScriptEngine::addKeyword("forward");
+	ScriptEngine::addKeyword("weighted_oit");
+	ScriptEngine::addKeyword("linked");
+	ScriptEngine::addKeyword("dynamic_fragment");
+	ScriptEngine::addKeyword("adaptive");
+	ScriptEngine::addKeyword("multilayer_alpha");
+	ScriptEngine::addKeyword("projection");
+
 	ICamera::initScripts();
 }
 

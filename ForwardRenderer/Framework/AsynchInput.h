@@ -5,17 +5,9 @@
 
 class AsynchInput
 {
-	static std::string readConsole()
-	{
-		std::string a;
-		std::getline(std::cin, a, '\n');
-		return a;
-	}
+	static std::string readConsole();
 public:
-	AsynchInput()
-	{
-		start();
-	}
+	AsynchInput();
 
 	/// \brief checks if new input is available
 	/// \return empty string or input if available
@@ -31,6 +23,7 @@ public:
 		return res;
 	}
 
+	static void setKeywords(std::vector<std::string> keywords);
 private:
 	void start()
 	{

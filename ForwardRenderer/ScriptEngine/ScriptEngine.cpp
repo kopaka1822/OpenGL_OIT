@@ -6,6 +6,7 @@
 #include <queue>
 #include <cassert>
 #include <numeric>
+#include "../Framework/AsynchInput.h"
 
 static std::unordered_map<std::string, ScriptEngine::FunctionT> s_functions;
 static std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
@@ -13,12 +14,32 @@ static size_t s_curIteration = 0;
 static size_t s_waitIterations = 0;
 static std::queue<std::pair<std::string, std::string>> s_commandQueue;
 static std::unordered_map<std::string, Token> s_variables;
+static std::vector<std::string> s_keywords;
+
+static void refreshKeywords()
+{
+	std::vector<std::string> words;
+	words.reserve(s_functions.size() + s_properties.size() + s_keywords.size());
+
+	for (const auto& f : s_functions)
+		words.push_back(f.first);
+
+	for (const auto& p : s_properties)
+		words.push_back(p.first);
+
+	for (const auto& w : s_keywords)
+		words.push_back(w);
+
+	AsynchInput::setKeywords(std::move(words));
+}
 
 void ScriptEngine::addFunction(const std::string& name, FunctionT callback)
 {
 	if (s_functions.find(name) != s_functions.end())
 		std::cerr << "WAR: function " << name << " will be overwrittern\n";
 	s_functions[name] = callback;
+
+	refreshKeywords();
 }
 
 void ScriptEngine::addProperty(const std::string& name, GetterT get, SetterT set)
@@ -26,6 +47,8 @@ void ScriptEngine::addProperty(const std::string& name, GetterT get, SetterT set
 	if (s_properties.find(name) != s_properties.end())
 		std::cerr << "WAR: property " << name << " will be overwrittern\n";
 	s_properties[name] = std::make_pair(get, set);
+
+	refreshKeywords();
 }
 
 void ScriptEngine::addProperty(const std::string& name, GetterT get)
@@ -36,6 +59,14 @@ void ScriptEngine::addProperty(const std::string& name, GetterT get)
 	{
 		std::cerr << name << " is read only" << std::endl;
 	}));
+
+	refreshKeywords();
+}
+
+void ScriptEngine::addKeyword(const std::string& name)
+{
+	s_keywords.push_back(name);
+	refreshKeywords();
 }
 
 void ScriptEngine::removeProperty(const std::string& str)
@@ -48,6 +79,8 @@ void ScriptEngine::removeProperty(const std::string& str)
 	}
 
 	s_properties.erase(it);
+
+	refreshKeywords();
 }
 
 void ScriptEngine::removeFunction(const std::string& str)
@@ -60,6 +93,8 @@ void ScriptEngine::removeFunction(const std::string& str)
 	}
 
 	s_functions.erase(it);
+
+	refreshKeywords();
 }
 
 static Token makeTokenFromString(const std::string& str)

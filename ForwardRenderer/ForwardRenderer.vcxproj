@@ -214,6 +214,7 @@
     <ClCompile Include="DynamicFragmentBuffer.cpp" />
     <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="Framework\Application.cpp" />
+    <ClCompile Include="Framework\AsynchInput.cpp" />
     <ClCompile Include="Framework\DebugContext.cpp" />
     <ClCompile Include="Framework\Profiler.cpp" />
     <ClCompile Include="Graphics\HotReloadShader.cpp" />

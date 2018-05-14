@@ -235,6 +235,9 @@
     <ClCompile Include="MultiLayerAlphaRenderer.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\AsynchInput.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DefaultShader.fs">

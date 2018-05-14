@@ -26,6 +26,9 @@ public:
 		GetterT get
 	);
 
+	// keyword which is used for console auto complete
+	static void addKeyword(const std::string& name);
+
 	static void removeProperty(const std::string& str);
 
 	static void removeFunction(const std::string& str);
