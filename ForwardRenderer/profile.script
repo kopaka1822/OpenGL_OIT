@@ -7,29 +7,29 @@
 
 profileType = average
 
-renderer=adaptive4
-waitIterations(>waitCount)
-getProfileTime(>profiler)
+//renderer=adaptive4
+//waitIterations(>waitCount)
+//getProfileTimes()
 
 renderer=adaptive8
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+getProfileTimes()
 
 renderer=adaptive16
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+getProfileTimes()
 
 renderer=adaptive32
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+getProfileTimes()
 
 //renderer=adaptive48
 //waitIterations(>waitCount)
-//getProfileTime(>profiler)
-
+//getProfileTimes()
+//
 //renderer=adaptive64
 //waitIterations(>waitCount)
-//getProfileTime(>profiler)
+//getProfileTimes()
 
 renderer=adaptive16
 profileType = latest

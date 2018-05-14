@@ -51,12 +51,12 @@ void insertAlpha(float one_minus_alpha, float depth)
 		currentLink = l.next;
 	}*/
 
-	Link links[MAX_SAMPLES];
+	//Link links[MAX_SAMPLES];
 	int currentLink = (MAX_SAMPLES * (MAX_SAMPLES - 1)) / 2 - 1;
 	for (int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		Link l = unpackLink(LOAD(i % MAX_SAMPLES));
-		links[i] = l;
+		Link l = unpackLink(LOAD(i));
+		//links[i] = l;
 		currentLink -= l.next;
 	}
 	
@@ -65,19 +65,9 @@ void insertAlpha(float one_minus_alpha, float depth)
 	
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
-		int nextLink = currentLink;
-		
-		for(int j = 0; j < MAX_SAMPLES; ++j)
-		{
-			Link l = links[j];
-			if(currentLink == j)
-			{
-				fragments[i + 1] = Fragment( l.depth, l.alpha, l.next, j );
-				nextLink = l.next;
-				break;
-			}
-		}
-		currentLink = nextLink;
+		Link l = unpackLink(LOAD(currentLink));//links[currentLink];
+		fragments[i+1] =  Fragment( l.depth, l.alpha, l.next, currentLink );
+		currentLink = l.next;
 	}
 	
 	// the value that is before the inserted value
