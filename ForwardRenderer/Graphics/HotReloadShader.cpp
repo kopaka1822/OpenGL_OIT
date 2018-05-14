@@ -124,7 +124,7 @@ void HotReloadShader::update(bool force)
 
 				// file was modified
 				// try a hot reload
-				std::cerr << "attempting hot reload for " << shader->getDescription() << "\n";
+				std::cerr << "attempting hot reload for " << shader->getDescription() << '\n';
 
 				try
 				{
@@ -149,8 +149,8 @@ void HotReloadShader::update(bool force)
 						}
 						catch (const std::exception& e)
 						{
-							std::cerr << "program relink failed for " << program->getDescription() << "\n";
-							std::cerr << e.what() << "\n";
+							std::cerr << "program relink failed for " << program->getDescription() << '\n';
+							std::cerr << e.what() << '\n';
 						}
 				}
 				std::cerr << "finished program reload\n";
@@ -356,7 +356,7 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		shader.compile(source, string.c_str());
 		auto log = shader.getInfoLog();
 		if (log.length())
-			std::cerr << gl::Shader::convertLog(log, fileMatcher);
+			std::cerr << gl::Shader::convertLog(log, fileMatcher) << '\n';
 	}
 	catch (const std::exception& e)
 	{
@@ -402,7 +402,7 @@ void HotReloadShader::loadProgram(WatchedProgram& program)
 		p.link();
 		auto log = p.getInfoLog();
 		if (log.length())
-			std::cerr << gl::Program::convertLog(log, program.getConvertFunction());
+			std::cerr << gl::Program::convertLog(log, program.getConvertFunction()) << '\n';
 	}
 	catch(const std::exception& e)
 	{
