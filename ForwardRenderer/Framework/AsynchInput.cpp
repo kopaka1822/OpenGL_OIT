@@ -11,54 +11,61 @@ static std::string s_lastCompleteWord;
 static std::vector<std::string> s_lastWords;
 static size_t currentWordIndex = 0;
 
-static std::mutex s_muKeywords;
+// the recorded string
+static std::string s_input;
+static bool s_pressedTab = false;
 
-std::string AsynchInput::readConsole()
+std::string AsynchInput::get()
 {
-	std::string input;
 	INPUT_RECORD ir;
-	
+	DWORD cNumRead;
+
 	currentWordIndex = s_lastWords.size();
 
-	bool pressedTab = false;
-	while(true)
-	{		
-		DWORD cNumRead;
-
-		if(!ReadConsoleInputA(
-		s_inHandle,
-		&ir,
-		1,
-		&cNumRead
-		)) continue;
+	while (true)
+	{
+		if (!PeekConsoleInputA(
+			s_inHandle,
+			&ir,
+			1,
+			&cNumRead)) break;
 		
-		if(!cNumRead) continue;
+		// nothing available to read
+		if (!cNumRead) break;
+
+		// process the data
+		if(!ReadConsoleInputA(
+			s_inHandle,
+			&ir,
+			1,
+			&cNumRead)) break;
+		
+		if(!cNumRead) break;
 		if(ir.EventType != KEY_EVENT) continue;
 
 		auto& e = ir.Event.KeyEvent;
 		if (!e.bKeyDown) continue;
 
 		// reset and remember tab state
-		const auto prevPressedTab = pressedTab;
-		pressedTab = false;
+		const auto prevPressedTab = s_pressedTab;
+		s_pressedTab = false;
 
 		switch (e.wVirtualKeyCode)
 		{
 		case VK_RETURN:
-			// accept input
+			// accept s_input
 			std::cout << '\n';
 
-			s_lastWords.push_back(input);
-			return input;
+			s_lastWords.push_back(s_input);
+			return s_input;
 		case VK_TAB:
 			// auto complete
 			// find best match
 			{
-				pressedTab = true;
-				std::lock_guard<std::mutex> g(s_muKeywords);
+				s_pressedTab = true;
 				// find best match
-				// TODO extract the current word from input
-				auto w = input;
+				// TODO extract the current word from s_input
+				auto w = s_input;
 				const auto lastSpace = w.find_last_of(' ');
 				if(lastSpace != std::string::npos)
 				{
@@ -109,12 +116,12 @@ std::string AsynchInput::readConsole()
 					for(auto i = 0; i < prevWordLenghtDiff; ++i)
 					{
 						std::cout << "\b \b";
-						input.pop_back();
+						s_input.pop_back();
 					}
 				}
 				// display this match
 				const auto sub = s_lastAutoComplete->substr(w.length());
-				input.append(sub);
+				s_input.append(sub);
 				std::cout << sub;
 			}
 			break;
@@ -125,11 +132,11 @@ std::string AsynchInput::readConsole()
 			--currentWordIndex;
 
 			// erase current word
-			for (size_t i = 0; i < input.length(); ++i)
+			for (size_t i = 0; i < s_input.length(); ++i)
 				std::cout << "\b \b";
 
-			input = s_lastWords[currentWordIndex];
-			std::cout << input;
+			s_input = s_lastWords[currentWordIndex];
+			std::cout << s_input;
 		}
 			break;
 		case VK_DOWN:
@@ -138,18 +145,18 @@ std::string AsynchInput::readConsole()
 			++currentWordIndex;
 
 			// erase current word
-			for (size_t i = 0; i < input.length(); ++i)
+			for (size_t i = 0; i < s_input.length(); ++i)
 				std::cout << "\b \b";
 
-			input = s_lastWords[currentWordIndex];
-			std::cout << input;
+			s_input = s_lastWords[currentWordIndex];
+			std::cout << s_input;
 			break;
 		case VK_BACK:
-			// delete last input
-			if(input.length())
+			// delete last s_input
+			if(s_input.length())
 			{
 				std::cout << "\b \b";
-				input.pop_back();
+				s_input.pop_back();
 			}
 			break;
 		default:
@@ -157,33 +164,28 @@ std::string AsynchInput::readConsole()
 			if (e.uChar.UnicodeChar)
 			{
 				std::cout << char(e.uChar.AsciiChar);
-				input.push_back(char(e.uChar.AsciiChar));
+				s_input.push_back(char(e.uChar.AsciiChar));
+			}
+			else
+			{
+				// some random key was pressed. just keave the tab state
+				s_pressedTab = prevPressedTab;
 			}
 			break;
 		}
 	}
 
-
 	return "";
-	/*std::string a;
-	std::getline(std::cin, a, '\n');
-	return a;	*/
 }
 
-AsynchInput::AsynchInput()
+void AsynchInput::init()
 {
-	start();
-	
-	if(!s_outHandle)
-		s_outHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
-	if(!s_inHandle)
-		s_inHandle = GetStdHandle(STD_INPUT_HANDLE);
+	s_outHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	s_inHandle = GetStdHandle(STD_INPUT_HANDLE);
 }
 
 void AsynchInput::setKeywords(std::vector<std::string> keywords)
 {
-	std::lock_guard<std::mutex> g(s_muKeywords);
 	s_keywords = keywords;
 	s_lastAutoComplete = s_keywords.end();
 }
