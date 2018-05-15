@@ -10,7 +10,7 @@ layout(location = 0) out vec4 out_fragColor;
 
 #include "light/light.glsl"
 #include "MultiLayerAlphaStorage.glsl"
-
+#define FLOAT_MAX 3.402823466e+38
 
 layout(binding = 1, r32ui) coherent uniform uimage2D tex_atomics;
 
@@ -58,10 +58,6 @@ void insertFragment(vec4 color, float depth)
 	vec2 shigh = vec2(-1.0, 0.0);
 	int shighIdx = 0;
 
-//#define LCACHE
-//#define GLOBAL
-#ifdef LCACHE
-	
 	// find maximum
 	for(int i = 0; i <= size; ++i)
 	{
@@ -71,57 +67,13 @@ void insertFragment(vec4 color, float depth)
 			highIdx = i;
 		}
 	}
-	high = fragments[highIdx];
 	
-	// find second highest value
-	for(int i = 0; i <= size; ++i)
+	// is a default value in this list?
+	if(high.x == FLOAT_MAX)
 	{
-		if(fragments[i].x > shigh.x && i != highIdx)
-		{
-			shigh = fragments[i];
-			shighIdx = i;
-		}
-	}
-	shigh = fragments[shighIdx];
-#else
-#ifdef GLOBAL
-	for(int i = 0; i < size; ++i)
-	{
-		if(LOAD(i).x > high.x)
-		{
-			high = LOAD(i);
-			highIdx = i;
-		}
-	}
-	if(insertedFrag.x > high.x)
-	{
-		high = insertedFrag;
-		highIdx = size;
-	}
-	
-	for(int i = 0; i < size; ++i)
-	{
-		if(LOAD(i).x > shigh.x && i != highIdx)
-		{
-			shigh = LOAD(i);
-			shighIdx = i;
-		}
-	}
-	if(insertedFrag.x > shigh.x && size != highIdx)
-	{
-		shigh = insertedFrag;
-		shighIdx = size;
-	}
-	
-#else // register
-	// find maximum
-	for(int i = 0; i <= size; ++i)
-	{
-		if(fragments[i].x > high.x)
-		{
-			high = fragments[i];
-			highIdx = i;
-		}
+		// only insert the new fragment (no need to merge)
+		STORE(highIdx, vec2(depth, packColor(color)));
+		return;
 	}
 	
 	// find second highest value
@@ -133,8 +85,6 @@ void insertFragment(vec4 color, float depth)
 			shighIdx = i;
 		}
 	}
-#endif
-#endif 
 	
 	// merge the two highest fragments
 	vec2 merged = merge(shigh, high);
@@ -154,7 +104,6 @@ void insertFragment(vec4 color, float depth)
 	{
 		STORE(shighIdx, vec2(depth, packColor(color)));
 	}
-	
 
 	/*vec2 insertValue = vec2(depth, packColor(color));
 	if(highIdx >= MAX_SAMPLES)
