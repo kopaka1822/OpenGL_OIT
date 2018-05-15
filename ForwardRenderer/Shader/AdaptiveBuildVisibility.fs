@@ -18,6 +18,121 @@ float getRectArea(vec2 pos1, vec2 pos2)
 	return (pos2.x - pos1.x) * (pos1.y - pos2.y);
 }
 
+#ifdef USE_UNSORTED_HEIGHTS
+
+float g_visExponent = 0.0f;
+float g_visOffset = 0.0f;
+
+#define DEPTH(v) ((v).x)
+#define ALPHA(v) ((v).y)
+#define FLOAT_MAX 3.402823466e+38
+
+float vis(float x)
+{
+	return exp(g_visExponent * (x + g_visOffset));
+}
+
+void insertAlpha(float one_minus_alpha, float depth)
+{
+	vec2 fragments[MAX_SAMPLES + 1];
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		fragments[i] = LOAD(i);
+	}
+	fragments[MAX_SAMPLES] = vec2(depth, one_minus_alpha);
+
+	// determine visibility function
+	float maxDepth = DEPTH(fragments[0]);
+	float minDepth = DEPTH(fragments[0]);
+	float productAlpha = ALPHA(fragments[0]);
+	float lastAlpha = ALPHA(fragments[0]);
+	int maxIndex = 0;
+
+	for(int i = 1; i <= MAX_SAMPLES; ++i)
+	{
+		productAlpha *= ALPHA(fragments[i]);
+
+		if(DEPTH(fragments[i]) > maxDepth)
+		{
+			// new max depth
+			maxDepth = DEPTH(fragments[i]);
+			lastAlpha = ALPHA(fragments[i]);
+			maxIndex = i;
+		}
+		//minDepth = min(minDepth, DEPTH(fragments[i]));
+		if(DEPTH(fragments[i]) < minDepth)
+		{
+			minDepth = DEPTH(fragments[i]);
+		}
+	}
+
+	// store visibility function
+	// avoid dividing by zero
+	lastAlpha = max(lastAlpha, 0.00000001);
+	
+	g_visExponent = log(productAlpha / lastAlpha) / (maxDepth - minDepth);
+	g_visOffset = -minDepth;
+
+	float minHeight = FLOAT_MAX;
+	int minIndex = 0;
+	vec2 compressFragment = fragments[0];
+
+	bool removeMax = maxDepth == FLOAT_MAX;
+	// determine minimal height for compression
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	{
+		if(maxIndex != i)
+		{
+			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
+			if(removeMax)
+			{
+				// remove the value with the smallest distance to max
+				height = -DEPTH(fragments[i]);
+			}
+			if (height < minHeight)
+			{
+				minHeight = height;
+				minIndex = i;
+				compressFragment = fragments[i];
+			}
+				
+		}
+	}
+
+	int removeIndex = -1;
+	vec2 removeFragment;
+	DEPTH(removeFragment) = FLOAT_MAX;
+	// determine the next node for removal
+	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	{
+		if( 
+		i != minIndex && 
+		DEPTH(removeFragment) >= DEPTH(fragments[i]) && 
+		DEPTH(fragments[i]) >= DEPTH(compressFragment))
+		{
+			removeIndex = i;
+			removeFragment = fragments[i];
+		}
+	}
+
+	// adjust alpha for compression
+	ALPHA(compressFragment) *= ALPHA(removeFragment);
+
+	if(minIndex == MAX_SAMPLES)
+	{
+		// only store this
+		STORE(removeIndex, compressFragment);
+	}
+	else
+	{
+		STORE(minIndex, compressFragment);
+		if(removeIndex != MAX_SAMPLES)
+			STORE(removeIndex, fragments[MAX_SAMPLES]);
+	}
+}
+
+#else // no unsorted heights
+
 #ifdef USE_ARRAY_LINKED_LIST
 
 struct Fragment
@@ -284,7 +399,10 @@ void insertAlpha(float one_minus_alpha, float depth)
 			vec2(nextSmallestRectValue.depth, nextSmallestRectValue.alpha));
 }
 
-#else // Default
+#else
+
+ // Default
+
 void insertAlphaReference(float one_minus_alpha, float depth)
 { 
 	vec2 fragments[MAX_SAMPLES + 1];
@@ -442,6 +560,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 }
 #endif // unsorted buffer
 #endif // array linked list
+#endif // unsorted heights
+
 
 void main()
 {

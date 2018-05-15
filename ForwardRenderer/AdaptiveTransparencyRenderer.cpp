@@ -22,7 +22,7 @@ enum class Technique
 	ArrayLinkedList,
 	UnsortedHeights
 };
-static Technique s_technique = Technique::Default;
+static Technique s_technique = Technique::UnsortedHeights;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -297,7 +297,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 		m_shaderAdjustBackground->draw();
 
-		if(s_technique != Technique::Default)
+		if (s_technique != Technique::Default)
 		{
 			if (s_useTextureBuffer)
 				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
@@ -305,6 +305,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 			bindFunctionRead();
 		}
+
+	//}
 
 		// add all values
 		glBlendFunc(GL_ONE, GL_ONE);

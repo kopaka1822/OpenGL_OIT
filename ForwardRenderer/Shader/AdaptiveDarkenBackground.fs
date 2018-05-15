@@ -4,14 +4,24 @@ layout(location = 0) out vec4 out_fragColor;
 
 #ifndef UNSORTED_LIST
 #ifndef USE_ARRAY_LINKED_LIST
+#ifndef USE_UNSORTED_HEIGHTS
 #define STORAGE_READ_ONLY
+#endif
 #endif
 #endif
 
 #include "AdaptiveStorage.glsl"
 
+// use a simple depth sort for these two techniques
+#ifdef UNSORTED_LIST
+#define SIMPLE_SORT_LIST
+#endif
+#ifdef USE_UNSORTED_HEIGHTS
+#define SIMPLE_SORT_LIST
+#endif
+
 #ifndef USE_ARRAY_LINKED_LIST
-#ifndef UNSORTED_LIST
+#ifndef SIMPLE_SORT_LIST
 
 void main()
 {
@@ -23,7 +33,7 @@ void main()
 	out_fragColor = vec4(0.0, 0.0, 0.0, transmittance);
 }
 
-#else // unsorted list
+#else // unsorted list and unsorted heights
 
 void main()
 {
@@ -32,7 +42,7 @@ void main()
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 		fragments[i] = LOAD(i);
 		
-		// sort values depending on depth
+	// sort values depending on depth
 	// modified insertion sort
 	for(int i = 1; i < MAX_SAMPLES; ++i)
 	{
