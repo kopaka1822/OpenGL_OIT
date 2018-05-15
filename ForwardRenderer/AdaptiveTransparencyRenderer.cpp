@@ -14,8 +14,15 @@
 // ssbo is faster
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
-static bool s_useUnsortedBuffer = true;
-static bool s_useArrayLinkedList = false;
+
+enum class Technique
+{
+	Default,
+	Unsorted,
+	ArrayLinkedList,
+	UnsortedHeights
+};
+static Technique s_technique = Technique::Default;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -30,8 +37,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 {
 	ScriptEngine::removeProperty("adaptive_use_texture");
 	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
-	ScriptEngine::removeProperty("adaptive_use_unsorted_buffer");
-	ScriptEngine::removeProperty("adaptive_use_array_linked_list");
+	ScriptEngine::removeProperty("adaptive_technique");
 }
 
 void AdaptiveTransparencyRenderer::init()
@@ -43,9 +49,9 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define SSBO_STORAGE";
 		if (s_useTextureBufferView)
 			shaderParams += "\n#define SSBO_TEX_VIEW";
-		if (s_useUnsortedBuffer)
+		if (s_technique == Technique::Unsorted)
 			shaderParams += "\n#define UNSORTED_LIST";
-		if (s_useArrayLinkedList)
+		if (s_technique == Technique::ArrayLinkedList)
 			shaderParams += "\n#define USE_ARRAY_LINKED_LIST";
 
 		// build the shaders
@@ -73,7 +79,7 @@ void AdaptiveTransparencyRenderer::init()
 			HotReloadShader::loadProgram({ vertex, geometry, useVisz }));
 		m_shaderAdjustBackground = std::make_unique<FullscreenQuadShader>(adjustBg);
 
-		if(s_useArrayLinkedList)
+		if(s_technique == Technique::ArrayLinkedList)
 		{
 			auto clearBg = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, 
 							"Shader/AdaptiveClearBuffer.fs", 450, shaderParams);
@@ -111,21 +117,39 @@ void AdaptiveTransparencyRenderer::init()
 		loadShader();
 	});
 
-	ScriptEngine::addProperty("adaptive_use_unsorted_buffer", [this]()
+	ScriptEngine::addProperty(std::string("adaptive_technique"), [this]() -> std::string
 	{
-		return std::to_string(s_useUnsortedBuffer);
-	}, [this, loadShader](const std::vector<Token>& args)
+		switch (s_technique)
+		{
+		case Technique::Default: return std::string("default");
+		case Technique::Unsorted: return std::string("unsorted");
+		case Technique::ArrayLinkedList: return std::string("array_linked_list");
+		case Technique::UnsortedHeights: return std::string("unsorted_heights");
+		default: return std::string("error");
+		}
+	},
+	[this, loadShader](const std::vector<Token>& args)
 	{
-		s_useUnsortedBuffer = args.at(0).getBool();
-		loadShader();
-	});
-
-	ScriptEngine::addProperty("adaptive_use_array_linked_list", [this]()
-	{
-		return std::to_string(s_useArrayLinkedList);
-	}, [this, loadShader](const std::vector<Token>& args)
-	{
-		s_useArrayLinkedList = args.at(0).getBool();
+		if (args.at(0).getString() == "default")
+		{
+			s_technique = Technique::Default;
+		}
+		else if (args.at(0).getString() == "unsorted")
+		{
+			s_technique = Technique::Unsorted;
+		}
+		else if (args.at(0).getString() == "array_linked_list")
+		{
+			s_technique = Technique::ArrayLinkedList;
+		}
+		else if (args.at(0).getString() == "unsorted_heights")
+		{
+			s_technique = Technique::UnsortedHeights;
+		}
+		else
+		{
+			throw std::runtime_error("unknown technique");
+		}
 		loadShader();
 	});
 }
@@ -256,7 +280,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
 
-		if(s_useArrayLinkedList)
+		if(s_technique == Technique::ArrayLinkedList)
 		{
 			// disable colors
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -339,7 +363,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// apply visibility function
-		if (s_useUnsortedBuffer)
+		if (s_technique == Technique::Unsorted)
 			bindFunctionReadWrite();
 		else
 			bindFunctionRead();
@@ -349,7 +373,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 		m_shaderAdjustBackground->draw();
 
-		if(s_useUnsortedBuffer)
+		if(s_technique == Technique::Unsorted)
 		{
 			if (s_useTextureBuffer)
 				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
