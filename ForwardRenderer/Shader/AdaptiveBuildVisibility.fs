@@ -34,22 +34,20 @@ float vis(float x)
 
 void insertAlpha(float one_minus_alpha, float depth)
 {
+	// determine visibility function
+	float maxDepth = depth;
+	float minDepth = depth;
+	float productAlpha = one_minus_alpha;
+	float lastAlpha = one_minus_alpha;
+	int maxIndex = MAX_SAMPLES;
+	
 	vec2 fragments[MAX_SAMPLES + 1];
+	fragments[MAX_SAMPLES] = vec2(depth, one_minus_alpha);
+	
+	// load all fragments
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
 		fragments[i] = LOAD(i);
-	}
-	fragments[MAX_SAMPLES] = vec2(depth, one_minus_alpha);
-
-	// determine visibility function
-	float maxDepth = DEPTH(fragments[0]);
-	float minDepth = DEPTH(fragments[0]);
-	float productAlpha = ALPHA(fragments[0]);
-	float lastAlpha = ALPHA(fragments[0]);
-	int maxIndex = 0;
-
-	for(int i = 1; i <= MAX_SAMPLES; ++i)
-	{
 		productAlpha *= ALPHA(fragments[i]);
 
 		if(DEPTH(fragments[i]) > maxDepth)
@@ -67,37 +65,42 @@ void insertAlpha(float one_minus_alpha, float depth)
 	}
 
 	// store visibility function
-	// avoid dividing by zero
-	lastAlpha = max(lastAlpha, 0.00000001);
 	
-	g_visExponent = log(productAlpha / lastAlpha) / (maxDepth - minDepth);
+	// avoid dividing by zero
+	g_visExponent = log(productAlpha / max(lastAlpha, 0.00000001)) / max(maxDepth - minDepth, 0.00000001);
 	g_visOffset = -minDepth;
 
 	float minHeight = FLOAT_MAX;
 	int minIndex = 0;
 	vec2 compressFragment = fragments[0];
 
-	bool removeMax = maxDepth == FLOAT_MAX;
-	// determine minimal height for compression
-	for(int i = 0; i <= MAX_SAMPLES; ++i)
+	if(maxDepth == FLOAT_MAX)
 	{
-		if(maxIndex != i)
+		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
-			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
-			if(removeMax)
-			{
-				// remove the value with the smallest distance to max
-				height = -DEPTH(fragments[i]);
-			}
-			if (height < minHeight)
+			float height = -DEPTH(fragments[i]);
+			if (height < minHeight && maxIndex != i)
 			{
 				minHeight = height;
 				minIndex = i;
 				compressFragment = fragments[i];
 			}
-				
 		}
 	}
+	else // determine minimal height for compression
+	{
+		for(int i = 0; i <= MAX_SAMPLES; ++i)
+		{
+			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
+			if (height < minHeight && maxIndex != i)
+			{
+				minHeight = height;
+				minIndex = i;
+				compressFragment = fragments[i];
+			}
+		}
+	}
+	
 
 	int removeIndex = -1;
 	vec2 removeFragment;
