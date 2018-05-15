@@ -65,30 +65,21 @@ void insertAlpha(float one_minus_alpha, float depth)
 	}
 
 	// store visibility function
-	
-	// avoid dividing by zero
-	g_visExponent = log(productAlpha / max(lastAlpha, 0.00000001)) / max(maxDepth - minDepth, 0.00000001);
-	g_visOffset = -minDepth;
-
-	float minHeight = FLOAT_MAX;
-	int minIndex = 0;
-	vec2 compressFragment = fragments[0];
 
 	if(maxDepth == FLOAT_MAX)
 	{
-		for(int i = 0; i <= MAX_SAMPLES; ++i)
-		{
-			float height = -DEPTH(fragments[i]);
-			if (height < minHeight && maxIndex != i)
-			{
-				minHeight = height;
-				minIndex = i;
-				compressFragment = fragments[i];
-			}
-		}
+		STORE(maxIndex, fragments[MAX_SAMPLES]);
 	}
-	else // determine minimal height for compression
+	else
 	{
+		// avoid dividing by zero
+		g_visExponent = log(productAlpha / max(lastAlpha, 0.00000001)) / max(maxDepth - minDepth, 0.00000001);
+		g_visOffset = -minDepth;
+
+		float minHeight = FLOAT_MAX;
+		int minIndex = 0;
+		vec2 compressFragment = fragments[0];
+	
 		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
 			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
@@ -99,38 +90,39 @@ void insertAlpha(float one_minus_alpha, float depth)
 				compressFragment = fragments[i];
 			}
 		}
-	}
-	
+		
+		
 
-	int removeIndex = -1;
-	vec2 removeFragment;
-	DEPTH(removeFragment) = FLOAT_MAX;
-	// determine the next node for removal
-	for(int i = 0; i <= MAX_SAMPLES; ++i)
-	{
-		if( 
-		i != minIndex && 
-		DEPTH(removeFragment) >= DEPTH(fragments[i]) && 
-		DEPTH(fragments[i]) >= DEPTH(compressFragment))
+		int removeIndex = -1;
+		vec2 removeFragment;
+		DEPTH(removeFragment) = FLOAT_MAX;
+		// determine the next node for removal
+		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
-			removeIndex = i;
-			removeFragment = fragments[i];
+			if( 
+			i != minIndex && 
+			DEPTH(removeFragment) >= DEPTH(fragments[i]) && 
+			DEPTH(fragments[i]) >= DEPTH(compressFragment))
+			{
+				removeIndex = i;
+				removeFragment = fragments[i];
+			}
 		}
-	}
 
-	// adjust alpha for compression
-	ALPHA(compressFragment) *= ALPHA(removeFragment);
+		// adjust alpha for compression
+		ALPHA(compressFragment) *= ALPHA(removeFragment);
 
-	if(minIndex == MAX_SAMPLES)
-	{
-		// only store this
-		STORE(removeIndex, compressFragment);
-	}
-	else
-	{
-		STORE(minIndex, compressFragment);
-		if(removeIndex != MAX_SAMPLES)
-			STORE(removeIndex, fragments[MAX_SAMPLES]);
+		if(minIndex == MAX_SAMPLES)
+		{
+			// only store this
+			STORE(removeIndex, compressFragment);
+		}
+		else
+		{
+			STORE(minIndex, compressFragment);
+			if(removeIndex != MAX_SAMPLES)
+				STORE(removeIndex, fragments[MAX_SAMPLES]);
+		}
 	}
 }
 
