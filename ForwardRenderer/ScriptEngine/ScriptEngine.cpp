@@ -7,6 +7,7 @@
 #include <cassert>
 #include <numeric>
 #include "../Framework/AsynchInput.h"
+#include <unordered_set>
 
 static std::unordered_map<std::string, ScriptEngine::FunctionT> s_functions;
 static std::unordered_map<std::string, std::pair<ScriptEngine::GetterT, ScriptEngine::SetterT>> s_properties;
@@ -14,7 +15,7 @@ static size_t s_curIteration = 0;
 static size_t s_waitIterations = 0;
 static std::queue<std::pair<std::string, std::string>> s_commandQueue;
 static std::unordered_map<std::string, Token> s_variables;
-static std::vector<std::string> s_keywords;
+static std::unordered_set<std::string> s_keywords;
 
 static void refreshKeywords()
 {
@@ -65,8 +66,10 @@ void ScriptEngine::addProperty(const std::string& name, GetterT get)
 
 void ScriptEngine::addKeyword(const std::string& name)
 {
-	s_keywords.push_back(name);
-	refreshKeywords();
+	auto ret = s_keywords.insert(name);
+	// only refresh if insertion took place
+	if(ret.second)
+		refreshKeywords();
 }
 
 void ScriptEngine::removeProperty(const std::string& str)

@@ -53,6 +53,8 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define UNSORTED_LIST";
 		if (s_technique == Technique::ArrayLinkedList)
 			shaderParams += "\n#define USE_ARRAY_LINKED_LIST";
+		if (s_technique == Technique::UnsortedHeights)
+			shaderParams += "\n#define USE_UNSORTED_HEIGHTS";
 
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -152,6 +154,11 @@ void AdaptiveTransparencyRenderer::init()
 		}
 		loadShader();
 	});
+
+	ScriptEngine::addKeyword("default");
+	ScriptEngine::addKeyword("unsorted");
+	ScriptEngine::addKeyword("array_linked_list");
+	ScriptEngine::addKeyword("unsorted_heights");
 }
 
 void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera)
@@ -196,83 +203,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		else
 			m_visibilityBuffer.bind(7);
 	};
-	auto debugBuffer = [this](const std::vector<glm::vec2>& buffer, bool isTexture)
-	{
-		// put buffer into links
-		struct Link
-		{
-			float depth;
-			float alpha;
-			int next;
-		};
-
-		std::vector<Link> debugs;
-		debugs.resize(buffer.size());
-		std::transform(buffer.begin(), buffer.end(), debugs.begin(), [=](const glm::vec2& v)
-		{
-			Link res;
-			res.depth = v.x;
-
-			// int important for arithmetical shift
-			int packed = glm::floatBitsToInt(v.y);
-			res.next = packed >> 16;
-
-			glm::vec2 alphaNext = glm::unpackUnorm2x16(packed);
-			res.alpha = alphaNext.x;
-			return res;
-		});
-
-		std::cout << "testing for broken links:" << std::endl;
-		// test for broken links
-		if(isTexture)
-		{
-			size_t layerSize = Window::getWidth() * Window::getHeight();
-			for(auto it = debugs.begin(), end = debugs.begin() + layerSize; it != end; ++it)
-			{
-				std::set<int> set;
-				for(auto i = it, end = it + layerSize * m_samplesPerPixel; i != end; i += layerSize)
-				{
-					set.insert(i->next);
-				}
-				if (set.size() != m_samplesPerPixel)
-				{
-					std::cout << "invalid number of links" << set.size() << "\n";
-				}
-				for (const auto& item : set)
-				{
-					if (item < -1 || item >= int(m_samplesPerPixel))
-					{
-						std::cout << "invalid link: " << item << "\n";
-					}
-				}
-			}
-		}
-		else
-		{
-			for (auto it = debugs.begin(), end = debugs.end(); it != end; it += m_samplesPerPixel)
-			{
-				std::set<int> set;
-				for (auto i = it, end2 = it + m_samplesPerPixel; i != end2; ++i)
-				{
-					set.insert(i->next);
-				}
-				if (set.size() != m_samplesPerPixel)
-				{
-					std::cout << "invalid number of links" << set.size() << "\n";
-				}
-				for (const auto& item : set)
-				{
-					if (item < -1 || item >= int(m_samplesPerPixel))
-					{
-						std::cout << "invalid link: " << item << "\n";
-					}
-				}
-			}
-		}
-		
-
-		//__debugbreak();
-	};
 		
 	// determine visibility function
 	
@@ -303,19 +233,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		}
 	}
 
-	//if(s_useTextureBuffer)
-	//{
-	//	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	//	auto buffer = m_visibilityTex.getData<glm::vec2>(0, gl::SetDataFormat::RG, gl::SetDataType::FLOAT);
-	//	debugBuffer(buffer, true);
-	//}
-	//else
-	//{
-	//	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	//	auto buffer = m_visibilityBuffer.getData<glm::vec2>();
-	//	debugBuffer(buffer, false);
-	//}
-
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_BUILD_VIS]);
 
@@ -344,11 +261,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 				s->draw(m_shaderBuildVisz.get());
 			}
 		}
-
-		if (s_useTextureBuffer)
-			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
-		else
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 	
 	//debugBuffer();
@@ -363,17 +275,29 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// apply visibility function
-		if (s_technique == Technique::Unsorted)
-			bindFunctionReadWrite();
-		else
+		if (s_technique == Technique::Default)
+		{
+			if (s_useTextureBuffer)
+				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+			else
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 			bindFunctionRead();
+		}
+		else
+		{
+			if (s_useTextureBuffer)
+				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			else
+				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			bindFunctionReadWrite();
+		}
 
 		// darken the background
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 		m_shaderAdjustBackground->draw();
 
-		if(s_technique == Technique::Unsorted)
+		if(s_technique != Technique::Default)
 		{
 			if (s_useTextureBuffer)
 				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
