@@ -71,7 +71,7 @@ std::string AsynchInput::readConsole()
 
 				auto begin = s_keywords.begin();
 				const bool firstSearch = !prevPressedTab;
-				auto prevWordLenghtDiff = 0;
+				size_t prevWordLenghtDiff = 0;
 
 				s_lastCompleteWord = w;
 				if(!firstSearch)
