@@ -9,6 +9,33 @@ layout(location = 0) out vec4 out_fragColor;
 #define STORAGE_READ_ONLY
 #include "AdaptiveStorage.glsl"
 
+// the function is unsorted for the unsorted techniques if it was not sorted in resolve
+#ifndef UNSORTED_SORT_RESOLVE
+#ifdef UNSORTED_LIST
+#define UNSORTED_VIS
+#endif
+#ifdef USE_UNSORTED_HEIGHTS
+#define UNSORTED_VIS
+#endif
+#endif
+
+#ifdef UNSORTED_VIS
+
+float visz(float depth)
+{
+	// accumulate alpha of all previous fragments
+	float alpha = 1.0;
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		vec2 val = LOAD(i);
+		if(depth > val.x)
+			alpha *= val.y;
+	}
+	return alpha;
+}
+
+#else
+
 float visz(float depth)
 {
 	float previousTransmittance = 1.0;
@@ -38,6 +65,8 @@ float visz(float depth)
 	}
 	return previousTransmittance;*/
 }
+
+#endif
 
 void main()
 {

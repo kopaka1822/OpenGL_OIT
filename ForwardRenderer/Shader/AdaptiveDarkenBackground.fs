@@ -2,6 +2,7 @@ layout(location = 0) out vec4 out_fragColor;
 
 #include "uniforms/transform.glsl"
 
+// read only access for the default technique
 #ifndef UNSORTED_LIST
 #ifndef USE_ARRAY_LINKED_LIST
 #ifndef USE_UNSORTED_HEIGHTS
@@ -9,6 +10,17 @@ layout(location = 0) out vec4 out_fragColor;
 #endif
 #endif
 #endif
+
+// read only access for unsorted if nothing is sorted in resolve
+#ifndef UNSORTED_SORT_RESOLVE
+#ifdef UNSORTED_LIST
+#define STORAGE_READ_ONLY
+#endif
+#ifdef USE_UNSORTED_HEIGHTS
+#define STORAGE_READ_ONLY
+#endif
+#endif
+
 
 #include "AdaptiveStorage.glsl"
 
@@ -34,6 +46,9 @@ void main()
 }
 
 #else // unsorted list and unsorted heights
+
+#ifdef UNSORTED_SORT_RESOLVE
+// sort list in resolve stage (faster read for second geometry pass)
 
 void main()
 {
@@ -72,7 +87,24 @@ void main()
 	out_fragColor = vec4(0.0, 0.0, 0.0, fragments[MAX_SAMPLES - 1].y);
 }
 
+#else // unsorted -> dont sort in resolve stage
+
+void main()
+{
+	// accumulate alpha values
+	float alpha = 1.0;
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		alpha *= LOAD(i).y;
+	}
+	
+	out_fragColor = vec4(0.0, 0.0, 0.0, alpha);
+}
+
+#endif // unsorted sort resolve
+
 #endif
+
 #else // array linked list
 
 // for now just sort again

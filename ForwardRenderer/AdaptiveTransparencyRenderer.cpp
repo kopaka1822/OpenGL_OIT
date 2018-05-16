@@ -14,6 +14,7 @@
 // ssbo is faster
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
+static bool s_unsortedSortInResolve = true;
 
 enum class Technique
 {
@@ -38,6 +39,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 	ScriptEngine::removeProperty("adaptive_use_texture");
 	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
 	ScriptEngine::removeProperty("adaptive_technique");
+	ScriptEngine::removeProperty("adaptive_unsorted_sort_in_resolve");
 }
 
 void AdaptiveTransparencyRenderer::init()
@@ -55,6 +57,8 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define USE_ARRAY_LINKED_LIST";
 		if (s_technique == Technique::UnsortedHeights)
 			shaderParams += "\n#define USE_UNSORTED_HEIGHTS";
+		if (s_unsortedSortInResolve)
+			shaderParams += "\n#define UNSORTED_SORT_RESOLVE";
 
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -110,7 +114,7 @@ void AdaptiveTransparencyRenderer::init()
 		loadShader();
 	});
 
-	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", [this]()
+	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", []()
 	{
 		return std::to_string(s_useTextureBufferView);
 	}, [this, loadShader](const std::vector<Token>& args)
@@ -152,6 +156,15 @@ void AdaptiveTransparencyRenderer::init()
 		{
 			throw std::runtime_error("unknown technique");
 		}
+		loadShader();
+	});
+
+	ScriptEngine::addProperty("adaptive_unsorted_sort_in_resolve", []()
+	{
+		return std::to_string(s_unsortedSortInResolve);
+	}, [loadShader](const std::vector<Token>& args)
+	{
+		s_unsortedSortInResolve = args.at(0).getBool();
 		loadShader();
 	});
 
@@ -274,9 +287,12 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glStencilFunc(GL_EQUAL, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
+		bool bindReadOnly = s_technique == Technique::Default ||
+			(!s_unsortedSortInResolve && (s_technique == Technique::UnsortedHeights || s_technique == Technique::Unsorted));
 		// apply visibility function
-		if (s_technique == Technique::Default)
+		if (bindReadOnly)
 		{
+			// read only access
 			if (s_useTextureBuffer)
 				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 			else
@@ -297,8 +313,9 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 		m_shaderAdjustBackground->draw();
 
-		if (s_technique != Technique::Default)
+		if (!bindReadOnly)
 		{
+			// bind read only for the last stage
 			if (s_useTextureBuffer)
 				glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 			else

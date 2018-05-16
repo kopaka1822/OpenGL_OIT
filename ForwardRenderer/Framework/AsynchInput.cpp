@@ -20,8 +20,6 @@ std::string AsynchInput::get()
 	INPUT_RECORD ir;
 	DWORD cNumRead;
 
-	currentWordIndex = s_lastWords.size();
-
 	while (true)
 	{
 		if (!PeekConsoleInputA(
@@ -57,7 +55,14 @@ std::string AsynchInput::get()
 			std::cout << '\n';
 
 			s_lastWords.push_back(s_input);
-			return s_input;
+		{
+			// reset some settings
+			currentWordIndex = s_lastWords.size();
+
+			auto res = move(s_input);
+			s_input.clear();
+			return res;
+		}
 		case VK_TAB:
 			// auto complete
 			// find best match
