@@ -1,4 +1,5 @@
 layout(location = 0) out vec4 out_fragColor;
+layout(early_fragment_tests) in;
 
 #include "uniforms/transform.glsl"
 

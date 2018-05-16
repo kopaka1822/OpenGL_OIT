@@ -36,6 +36,7 @@ private:
 		T_CLEAR,
 		T_OPAQUE,
 		T_BUILD_VIS,
+		T_DARKEN_BG,
 		T_USE_VIS,
 		SIZE
 	};

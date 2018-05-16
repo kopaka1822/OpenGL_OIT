@@ -15,6 +15,7 @@
 static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
 static bool s_unsortedSortInResolve = true;
+static bool s_useStencilMask = false;
 
 enum class Technique
 {
@@ -40,6 +41,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 	ScriptEngine::removeProperty("adaptive_use_texture_buffer_view");
 	ScriptEngine::removeProperty("adaptive_technique");
 	ScriptEngine::removeProperty("adaptive_unsorted_sort_in_resolve");
+	ScriptEngine::removeProperty("adaptive_use_stencil");
 }
 
 void AdaptiveTransparencyRenderer::init()
@@ -105,24 +107,6 @@ void AdaptiveTransparencyRenderer::init()
 
 	loadShader();
 
-	ScriptEngine::addProperty("adaptive_use_texture", [this]()
-	{
-		return std::to_string(s_useTextureBuffer);
-	}, [this, loadShader](const std::vector<Token>& args)
-	{
-		s_useTextureBuffer = args.at(0).getBool();
-		loadShader();
-	});
-
-	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", []()
-	{
-		return std::to_string(s_useTextureBufferView);
-	}, [this, loadShader](const std::vector<Token>& args)
-	{
-		s_useTextureBufferView = args.at(0).getBool();
-		loadShader();
-	});
-
 	ScriptEngine::addProperty(std::string("adaptive_technique"), [this]() -> std::string
 	{
 		switch (s_technique)
@@ -159,12 +143,38 @@ void AdaptiveTransparencyRenderer::init()
 		loadShader();
 	});
 
+	ScriptEngine::addProperty("adaptive_use_stencil", []()
+	{
+		return std::to_string(s_useStencilMask);
+	}, [](const std::vector<Token>& args)
+	{
+		s_useStencilMask = args.at(0).getBool();
+	});
+
 	ScriptEngine::addProperty("adaptive_unsorted_sort_in_resolve", []()
 	{
 		return std::to_string(s_unsortedSortInResolve);
 	}, [loadShader](const std::vector<Token>& args)
 	{
 		s_unsortedSortInResolve = args.at(0).getBool();
+		loadShader();
+	});
+
+	ScriptEngine::addProperty("adaptive_use_texture", [this]()
+	{
+		return std::to_string(s_useTextureBuffer);
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		s_useTextureBuffer = args.at(0).getBool();
+		loadShader();
+	});
+
+	ScriptEngine::addProperty("adaptive_use_texture_buffer_view", []()
+	{
+		return std::to_string(s_useTextureBufferView);
+	}, [this, loadShader](const std::vector<Token>& args)
+	{
+		s_useTextureBufferView = args.at(0).getBool();
 		loadShader();
 	});
 
@@ -190,7 +200,10 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		glEnable(GL_DEPTH_TEST);
 		//glDisable(GL_POLYGON_SMOOTH);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		GLbitfield clrFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+		if (s_useStencilMask)
+			clrFlags |= GL_STENCIL_BUFFER_BIT;
+		glClear( clrFlags );
 
 		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
@@ -257,14 +270,16 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 
 		// disable colors
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
-		// create Stencil Mask (1's for transparent particles)
-		//glEnable(GL_STENCIL_TEST);
-		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		if(s_useStencilMask)
+		{
+			// create Stencil Mask (1's for transparent particles)
+			glEnable(GL_STENCIL_TEST);
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		}	
 
 		model->prepareDrawing(*m_shaderBuildVisz);
 		for (const auto& s : model->getShapes())
@@ -279,13 +294,16 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 	//debugBuffer();
 
 	{
-		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
+		std::lock_guard<GpuTimer> g(m_timer[T_DARKEN_BG]);
 		// enable colors
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-		// only draw if a 1 is in the stencil buffer
-		glStencilFunc(GL_EQUAL, 1, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		if(s_useStencilMask)
+		{
+			// only draw if a 1 is in the stencil buffer
+			glStencilFunc(GL_EQUAL, 1, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		}
 
 		bool bindReadOnly = s_technique == Technique::Default ||
 			(!s_unsortedSortInResolve && (s_technique == Technique::UnsortedHeights || s_technique == Technique::Unsorted));
@@ -322,9 +340,11 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 				glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 			bindFunctionRead();
 		}
+		glDisable(GL_STENCIL_TEST);
+	}
 
-	//}
-
+	{
+		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
 		// add all values
 		glBlendFunc(GL_ONE, GL_ONE);
 		model->prepareDrawing(*m_shaderApplyVisz);
@@ -340,7 +360,6 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 
 		// enable depth write
 		glDepthMask(GL_TRUE);
-		glDisable(GL_STENCIL_TEST);
 	}
 
 	Profiler::set("time", std::accumulate(m_timer.begin(), m_timer.end(), Profiler::Profile(), [](auto time, const GpuTimer& timer)
@@ -350,6 +369,7 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 	Profiler::set("clear", m_timer[T_CLEAR].get());
 	Profiler::set("opaque", m_timer[T_OPAQUE].get());
 	Profiler::set("build_vis", m_timer[T_BUILD_VIS].get());
+	Profiler::set("darken_bg", m_timer[T_DARKEN_BG].get());
 	Profiler::set("use_vis", m_timer[T_USE_VIS].get());
 }
 
