@@ -16,6 +16,7 @@ static bool s_useTextureBuffer = false;
 static bool s_useTextureBufferView = false;
 static bool s_unsortedSortInResolve = true;
 static bool s_useStencilMask = false;
+static bool s_defaultUseHeights = false;
 
 enum class Technique
 {
@@ -42,6 +43,7 @@ AdaptiveTransparencyRenderer::~AdaptiveTransparencyRenderer()
 	ScriptEngine::removeProperty("adaptive_technique");
 	ScriptEngine::removeProperty("adaptive_unsorted_sort_in_resolve");
 	ScriptEngine::removeProperty("adaptive_use_stencil");
+	ScriptEngine::removeProperty("adaptive_default_use_heights");
 }
 
 void AdaptiveTransparencyRenderer::init()
@@ -61,6 +63,8 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define USE_UNSORTED_HEIGHTS";
 		if (s_unsortedSortInResolve)
 			shaderParams += "\n#define UNSORTED_SORT_RESOLVE";
+		if (s_defaultUseHeights)
+			shaderParams += "\n#define USE_HEIGHT_METRIC";
 
 		// build the shaders
 		auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
@@ -157,6 +161,15 @@ void AdaptiveTransparencyRenderer::init()
 	}, [loadShader](const std::vector<Token>& args)
 	{
 		s_unsortedSortInResolve = args.at(0).getBool();
+		loadShader();
+	});
+
+	ScriptEngine::addProperty("adaptive_default_use_heights", []()
+	{
+		return std::to_string(s_defaultUseHeights);
+	}, [loadShader](const std::vector<Token>& args)
+	{
+		s_defaultUseHeights = args.at(0).getBool();
 		loadShader();
 	});
 

@@ -489,10 +489,6 @@ void insertAlphaReference(float one_minus_alpha, float depth)
 
 void insertAlpha(float one_minus_alpha, float depth)
 {	 
-	//insertAlphaReference(one_minus_alpha, depth);
-	//insertAlphaSep(one_minus_alpha, depth);
-	//return;
-	
 	vec2 fragments[MAX_SAMPLES + 1];
 	// load values
 	fragments[0] = vec2(depth, one_minus_alpha);
@@ -526,8 +522,13 @@ void insertAlpha(float one_minus_alpha, float depth)
 	
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
+#ifdef USE_HEIGHT_METRIC
+		float area = fragments[i].y - fragments[i+1].y;
+#else // deafult metric (rectangle area)
 		float area = getRectArea(	fragments[i],
 									fragments[i+1] );
+#endif
+									
 		if(area < minRectArea)
 		{
 			minRectArea = area;
