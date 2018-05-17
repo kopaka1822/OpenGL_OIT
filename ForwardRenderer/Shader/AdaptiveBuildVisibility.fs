@@ -40,6 +40,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	float productAlpha = one_minus_alpha;
 	float lastAlpha = one_minus_alpha;
 	int maxIndex = MAX_SAMPLES;
+	int minIndex = MAX_SAMPLES;
 	
 	vec2 fragments[MAX_SAMPLES + 1];
 	fragments[MAX_SAMPLES] = vec2(depth, one_minus_alpha);
@@ -57,10 +58,11 @@ void insertAlpha(float one_minus_alpha, float depth)
 			lastAlpha = ALPHA(fragments[i]);
 			maxIndex = i;
 		}
-		//minDepth = min(minDepth, DEPTH(fragments[i]));
+		
 		if(DEPTH(fragments[i]) < minDepth)
 		{
 			minDepth = DEPTH(fragments[i]);
+			minIndex = i;
 		}
 	}
 
@@ -77,49 +79,49 @@ void insertAlpha(float one_minus_alpha, float depth)
 		g_visOffset = -minDepth;
 
 		float minHeight = FLOAT_MAX;
-		int minIndex = 0;
-		vec2 compressFragment = fragments[0];
+		int removeIndex = 0;
+		vec2 removeFragment = fragments[0];
 	
+		// find the node with the smallest height difference (this node will be removed)
 		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
 			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
-			if (height < minHeight && maxIndex != i)
+			if (height < minHeight && minIndex != i)
 			{
 				minHeight = height;
-				minIndex = i;
-				compressFragment = fragments[i];
+				removeIndex = i;
+				removeFragment = fragments[i];
 			}
 		}
 		
-		
+		// determine the previous node
+		int smallestRectIndex = -1;
+		vec2 compressFragment;
+		DEPTH(compressFragment) = -1.0;
 
-		int removeIndex = -1;
-		vec2 removeFragment;
-		DEPTH(removeFragment) = FLOAT_MAX;
-		// determine the next node for removal
 		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
-			if( 
-			i != minIndex && 
-			DEPTH(removeFragment) >= DEPTH(fragments[i]) && 
-			DEPTH(fragments[i]) >= DEPTH(compressFragment))
+			if(
+				i != removeIndex &&
+				DEPTH(compressFragment) <= DEPTH(fragments[i]) &&
+				DEPTH(fragments[i]) <= DEPTH(removeFragment) )
 			{
-				removeIndex = i;
-				removeFragment = fragments[i];
+				smallestRectIndex = i;
+				compressFragment = fragments[i];
 			}
 		}
 
 		// adjust alpha for compression
 		ALPHA(compressFragment) *= ALPHA(removeFragment);
 
-		if(minIndex == MAX_SAMPLES)
+		if(smallestRectIndex == MAX_SAMPLES)
 		{
 			// only store this
 			STORE(removeIndex, compressFragment);
 		}
 		else
 		{
-			STORE(minIndex, compressFragment);
+			STORE(smallestRectIndex, compressFragment);
 			if(removeIndex != MAX_SAMPLES)
 				STORE(removeIndex, fragments[MAX_SAMPLES]);
 		}
