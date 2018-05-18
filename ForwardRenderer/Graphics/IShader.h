@@ -12,6 +12,4 @@ public:
 
 	virtual void applyCamera(const ICamera& camera) {}
 	virtual void setModelTransform(const glm::mat4& transform) {}
-
-	virtual void setMaterial(const ParamSet& material){}
 };

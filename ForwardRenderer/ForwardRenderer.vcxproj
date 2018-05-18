@@ -189,6 +189,7 @@
     <ClInclude Include="Graphics\GpuTimer.h" />
     <ClInclude Include="Graphics\HotReloadShader.h" />
     <ClInclude Include="Graphics\ICamera.h" />
+    <ClInclude Include="Graphics\IMaterials.h" />
     <ClInclude Include="Graphics\IModel.h" />
     <ClInclude Include="Graphics\IRenderer.h" />
     <ClInclude Include="Graphics\IShader.h" />
@@ -203,6 +204,7 @@
     <ClInclude Include="ScriptEngine\ScriptEngine.h" />
     <ClInclude Include="ScriptEngine\Token.h" />
     <ClInclude Include="SimpleForwardRenderer.h" />
+    <ClInclude Include="SimpleMaterial.h" />
     <ClInclude Include="SimpleShader.h" />
     <ClInclude Include="WeightedTransparency.h" />
     <ClInclude Include="Window.h" />

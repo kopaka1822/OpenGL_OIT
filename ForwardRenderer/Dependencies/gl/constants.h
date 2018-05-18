@@ -241,6 +241,7 @@ namespace gl
 	__gl_get_integer(GetParam::NUM_EXTENSIONS);
 	__gl_get_integer(GetParam::NUM_PROGRAM_BINARY_FORMATS);
 	__gl_get_integer(GetParam::NUM_SHADER_BINARY_FORMATS);
+	__gl_get_integer(GetParam::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
 	
 	// TODO make enum
 	__gl_get_integer(GetParam::BLEND_DST_ALPHA);

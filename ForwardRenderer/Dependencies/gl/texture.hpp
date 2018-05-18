@@ -215,6 +215,7 @@ namespace gl
 	private:
 		void bind() const
 		{
+			assert(m_id);
 			glBindTexture(TType, m_id);
 		}
 		void allocateMemory()

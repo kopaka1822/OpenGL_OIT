@@ -5,6 +5,7 @@
 #include "Graphics/SamplerCache.h"
 #include "Dependencies/gl/vertexarrayobject.hpp"
 #include "Framework/ParamSet.h"
+#include "SimpleMaterial.h"
 
 class SimpleMaterial;
 
@@ -34,6 +35,7 @@ private:
 
 	gl::VertexArrayObject m_vao;
 	std::vector<std::unique_ptr<IShape>> m_shapes;
-	std::vector<ParamSet> m_material;
+
+	SimpleMaterial m_materials;
 };
 

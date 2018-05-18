@@ -179,6 +179,12 @@
     <ClInclude Include="Framework\ParamSet.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\IMaterials.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMaterial.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">

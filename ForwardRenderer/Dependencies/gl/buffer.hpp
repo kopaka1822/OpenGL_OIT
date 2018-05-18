@@ -42,17 +42,35 @@ namespace gl
 
 		void bind() const
 		{
+			assert(m_id);
 			glBindBuffer(TType, m_id);
 		}
+
 		template<bool TEnabled = (TType == GL_ATOMIC_COUNTER_BUFFER) || (TType == GL_TRANSFORM_FEEDBACK_BUFFER)
 		|| (TType == GL_UNIFORM_BUFFER) || (TType == GL_SHADER_STORAGE_BUFFER) || (TType == GL_ARRAY_BUFFER)>
 		std::enable_if_t<TEnabled> bind(GLuint bindingIndex) const
 		{
 			if (TType == GL_ARRAY_BUFFER)
+			{
 				bindAsVertexBuffer(bindingIndex);
+			}
 			else
+			{
+				bind();
 				glBindBufferRange(TType, bindingIndex, m_id, 0, m_size);
+			}
+
 		}
+
+		template<bool TEnabled = (TType == GL_ATOMIC_COUNTER_BUFFER) || (TType == GL_TRANSFORM_FEEDBACK_BUFFER)
+			|| (TType == GL_UNIFORM_BUFFER) || (TType == GL_SHADER_STORAGE_BUFFER)>
+			std::enable_if_t<TEnabled> bind(GLuint bindingIndex, GLuint elementOffset, GLuint numElements) const
+		{
+			assert(GLsizei(elementOffset + numElements) <= m_elementCount);
+			bind();
+			glBindBufferRange(TType, bindingIndex, m_id, elementOffset * m_elementSize, numElements * m_elementSize);
+		}
+
 		template<bool TEnabled = (TType == GL_ARRAY_BUFFER)>
 		std::enable_if_t<TEnabled> bind(GLuint bindingIndex, GLuint elementOffset) const
 		{

@@ -10,7 +10,10 @@ class ParamSet
 	std::unordered_map<std::string, std::shared_ptr<CachedTexture2D>> m_cachedTex;
 	std::unordered_map<std::string, glm::vec4> m_params;
 public:
-	
+	ParamSet() = default;
+	ParamSet(ParamSet&&) = default;
+	ParamSet& operator=(ParamSet&&) = default;
+
 	// add functions
 
 	void add(const std::string& name, const glm::vec4& value)

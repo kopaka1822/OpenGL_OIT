@@ -66,7 +66,7 @@ ObjModel::ObjModel(const std::string& filename)
 	
 	std::cerr << "INF: creating material" << std::endl;
 	// load material
-	m_material.reserve(materials.size());
+	m_materials.reserve(materials.size());
 	for(const auto& m : materials)
 	{
 		auto mat = ParamSet();
@@ -89,8 +89,10 @@ ObjModel::ObjModel(const std::string& filename)
 		if (m.alpha_texname.length())
 			tryAddingTexture(mat, "dissolve", directory + m.alpha_texname);
 
-		m_material.push_back(std::move(mat));
+		m_materials.addMaterial(std::move(mat));
 	}
+
+	m_materials.upload();
 
 	std::cerr << "INF: creating shapes" << std::endl;
 	// load shapes
@@ -108,7 +110,7 @@ ObjModel::ObjModel(const std::string& filename)
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
 			gl::StaticArrayBuffer(s.mesh.indices), 
-			m_material[materialId]));
+			m_materials.getInstance(materialId)));
 	}
 }
 
