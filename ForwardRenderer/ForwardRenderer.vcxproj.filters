@@ -185,6 +185,12 @@
     <ClInclude Include="SimpleMaterial.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\ILights.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleLights.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">

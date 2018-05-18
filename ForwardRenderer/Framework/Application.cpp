@@ -22,11 +22,13 @@
 #include "../Dependencies/stbi_helper.h"
 #include "../DynamicFragmentBuffer.h"
 #include "../MultiLayerAlphaRenderer.h"
+#include "../SimpleLights.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
 static std::string s_rendererName;
 static std::string s_cameraName;
+static std::string s_lightsName;
 
 static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 {
@@ -76,6 +78,17 @@ static std::unique_ptr<ICamera> makeCamera(const std::vector<Token>& args)
 	throw std::runtime_error("camera not found");
 }
 
+static std::unique_ptr<ILights> makeLights(const std::vector<Token>& args)
+{
+	if (args.empty())
+		throw std::runtime_error("lights name missing");
+
+	if (args.at(0).getString() == "default")
+		return std::make_unique<SimpleLights>();
+
+	throw std::runtime_error("lights not found");
+}
+
 Application::Application()
 	:
 	m_window(800, 800, "ForwardRenderer")
@@ -103,6 +116,15 @@ Application::Application()
 	{
 		this->m_camera = makeCamera(args);
 		s_cameraName = args[0].getString();
+	});
+
+	ScriptEngine::addProperty("lights", []()
+	{
+		return s_lightsName;
+	}, [this](const std::vector<Token>& args)
+	{
+		this->m_lights = makeLights(args);
+		s_lightsName = args.at(0).getString();
 	});
 
 	ScriptEngine::addFunction("loadObj", [this](const std::vector<Token>& args)
@@ -136,6 +158,57 @@ Application::Application()
 		return "";
 	});
 
+	ScriptEngine::addFunction("addPointLight", [this](const std::vector<Token>& args)
+	{
+		if (args.size() < 3)
+			throw std::runtime_error("expected posX, posY, posZ [, colorR, colorG, colorB [, quadraticAttenuation [, linearAttenuation]]]");
+		if (!m_lights)
+			throw std::runtime_error("no light model active");
+
+		ParamSet params;
+		params.add("position", glm::vec3(args.at(0).getFloat(), args.at(1).getFloat(), args.at(2).getFloat()));
+
+		if (args.size() >= 6)
+			params.add("color", glm::vec3(args.at(3).getFloat(), args.at(4).getFloat(), args.at(5).getFloat()));
+
+		if (args.size() >= 7)
+			params.add("linearAttenuation", args.at(6).getFloat());
+
+		if (args.size() >= 8)
+			params.add("quadraticAttenuation", args.at(7).getFloat());
+
+		m_lights->addLight(std::move(params));
+
+		return "";
+	});
+
+	ScriptEngine::addFunction("addDirectionalLight", [this](const std::vector<Token>& args)
+	{
+		if (args.size() < 3)
+			throw std::runtime_error("expected dirX, dirY, dirZ [, colorR, colorG, colorB]");
+		if (!m_lights)
+			throw std::runtime_error("no light model active");
+
+		ParamSet params;
+		params.add("direction", glm::vec3(args.at(0).getFloat(), args.at(1).getFloat(), args.at(2).getFloat()));
+
+		if (args.size() >= 6)
+			params.add("color", glm::vec3(args.at(3).getFloat(), args.at(4).getFloat(), args.at(5).getFloat()));
+
+		m_lights->addLight(std::move(params));
+
+		return "";
+	});
+
+	ScriptEngine::addFunction("uploadLights", [this](const std::vector<Token>& args)
+	{
+		if (!m_lights)
+			throw std::runtime_error("no light model active");
+
+		m_lights->upload();
+		return "";
+	});
+
 	ScriptEngine::addKeyword("forward");
 	ScriptEngine::addKeyword("weighted_oit");
 	ScriptEngine::addKeyword("linked");
@@ -159,6 +232,9 @@ void Application::tick()
 
 	for (const auto& r : s_tickReceiver)
 		r->tick(dt);
+
+	if (m_lights)
+		m_lights->bind();
 
 	if (m_renderer)
 		m_renderer->render(m_model.get(), m_camera.get());

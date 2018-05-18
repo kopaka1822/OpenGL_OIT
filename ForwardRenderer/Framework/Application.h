@@ -5,6 +5,7 @@
 #include "../Graphics/IModel.h"
 #include "../Graphics/IShader.h"
 #include "../Graphics/ICamera.h"
+#include "../Graphics/ILights.h"
 
 class ITickReceiver;
 
@@ -28,5 +29,6 @@ private:
 	std::unique_ptr<IRenderer> m_renderer;
 	std::unique_ptr<IModel> m_model;
 	std::unique_ptr<ICamera> m_camera;
+	std::unique_ptr<ILights> m_lights;
 	std::string m_screenshotDestination;
 };
