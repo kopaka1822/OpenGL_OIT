@@ -8,7 +8,6 @@
 #include <mutex>
 #include "ScriptEngine/Token.h"
 #include "ScriptEngine/ScriptEngine.h"
-#include <glm/detail/func_packing.inl>
 #include <set>
 
 // ssbo is faster

@@ -3,19 +3,18 @@
 #include <vector>
 #include "ObjModel.h"
 #include "Graphics/IShader.h"
-#include "SimpleMaterial.h"
 
 class ObjShape : public IShape
 {
 public:
-	ObjShape(gl::StaticArrayBuffer& buffer, const SimpleMaterial& material)
+	ObjShape(gl::StaticArrayBuffer& buffer, const ParamSet& material)
 		:
 	m_material(material),
 	m_elements(std::move(buffer))
 	{
 		// transparent
-		auto dissolve = material.getAttribute("dissolve");
-		if (dissolve && dissolve->x < 1.0f)
+		auto dissolve = material.get<float>("dissolve");
+		if (dissolve && *dissolve < 1.0f)
 			m_isTransparent = true;
 		if (material.getTexture("dissolve"))
 			m_isTransparent = true;
@@ -41,7 +40,7 @@ public:
 		return m_isTransparent;
 	}
 private:
-	const SimpleMaterial& m_material;
+	const ParamSet& m_material;
 	gl::StaticArrayBuffer m_elements;
 	bool m_isTransparent = false;
 };

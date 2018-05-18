@@ -1,7 +1,6 @@
 #pragma once
 #include "Graphics/IShader.h"
 #include <memory>
-#include "Graphics/IMaterial.h"
 #include "Dependencies/gl/buffer.hpp"
 #include "Graphics/SamplerCache.h"
 #include "Window.h"
@@ -85,7 +84,7 @@ public:
 		}
 	}
 
-	void setMaterial(const IMaterial& material) override
+	void setMaterial(const ParamSet& material) override
 	{
 		// set texture bindings
 		m_sampler.bind(DIFFUSE_BINDING);
@@ -93,46 +92,16 @@ public:
 		m_sampler.bind(AMBIENT_BINDING);
 		m_sampler.bind(SPECULAR_BINDING);
 
-		auto tex = material.getTexture("diffuse");
-		if (tex) tex->bind(DIFFUSE_BINDING);
-		else m_defaultTex->bind(DIFFUSE_BINDING);
-
-		tex = material.getTexture("dissolve");
-		if (tex) tex->bind(DISSOLVE_BINDING);
-		else m_defaultTex->bind(DISSOLVE_BINDING);
-
-		tex = material.getTexture("ambient");
-		if (tex) tex->bind(AMBIENT_BINDING);
-		else m_defaultTex->bind(AMBIENT_BINDING);
-
-		tex = material.getTexture("specular");
-		if (tex) tex->bind(SPECULAR_BINDING);
-		else m_defaultTex->bind(SPECULAR_BINDING);
+		material.getTexture("diffuse", m_defaultTex)->bind(DIFFUSE_BINDING);
+		material.getTexture("dissolve", m_defaultTex)->bind(DISSOLVE_BINDING);
+		material.getTexture("ambient", m_defaultTex)->bind(AMBIENT_BINDING);
+		material.getTexture("specular", m_defaultTex)->bind(SPECULAR_BINDING);
 
 		// set material data
-		auto ambient = material.getAttribute("ambient");
-		if (ambient)
-			m_materialData.m_ambient = glm::vec3(ambient->r, ambient->g, ambient->b);
-		else
-			m_materialData.m_ambient = glm::vec3(0.0f);
-
-		auto diffuse = material.getAttribute("diffuse");
-		if (diffuse)
-			m_materialData.m_diffuse = *diffuse;
-		else
-			m_materialData.m_diffuse = glm::vec4(0.5f);
-
-		auto specular = material.getAttribute("specular");
-		if (specular)
-			m_materialData.m_specular = *specular;
-		else
-			m_materialData.m_specular = glm::vec4(0.0f);
-
-		auto dissolve = material.getAttribute("dissolve");
-		if (dissolve)
-			m_materialData.m_dissolve = dissolve->r;
-		else
-			m_materialData.m_dissolve = 1.0f;
+		m_materialData.m_ambient = material.get("ambient", glm::vec3(0.0f));
+		m_materialData.m_diffuse = material.get("diffuse", glm::vec4(0.5f));
+		m_materialData.m_specular = material.get("specular", glm::vec4(0.0f));
+		m_materialData.m_dissolve = material.get("dissolve", 1.0f);
 
 		// upload the data
 		m_materialBuffer.update(&m_materialData);

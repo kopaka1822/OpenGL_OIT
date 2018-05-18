@@ -4,8 +4,6 @@
 #include <iostream>
 #include <chrono>
 #include "ObjShape.h"
-#include "SimpleMaterial.h"
-#include "SimpleMaterial.h"
 #include "Graphics/SamplerCache.h"
 
 // attempts to retrieve the file directory
@@ -71,25 +69,25 @@ ObjModel::ObjModel(const std::string& filename)
 	m_material.reserve(materials.size());
 	for(const auto& m : materials)
 	{
-		auto mat = std::make_unique<SimpleMaterial>();
+		auto mat = ParamSet();
 
-		mat->addAttribute("diffuse", glm::vec4(m.diffuse[0], m.diffuse[1], m.diffuse[2], 1.0f));
+		mat.add("diffuse", glm::vec3(m.diffuse[0], m.diffuse[1], m.diffuse[2]));
 		//mat->addAttribute("ambient", glm::vec4(m.ambient[0], m.ambient[1], m.ambient[2], 1.0f));
-		mat->addAttribute("specular", glm::vec4(m.specular[0], m.specular[1], m.specular[2], m.shininess));
-		mat->addAttribute("dissolve", glm::vec4(m.dissolve));
+		mat.add("specular", glm::vec4(m.specular[0], m.specular[1], m.specular[2], m.shininess));
+		mat.add("dissolve", m.dissolve);
 
 		// add available attributes
 		if (m.diffuse_texname.length())
-			tryAddingTexture(*mat, "diffuse", directory + m.diffuse_texname);
+			tryAddingTexture(mat, "diffuse", directory + m.diffuse_texname);
 
 		if (m.ambient_texname.length())
-			tryAddingTexture(*mat, "ambient", directory + m.ambient_texname);
+			tryAddingTexture(mat, "ambient", directory + m.ambient_texname);
 
 		if (m.specular_texname.length())
-			tryAddingTexture(*mat, "specular", directory + m.specular_texname);
+			tryAddingTexture(mat, "specular", directory + m.specular_texname);
 
 		if (m.alpha_texname.length())
-			tryAddingTexture(*mat, "dissolve", directory + m.alpha_texname);
+			tryAddingTexture(mat, "dissolve", directory + m.alpha_texname);
 
 		m_material.push_back(std::move(mat));
 	}
@@ -110,7 +108,7 @@ ObjModel::ObjModel(const std::string& filename)
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
 			gl::StaticArrayBuffer(s.mesh.indices), 
-			*m_material[materialId]));
+			m_material[materialId]));
 	}
 }
 
@@ -141,7 +139,7 @@ const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const
 	return m_shapes;
 }
 
-void ObjModel::tryAddingTexture(SimpleMaterial& material, const std::string& attrName, const std::string& textureName)
+void ObjModel::tryAddingTexture(ParamSet& material, const std::string& attrName, const std::string& textureName)
 {
 	try
 	{

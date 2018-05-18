@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/matrix.hpp>
-#include "IMaterial.h"
+#include "../Framework/ParamSet.h"
 
 class ICamera;
 
@@ -13,5 +13,5 @@ public:
 	virtual void applyCamera(const ICamera& camera) {}
 	virtual void setModelTransform(const glm::mat4& transform) {}
 
-	virtual void setMaterial(const IMaterial& material){}
+	virtual void setMaterial(const ParamSet& material){}
 };

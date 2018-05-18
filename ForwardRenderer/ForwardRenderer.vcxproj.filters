@@ -83,12 +83,6 @@
     <ClInclude Include="Framework\ITickReveicer.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\IMaterial.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleMaterial.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\IWindowReceiver.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
@@ -180,6 +174,9 @@
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Framework\alignment.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ParamSet.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,6 @@
 #include "SimpleShader.h"
 #include <mutex>
 #include <glad/glad.h>
-#include <glm/detail/func_packing.inl>
 #include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
 #include "Framework/alignment.h"
