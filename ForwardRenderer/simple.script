@@ -1,18 +1,18 @@
-renderer = adaptive8
+renderer = dynamic_fragment
 camera = projection
 //debugOutput = false
 profileType = latest
 
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
-//loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//camSpeed = 0.001
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
+loadObj("Scene/miguel/san-miguel-low-poly.obj")
+camSpeed = 0.001
 
-loadObj("Scene/powerplant/powerplant.obj")
-camSpeed = 40
-camPos = 107055, 86794.4, 116970
-camDir = -0.747132, -0.179029, -0.640115
-camNear = 10
+//loadObj("Scene/powerplant/powerplant.obj")
+//camSpeed = 40
+//camPos = 107055, 86794.4, 116970
+//camDir = -0.747132, -0.179029, -0.640115
+//camNear = 10
 //camPos = 353.751, 57420.4, 39287.2
 //camDir = -0.0120038, -0.247403, -0.968841
 

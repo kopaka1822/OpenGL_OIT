@@ -21,13 +21,25 @@ float calcMaterialAlpha()
 
 #ifndef LIGHT_ONLY_TRANSPARENT
 
+vec3 toGamma(vec3 vec)
+{
+	//return vec;
+	return pow(vec, vec3(1.0 / 2.2));
+}
+
+vec3 fromGamma(vec3 vec)
+{
+	//return vec;
+	return pow(vec, vec3(2.2));
+}
+
 vec3 calcMaterialColor()
 {
 	vec3 LIGHT_DIR = normalize(in_position - u_cameraPosition);
 
-	vec3 ambient_col = m_ambient.rgb * texture(tex_ambient, in_texcoord).rgb;
-	vec3 diffuse_col = m_diffuse.rgb * texture(tex_diffuse, in_texcoord).rgb;
-	vec3 specular_col = m_specular.rgb * texture(tex_specular, in_texcoord).rgb;
+	vec3 ambient_col  = fromGamma( m_ambient.rgb  * texture(tex_ambient, in_texcoord).rgb);
+	vec3 diffuse_col  = fromGamma( m_diffuse.rgb  * texture(tex_diffuse, in_texcoord).rgb);
+	vec3 specular_col = fromGamma( m_specular.rgb * texture(tex_specular, in_texcoord).rgb);
 	
 	vec3 normal = normalize(in_normal);
 	
@@ -43,7 +55,7 @@ vec3 calcMaterialColor()
 		max(vec3(0.0), specular_col * pow(max(0.0, -HdotN), m_specular.a)) +
 		diffuse_col * 0.01;
 		
-	return color;
+	return toGamma(color);
 }
 
 #endif
