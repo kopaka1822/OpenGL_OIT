@@ -23,7 +23,7 @@ static void refreshKeywords()
 	words.reserve(s_functions.size() + s_properties.size() + s_keywords.size());
 
 	for (const auto& f : s_functions)
-		words.push_back(f.first);
+		words.push_back(f.first + "(");
 
 	for (const auto& p : s_properties)
 		words.push_back(p.first);
