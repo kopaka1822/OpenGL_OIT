@@ -2,6 +2,10 @@ renderer = dynamic_fragment
 camera = projection
 //debugOutput = false
 profileType = latest
+lights = default
+
+addDirectionalLight(0.1, -1, 0.1)
+uploadLights()
 
 camPos = 8.64316, 0.967475, 11.4518
 camDir =   0.254568, 0.0399896, -0.96623

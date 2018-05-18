@@ -10,11 +10,10 @@ class SimpleLights : public ILights
 		// directional light (if w = 0.0)
 		glm::vec4 position;
 
-		glm::vec3 color;
-		float quadAttenuation;
+		glm::vec4 color;
 
-		float linearAttenuation;
-		glm::vec3 padding;
+		// x = linear, y = quadratic
+		glm::vec4 attenuation;
 	};
 public:
 	void addLight(ParamSet light) override
@@ -24,33 +23,41 @@ public:
 
 	void upload() override
 	{
-		std::vector<LightData> data;
-		data.resize(m_lights.size());
+		auto numLights = 8;
 
-		std::transform(m_lights.begin(), m_lights.end(), data.begin(), [](const ParamSet& l)
+		assert(m_lights.size() <= numLights);
+
+		auto data = std::make_unique<uint8_t[]>(16 + sizeof(LightData) * numLights);
+		
+		// set the number of lights
+		*reinterpret_cast<int*>(data.get()) = int(m_lights.size());
+
+		auto cur = data.get() + 16;
+
+		for(auto i = m_lights.begin(), end = m_lights.end(); i != end; ++i)
 		{
-			LightData d;
+			LightData* d = reinterpret_cast<LightData*>(cur);
 
-			if(l.get<glm::vec4>("position"))
+			if (i->get<glm::vec4>("position"))
 			{
-				d.position = *l.get<glm::vec4>("position");
-				d.position.w = 1.0f;
+				d->position = *i->get<glm::vec4>("position");
+				d->position.w = 1.0f;
 			}
-			else if(l.get<glm::vec4>("direction"))
+			else if (i->get<glm::vec4>("direction"))
 			{
-				d.position = *l.get<glm::vec4>("direction");
-				d.position.w = 0.0f;
+				d->position = *i->get<glm::vec4>("direction");
+				d->position.w = 0.0f;
 			}
 			else throw std::runtime_error("direction or position is required for light");
 
-			d.color = l.get("color", glm::vec3(1.0));
-			d.linearAttenuation = l.get("linearAttenuation", 0.0f);
-			d.quadAttenuation = l.get("quadraticAttenuation", 0.0075f);
+			d->color = i->get("color", glm::vec4(1.0));
+			d->attenuation.x = i->get("linearAttenuation", 0.0f);
+			d->attenuation.y = i->get("quadraticAttenuation", 0.0075f);
 
-			return d;
-		});
+			cur += sizeof(LightData);
+		}
 
-		m_uniform = gl::StaticUniformBuffer(data);
+		m_uniform = gl::StaticUniformBuffer(GLsizei(16 + sizeof(LightData) * numLights), 1, data.get());
 	}
 
 	void bind() const override

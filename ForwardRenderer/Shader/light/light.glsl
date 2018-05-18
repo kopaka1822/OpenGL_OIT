@@ -9,6 +9,8 @@ layout(binding = 2) uniform sampler2D tex_diffuse;
 layout(binding = 0) uniform sampler2D tex_ambient;
 layout(binding = 3) uniform sampler2D tex_specular;
 
+#include "../uniforms/lights.glsl"
+
 #endif
 
 float calcMaterialAlpha()
@@ -43,19 +45,60 @@ vec3 calcMaterialColor()
 	
 	vec3 normal = normalize(in_normal);
 	
-	// angle for diffuse
-	float cosTheta = dot(-LIGHT_DIR, normal);
-	// angle for specular color
-	vec3 viewDir = normalize(in_position - u_cameraPosition);
-	float HdotN = dot(normalize(viewDir + LIGHT_DIR), normal);
+	const vec3 viewDir = normalize(in_position - u_cameraPosition);
 	
-	vec3 color = 
-		max(vec3(0.0), ambient_col) + // ambient color
-		max(vec3(0.0), diffuse_col * cosTheta) + // diffuse color
-		max(vec3(0.0), specular_col * pow(max(0.0, -HdotN), m_specular.a)) +
-		diffuse_col * 0.01;
+	vec3 color = vec3(0.0);
+	
+	int numLights = min(NUM_LIGHTS.x, 8);
+	if(numLights > 0)
+	{
+		for(int i = 0; i < numLights; ++i)
+		{
+			vec3 direction;
+			vec3 lightColor = lights[i].color.rgb;
+			// calculate lightning
+			if(lights[i].position.w == 1.0f)
+			{
+				// calculate attenuation
+				float dist = distance(in_position, lights[i].position.xyz);
+				
+				// point light
+				direction = (in_position - lights[i].position.xyz) / dist;
+				
+				lightColor *= 1.0 / (1.0 + lights[i].attenuation.x * dist + lights[i].attenuation.y * dist * dist);
+			}
+			else
+			{
+				// directional light
+				direction = normalize(lights[i].position.xyz);
+			}
+			
+			// diffuse angle
+			float cosTheta = dot(-direction, normal);
+			
+			// angle for specular color
+			float hDotN = dot(normalize(-viewDir - direction), normal);
+			
+			color += 
+				max(vec3(0.0), diffuse_col * lightColor * cosTheta) +
+				max(vec3(0.0), specular_col * lightColor * pow(max(0.0, hDotN), m_specular.a));
+		}
+	}
+	else
+	{
+		float cosTheta = dot(-LIGHT_DIR, normal);
+		// angle for specular color
+		vec3 viewDir = normalize(in_position - u_cameraPosition);
+		float HdotN = dot(normalize(-viewDir - LIGHT_DIR), normal);
 		
-	return toGamma(color);
+		color = 
+			max(vec3(0.0), ambient_col) + // ambient color
+			max(vec3(0.0), diffuse_col * cosTheta) + // diffuse color
+			max(vec3(0.0), specular_col * pow(max(0.0, HdotN), m_specular.a)) +
+			diffuse_col * 0.01;
+	}
+	
+	return toGamma(color) * float(NUM_LIGHTS);
 }
 
 #endif
