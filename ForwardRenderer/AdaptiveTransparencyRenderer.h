@@ -16,7 +16,7 @@ public:
 	virtual ~AdaptiveTransparencyRenderer();
 
 	void init() override;
-	void render(const IModel* model, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera, ILights* lights) override;
 	void onSizeChange(int width, int height) override;
 private:
 	std::unique_ptr<IShader> m_defaultShader;

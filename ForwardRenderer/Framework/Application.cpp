@@ -200,12 +200,20 @@ Application::Application()
 		return "";
 	});
 
-	ScriptEngine::addFunction("uploadLights", [this](const std::vector<Token>& args)
+	ScriptEngine::addFunction("showLights", [this](const std::vector<Token>& args)
 	{
 		if (!m_lights)
 			throw std::runtime_error("no light model active");
 
-		m_lights->upload();
+		return m_lights->displayLights();
+	});
+
+	ScriptEngine::addFunction("removeLight", [this](const std::vector<Token>& args)
+	{
+		if (!m_lights)
+			throw std::runtime_error("no light model active");
+
+		m_lights->removeLight(args.at(0).getInt());
 		return "";
 	});
 
@@ -234,10 +242,10 @@ void Application::tick()
 		r->tick(dt);
 
 	if (m_lights)
-		m_lights->bind();
+		m_lights->upload();
 
 	if (m_renderer)
-		m_renderer->render(m_model.get(), m_camera.get());
+		m_renderer->render(m_model.get(), m_camera.get(), m_lights.get());
 	
 	if(!m_screenshotDestination.empty())
 	{

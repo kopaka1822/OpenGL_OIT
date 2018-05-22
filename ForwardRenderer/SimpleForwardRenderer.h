@@ -9,7 +9,7 @@ public:
 	SimpleForwardRenderer();
 	~SimpleForwardRenderer();
 
-	void render(const IModel* model, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera, ILights* lights) override;
 
 private:
 	std::unique_ptr<IShader> m_defaultShader;

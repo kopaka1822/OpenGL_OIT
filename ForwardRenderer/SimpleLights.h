@@ -19,11 +19,34 @@ public:
 	void addLight(ParamSet light) override
 	{
 		m_lights.push_back(std::move(light));
+		m_hasChanges = true;
+	}
+
+
+	void removeLight(int index) override
+	{
+		if (index < 0 || index >= m_lights.size())
+			throw std::out_of_range("light index");
+
+		m_lights.erase(m_lights.begin() + index);
+		m_hasChanges = true;
+	}
+
+	std::string displayLights() override
+	{
+		int index = 0;
+		return std::accumulate(m_lights.begin(), m_lights.end(), std::string("Lights:"), [&index](std::string left, const ParamSet& light)
+		{
+			return left + "\nLight " + std::to_string(index++) + "\n" + light.toString();
+		});
 	}
 
 	void upload() override
 	{
-		auto numLights = 8;
+		if (!m_hasChanges) return;
+		m_hasChanges = false;
+
+		auto numLights = m_lights.size();
 
 		assert(m_lights.size() <= numLights);
 
@@ -70,4 +93,5 @@ public:
 private:
 	std::vector<ParamSet> m_lights;
 	gl::StaticUniformBuffer m_uniform;
+	bool m_hasChanges = true;
 };

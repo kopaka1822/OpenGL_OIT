@@ -78,13 +78,14 @@ void MultiLayerAlphaRenderer::init()
 	});
 }
 
-void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera)
+void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera, ILights* lights)
 {
-	if (!model || !camera)
+	if (!model || !camera || !lights)
 		return;
 
 	m_opaqueShader->applyCamera(*camera);
 	m_transparentShader->applyCamera(*camera);
+	lights->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);

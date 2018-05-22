@@ -125,4 +125,18 @@ public:
 		auto val = getTexture(name);
 		return val ? val : defaultValue;
 	}
+
+	std::string toString() const
+	{
+		std::string res;
+		for(const auto& val : m_params)
+		{
+			res += val.first + ": " + std::to_string(val.second.x) + ", " + std::to_string(val.second.y) + ", " + std::to_string(val.second.z) + ", " + std::to_string(val.second.w) + "\n";
+		}
+		for(const auto& tex : m_cachedTex)
+		{
+			res += tex.first + ": texture\n";
+		}
+		return res;
+	}
 };

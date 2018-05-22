@@ -20,11 +20,12 @@ SimpleForwardRenderer::~SimpleForwardRenderer()
 {
 }
 
-void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera)
+void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, ILights* lights)
 {
-	if (!model || !camera)
+	if (!model || !camera || !lights)
 		return;
 
+	lights->bind();
 	auto hasAlpha = false;
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);

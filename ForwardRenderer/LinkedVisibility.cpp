@@ -33,15 +33,15 @@ LinkedVisibility::LinkedVisibility()
 	LinkedVisibility::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void LinkedVisibility::render(const IModel* model, const ICamera* camera)
+void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILights* lights)
 {
-	if (!model || !camera)
+	if (!model || !camera || !lights)
 		return;
 	
 	m_defaultShader->applyCamera(*camera);
 	m_shaderBuildVisz->applyCamera(*camera);
 	m_shaderApplyVisz->applyCamera(*camera);
-
+	lights->bind();
 	
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);

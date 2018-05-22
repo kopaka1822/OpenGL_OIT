@@ -60,16 +60,16 @@ void DynamicFragmentBufferRenderer::init()
 	});
 }
 
-void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* camera)
+void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* camera, ILights* lights)
 {
 	// uniform updates etc.
-	if (!model || !camera)
+	if (!model || !camera || !lights)
 		return;
 
 	m_defaultShader->applyCamera(*camera);
 	m_shaderCountFragments->applyCamera(*camera);
 	m_shaderStoreFragments->applyCamera(*camera);
-	
+	lights->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
@@ -134,6 +134,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* ca
 	{
 		// store fragments
 		std::lock_guard<GpuTimer> g(m_timer[T_STORE_FRAGMENTS]);
+		lights->bind();
 
 		// counter (will be counted down to 0's)
 		m_countingBuffer.bind(5);

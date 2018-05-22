@@ -11,7 +11,7 @@ class WeightedTransparency : public IRenderer, public IWindowReceiver
 {
 public:
 	WeightedTransparency();
-	void render(const IModel* model, const ICamera* camera) override;
+	void render(const IModel* model, const ICamera* camera, ILights* lights) override;
 
 	void onSizeChange(int width, int height) override;
 private:

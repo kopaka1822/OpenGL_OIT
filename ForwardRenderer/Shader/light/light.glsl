@@ -98,7 +98,7 @@ vec3 calcMaterialColor()
 			diffuse_col * 0.01;
 	}
 	
-	return toGamma(color) * float(NUM_LIGHTS);
+	return toGamma(color);
 }
 
 #endif
