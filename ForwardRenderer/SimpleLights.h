@@ -48,7 +48,7 @@ public:
 
 		auto numLights = m_lights.size();
 
-		assert(m_lights.size() <= numLights);
+		assert(m_lights.size() <= 64);
 
 		auto data = std::make_unique<uint8_t[]>(16 + sizeof(LightData) * numLights);
 		

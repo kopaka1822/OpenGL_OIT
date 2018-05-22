@@ -15,5 +15,5 @@ layout(binding = 2, std140) uniform ubo_lights
 {
 	ivec4 NUM_LIGHTS;
 	
-	LightData lights[8];
+	LightData lights[64];
 };
