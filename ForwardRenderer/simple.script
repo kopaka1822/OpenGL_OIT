@@ -6,10 +6,10 @@ lights = default
 
 addDirectionalLight(0.1, -1, 0.1)
 
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
-//loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//camSpeed = 0.001
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
+loadObj("Scene/miguel/san-miguel-low-poly.obj")
+camSpeed = 0.001
 
 //loadObj("Scene/powerplant/powerplant.obj")
 //camSpeed = 40
@@ -23,8 +23,8 @@ addDirectionalLight(0.1, -1, 0.1)
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
 
-camSpeed = 0.01
-loadObj("Scene/test.obj")
+//camSpeed = 0.01
+//loadObj("Scene/test.obj")
 
 //camPos = 1708.72, 1501.76, -831.255
 //camDir = -0.83374, -0.352274, 0.425183
