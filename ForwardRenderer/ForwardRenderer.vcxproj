@@ -197,6 +197,8 @@
     <ClInclude Include="Graphics\ITransforms.h" />
     <ClInclude Include="Graphics\SamplerCache.h" />
     <ClInclude Include="Graphics\CachedTexture2D.h" />
+    <ClInclude Include="Implementations\EnvironmentMap.h" />
+    <ClInclude Include="Implementations\EnvmapCamera.h" />
     <ClInclude Include="Implementations\FullscreenQuadShader.h" />
     <ClInclude Include="Implementations\ObjModel.h" />
     <ClInclude Include="Implementations\ObjShape.h" />

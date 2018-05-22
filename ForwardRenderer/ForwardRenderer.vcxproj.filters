@@ -203,6 +203,12 @@
     <ClInclude Include="Renderer\WeightedTransparency.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Implementations\EnvironmentMap.h">
+      <Filter>Source Files\Implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="Implementations\EnvmapCamera.h">
+      <Filter>Source Files\Implementations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">

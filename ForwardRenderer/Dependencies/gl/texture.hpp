@@ -8,6 +8,13 @@
 
 namespace gl
 {
+	inline GLuint computeMaxMipMapLevels(GLuint maxDim)
+	{
+		GLuint maxMip = 1;
+		while ((maxDim /= 2) > 0) ++maxMip;
+		return maxMip;
+	}
+
 	template<GLenum TType, GLsizei TComponents>
 	class Texture
 	{
@@ -239,13 +246,12 @@ namespace gl
 		}
 		GLuint computeMaxMipMapLevels()
 		{
-			GLuint maxMip = 1;
+			
 			GLuint maxResolution = std::accumulate(m_size.begin(), m_size.end(), GLuint(0), [](GLuint a, GLuint b)
 			{
 				return std::max(a, b);
 			});
-			while ((maxResolution /= 2) > 0) ++maxMip;
-			return maxMip;
+			return gl::computeMaxMipMapLevels(maxResolution);
 		}
 	private:
 		unique<GLuint> m_id;

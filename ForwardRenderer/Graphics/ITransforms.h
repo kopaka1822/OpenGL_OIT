@@ -10,4 +10,5 @@ public:
 
 	virtual void update(const ICamera& camera) = 0;
 	virtual void setModelTransform(const glm::mat4& model) = 0;
+	virtual const glm::mat4& getModelTransform() = 0;
 };

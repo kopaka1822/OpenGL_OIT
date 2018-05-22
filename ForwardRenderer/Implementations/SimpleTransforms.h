@@ -46,6 +46,11 @@ public:
 		m_data.model = model;
 	}
 
+
+	const glm::mat4& getModelTransform() override
+	{
+		return m_data.model;
+	}
 private:
 	UniformData m_data;
 	gl::DynamicUniformBuffer m_uniform;
