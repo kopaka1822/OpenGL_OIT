@@ -21,21 +21,20 @@ SimpleForwardRenderer::~SimpleForwardRenderer()
 {
 }
 
-void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, ILights* lights)
+void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
 {
 	if (!model || !camera || !lights)
 		return;
 
 	lights->bind();
+	transforms->bind();
+
 	auto hasAlpha = false;
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-		m_defaultShader->applyCamera(*camera);
 
 		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())

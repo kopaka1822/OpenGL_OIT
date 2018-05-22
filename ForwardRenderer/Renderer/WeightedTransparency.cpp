@@ -24,12 +24,14 @@ WeightedTransparency::WeightedTransparency()
 	WeightedTransparency::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void WeightedTransparency::render(const IModel * model, const ICamera * camera, ILights* lights)
+void WeightedTransparency::render(const IModel * model, const ICamera * camera, ILights* lights, ITransforms* transforms)
 {
 	if (!model || !camera || !lights)
 		return;
 
 	lights->bind();
+	transforms->bind();
+
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 
@@ -38,7 +40,6 @@ void WeightedTransparency::render(const IModel * model, const ICamera * camera, 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m_defaultShader->applyCamera(*camera);
 		model->prepareDrawing(*m_defaultShader);
 		for (const auto& s : model->getShapes())
 		{
@@ -57,7 +58,6 @@ void WeightedTransparency::render(const IModel * model, const ICamera * camera, 
 		glEnable(GL_BLEND);
 		glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
 
-		m_transShader->applyCamera(*camera);
 		model->prepareDrawing(*m_transShader);
 		for (const auto& s : model->getShapes())
 		{

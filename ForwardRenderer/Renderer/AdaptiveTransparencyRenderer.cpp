@@ -196,14 +196,12 @@ void AdaptiveTransparencyRenderer::init()
 	ScriptEngine::addKeyword("unsorted_heights");
 }
 
-void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera, ILights* lights)
+void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
 {
-	if (!model || !camera || !lights)
+	if (!model || !camera || !lights || !transforms)
 		return;
-
-	m_defaultShader->applyCamera(*camera);
-	m_shaderBuildVisz->applyCamera(*camera);
-	m_shaderApplyVisz->applyCamera(*camera);
+	
+	transforms->bind();
 	lights->bind();
 	
 	{

@@ -22,6 +22,7 @@
 #include "../Implementations/ObjModel.h"
 #include "../Implementations/ProjectionCamera.h"
 #include "../Implementations/SimpleLights.h"
+#include "../Implementations/SimpleTransforms.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -225,6 +226,8 @@ Application::Application()
 	ScriptEngine::addKeyword("projection");
 
 	ICamera::initScripts();
+
+	m_transforms = std::make_unique<SimpleTransforms>();
 }
 
 void Application::tick()
@@ -243,8 +246,14 @@ void Application::tick()
 	if (m_lights)
 		m_lights->upload();
 
+	if (m_transforms && m_camera)
+		m_transforms->update(*m_camera);
+
+	if (m_transforms)
+		m_transforms->upload();
+
 	if (m_renderer)
-		m_renderer->render(m_model.get(), m_camera.get(), m_lights.get());
+		m_renderer->render(m_model.get(), m_camera.get(), m_lights.get(), m_transforms.get());
 	
 	if(!m_screenshotDestination.empty())
 	{

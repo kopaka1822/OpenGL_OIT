@@ -78,13 +78,12 @@ void MultiLayerAlphaRenderer::init()
 	});
 }
 
-void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera, ILights* lights)
+void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
 {
 	if (!model || !camera || !lights)
 		return;
 
-	m_opaqueShader->applyCamera(*camera);
-	m_transparentShader->applyCamera(*camera);
+	transforms->bind();
 	lights->bind();
 
 	{

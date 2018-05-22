@@ -30,5 +30,6 @@ private:
 	std::unique_ptr<IModel> m_model;
 	std::unique_ptr<ICamera> m_camera;
 	std::unique_ptr<ILights> m_lights;
+	std::unique_ptr<ITransforms> m_transforms;
 	std::string m_screenshotDestination;
 };

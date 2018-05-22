@@ -33,14 +33,12 @@ LinkedVisibility::LinkedVisibility()
 	LinkedVisibility::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILights* lights)
+void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
 {
 	if (!model || !camera || !lights)
 		return;
 	
-	m_defaultShader->applyCamera(*camera);
-	m_shaderBuildVisz->applyCamera(*camera);
-	m_shaderApplyVisz->applyCamera(*camera);
+	transforms->bind();
 	lights->bind();
 	
 	{

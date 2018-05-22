@@ -60,15 +60,13 @@ void DynamicFragmentBufferRenderer::init()
 	});
 }
 
-void DynamicFragmentBufferRenderer::render(const IModel* model,const ICamera* camera, ILights* lights)
+void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
 {
 	// uniform updates etc.
 	if (!model || !camera || !lights)
 		return;
 
-	m_defaultShader->applyCamera(*camera);
-	m_shaderCountFragments->applyCamera(*camera);
-	m_shaderStoreFragments->applyCamera(*camera);
+	transforms->bind();
 	lights->bind();
 
 	{
