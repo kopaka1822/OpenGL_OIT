@@ -1,8 +1,8 @@
 #pragma once
-#include "Graphics/IShape.h"
+#include "../Graphics/IShape.h"
 #include <vector>
 #include "ObjModel.h"
-#include "Graphics/IShader.h"
+#include "../Graphics/IShader.h"
 
 class ObjShape : public IShape
 {

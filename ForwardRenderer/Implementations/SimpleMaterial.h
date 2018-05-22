@@ -1,8 +1,8 @@
 #pragma once
-#include "Graphics/IMaterials.h"
-#include "Dependencies/gl/buffer.hpp"
-#include "Graphics/SamplerCache.h"
-#include "Dependencies/gl/constants.h"
+#include "../Graphics/IMaterials.h"
+#include "../Dependencies/gl/buffer.hpp"
+#include "../Graphics/SamplerCache.h"
+#include "../Dependencies/gl/constants.h"
 
 class SimpleMaterial : public IMaterials
 {

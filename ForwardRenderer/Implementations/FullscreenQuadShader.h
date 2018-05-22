@@ -1,7 +1,7 @@
 #pragma once
-#include "Graphics/IShader.h"
-#include "Dependencies/gl/vertexarrayobject.hpp"
-#include "Graphics/HotReloadShader.h"
+#include "../Graphics/IShader.h"
+#include "../Dependencies/gl/vertexarrayobject.hpp"
+#include "../Graphics/HotReloadShader.h"
 
 /**
  * \brief helper class to draw a fullscreen quad

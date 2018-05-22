@@ -1,9 +1,9 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Framework/IWindowReceiver.h"
-#include "FullscreenQuadShader.h"
-#include "Graphics/GpuTimer.h"
-#include "Dependencies/gl/buffer.hpp"
+#include "../Graphics/IRenderer.h"
+#include "../Framework/IWindowReceiver.h"
+#include "../Implementations/FullscreenQuadShader.h"
+#include "../Graphics/GpuTimer.h"
+#include "../Dependencies/gl/buffer.hpp"
 
 #define MULTI_LAYER_SSBO
 

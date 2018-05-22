@@ -1,10 +1,10 @@
 #include "ObjModel.h"
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "Dependencies/tiny_obj_loader.h"
+#include "../Dependencies/tiny_obj_loader.h"
 #include <iostream>
 #include <chrono>
 #include "ObjShape.h"
-#include "Graphics/SamplerCache.h"
+#include "../Graphics/SamplerCache.h"
 
 // attempts to retrieve the file directory
 static std::string GetDirectory(const std::string &filepath) {

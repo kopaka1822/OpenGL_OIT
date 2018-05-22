@@ -1,11 +1,11 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Framework/IWindowReceiver.h"
-#include "FullscreenQuadShader.h"
-#include "Graphics/GpuTimer.h"
+#include "../Graphics/IRenderer.h"
+#include "../Framework/IWindowReceiver.h"
+#include "../Implementations/FullscreenQuadShader.h"
+#include "../Graphics/GpuTimer.h"
 #include <array>
-#include "Dependencies/gl/buffer.hpp"
-#include "Dependencies/gl/texture.hpp"
+#include "../Dependencies/gl/buffer.hpp"
+#include "../Dependencies/gl/texture.hpp"
 
 class LinkedVisibility : public IRenderer, public IWindowReceiver
 {

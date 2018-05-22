@@ -1,5 +1,5 @@
 #pragma once
-#include "../Window.h"
+#include "Window.h"
 #include <memory>
 #include "../Graphics/IRenderer.h"
 #include "../Graphics/IModel.h"

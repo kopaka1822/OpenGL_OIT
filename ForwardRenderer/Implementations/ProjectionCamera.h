@@ -1,14 +1,14 @@
 #pragma once
-#include "Graphics/ICamera.h"
+#include "../Graphics/ICamera.h"
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Framework/IMouseReceiver.h"
+#include "../Framework/IMouseReceiver.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "Framework/IKeyReceiver.h"
-#include "Framework/ITickReveicer.h"
+#include "../Framework/IKeyReceiver.h"
+#include "../Framework/ITickReveicer.h"
 #include <algorithm>
-#include "Framework/IWindowReceiver.h"
+#include "../Framework/IWindowReceiver.h"
 
 class ProjectionCamera : public ICamera, IMouseReceiver, IKeyReceiver, ITickReceiver, IWindowReceiver
 {

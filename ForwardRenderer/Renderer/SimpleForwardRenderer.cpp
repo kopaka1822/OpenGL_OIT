@@ -1,9 +1,10 @@
 #include "SimpleForwardRenderer.h"
 #include <glad/glad.h>
 #include <iostream>
-#include "Framework/Profiler.h"
+#include "../Framework/Profiler.h"
 #include <mutex>
-#include "SimpleShader.h"
+#include "../Graphics/HotReloadShader.h"
+#include "../Implementations/SimpleShader.h"
 
 SimpleForwardRenderer::SimpleForwardRenderer()
 {

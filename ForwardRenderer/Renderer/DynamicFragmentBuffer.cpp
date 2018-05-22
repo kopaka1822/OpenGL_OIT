@@ -1,10 +1,10 @@
 #include "DynamicFragmentBuffer.h"
 #include <mutex>
-#include "SimpleShader.h"
 #include <iostream>
 #include <glad/glad.h>
-#include "ScriptEngine/ScriptEngine.h"
-#include "Framework/alignment.h"
+#include "../ScriptEngine/ScriptEngine.h"
+#include "../Framework/alignment.h"
+#include "../Implementations/SimpleShader.h"
 
 static const int WORKGROUP_SIZE = 1024;
 static const int ELEM_PER_THREAD_SCAN = 8;

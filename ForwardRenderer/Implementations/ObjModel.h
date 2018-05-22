@@ -1,10 +1,10 @@
 #pragma once
-#include "Graphics/IModel.h"
+#include "../Graphics/IModel.h"
 #include <memory>
-#include "Dependencies/gl/buffer.hpp"
-#include "Graphics/SamplerCache.h"
-#include "Dependencies/gl/vertexarrayobject.hpp"
-#include "Framework/ParamSet.h"
+#include "../Dependencies/gl/buffer.hpp"
+#include "../Graphics/SamplerCache.h"
+#include "../Dependencies/gl/vertexarrayobject.hpp"
+#include "../Framework/ParamSet.h"
 #include "SimpleMaterial.h"
 
 class SimpleMaterial;

@@ -1,9 +1,9 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Framework/IWindowReceiver.h"
-#include "Graphics/GpuTimer.h"
-#include "Dependencies/gl/buffer.hpp"
-#include "FullscreenQuadShader.h"
+#include "../Graphics/IRenderer.h"
+#include "../Framework/IWindowReceiver.h"
+#include "../Graphics/GpuTimer.h"
+#include "../Dependencies/gl/buffer.hpp"
+#include "../Implementations/FullscreenQuadShader.h"
 
 class DynamicFragmentBufferRenderer : public IRenderer, public IWindowReceiver
 {

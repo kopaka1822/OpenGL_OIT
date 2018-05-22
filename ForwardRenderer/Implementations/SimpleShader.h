@@ -1,10 +1,10 @@
 #pragma once
-#include "Graphics/IShader.h"
+#include "../Graphics/IShader.h"
 #include <memory>
-#include "Dependencies/gl/buffer.hpp"
-#include "Graphics/SamplerCache.h"
-#include "Window.h"
-#include "Graphics/HotReloadShader.h"
+#include "../Dependencies/gl/buffer.hpp"
+#include "../Graphics/SamplerCache.h"
+#include "../Framework/Window.h"
+#include "../Graphics/HotReloadShader.h"
 
 class SimpleShader : public IShader
 {

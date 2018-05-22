@@ -1,12 +1,12 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Graphics/IShader.h"
-#include "Framework/IWindowReceiver.h"
-#include "FullscreenQuadShader.h"
+#include "../Graphics/IRenderer.h"
+#include "../Graphics/IShader.h"
+#include "../Framework/IWindowReceiver.h"
+#include "../Implementations/FullscreenQuadShader.h"
 #include <array>
-#include "Graphics/GpuTimer.h"
-#include "Dependencies/gl/texture.hpp"
-#include "Dependencies/gl/buffer.hpp"
+#include "../Graphics/GpuTimer.h"
+#include "../Dependencies/gl/texture.hpp"
+#include "../Dependencies/gl/buffer.hpp"
 
 class AdaptiveTransparencyRenderer : public IRenderer, public IWindowReceiver
 {

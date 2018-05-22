@@ -1,6 +1,6 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Graphics/GpuTimer.h"
+#include "../Graphics/IRenderer.h"
+#include "../Graphics/GpuTimer.h"
 
 class SimpleForwardRenderer :
 	public IRenderer

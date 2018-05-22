@@ -1,18 +1,10 @@
 #include "Application.h"
 #include <regex>
-#include "DebugContext.h"
-#include "../SimpleForwardRenderer.h"
-#include "../ObjModel.h"
-#include "../SimpleShader.h"
-#include "../ProjectionCamera.h"
 #include "ITickReveicer.h"
 #include <algorithm>
 #include <chrono>
 #include "../ScriptEngine/Token.h"
 #include "../ScriptEngine/ScriptEngine.h"
-#include "../AdaptiveTransparencyRenderer.h"
-#include "../WeightedTransparency.h"
-#include "../LinkedVisibility.h"
 #include "Profiler.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -20,9 +12,16 @@
 
 #include "../Dependencies/stb_image.h"
 #include "../Dependencies/stbi_helper.h"
-#include "../DynamicFragmentBuffer.h"
-#include "../MultiLayerAlphaRenderer.h"
-#include "../SimpleLights.h"
+#include "../Renderer/AdaptiveTransparencyRenderer.h"
+#include "../Renderer/MultiLayerAlphaRenderer.h"
+#include "../Renderer/DynamicFragmentBuffer.h"
+#include "../Renderer/LinkedVisibility.h"
+#include "../Renderer/WeightedTransparency.h"
+#include "../Renderer/SimpleForwardRenderer.h"
+#include <iostream>
+#include "../Implementations/ObjModel.h"
+#include "../Implementations/ProjectionCamera.h"
+#include "../Implementations/SimpleLights.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 

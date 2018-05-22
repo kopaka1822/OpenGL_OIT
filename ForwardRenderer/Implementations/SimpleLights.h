@@ -1,6 +1,6 @@
 #pragma once
-#include "Graphics/ILights.h"
-#include "Dependencies/gl/buffer.hpp"
+#include "../Graphics/ILights.h"
+#include "../Dependencies/gl/buffer.hpp"
 
 class SimpleLights : public ILights
 {

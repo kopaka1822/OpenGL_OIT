@@ -1,10 +1,10 @@
 #include "MultiLayerAlphaRenderer.h"
-#include "SimpleShader.h"
 #include <mutex>
 #include <glad/glad.h>
-#include "ScriptEngine/ScriptEngine.h"
 #include <iostream>
-#include "Framework/alignment.h"
+#include "../Framework/alignment.h"
+#include "../ScriptEngine/ScriptEngine.h"
+#include "../Implementations/SimpleShader.h"
 
 // shader storage is faster
 static bool s_useTextureBuffer = false;

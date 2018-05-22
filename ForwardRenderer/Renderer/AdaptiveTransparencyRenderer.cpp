@@ -1,13 +1,13 @@
 #include "AdaptiveTransparencyRenderer.h"
-#include "SimpleShader.h"
-#include "Window.h"
+#include "../Implementations/SimpleShader.h"
+#include "../Framework/Window.h"
 #include <iostream>
 #include <glad/glad.h>
-#include "Framework/Profiler.h"
+#include "../Framework/Profiler.h"
 #include <numeric>
 #include <mutex>
-#include "ScriptEngine/Token.h"
-#include "ScriptEngine/ScriptEngine.h"
+#include "../ScriptEngine/Token.h"
+#include "../ScriptEngine/ScriptEngine.h"
 #include <set>
 
 // ssbo is faster

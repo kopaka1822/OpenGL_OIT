@@ -1,8 +1,8 @@
 #include "WeightedTransparency.h"
-#include "SimpleShader.h"
-#include "Framework/Profiler.h"
+#include "../Framework/Profiler.h"
 #include <numeric>
 #include <mutex>
+#include "../Implementations/SimpleShader.h"
 
 WeightedTransparency::WeightedTransparency()
 {

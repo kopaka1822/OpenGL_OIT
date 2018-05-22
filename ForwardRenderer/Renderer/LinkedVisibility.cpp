@@ -1,6 +1,6 @@
 #include "LinkedVisibility.h"
-#include "SimpleShader.h"
-#include "Framework/Profiler.h"
+#include "../Implementations/SimpleShader.h"
+#include "../Framework/Profiler.h"
 #include <numeric>
 #include <functional>
 #include <mutex>

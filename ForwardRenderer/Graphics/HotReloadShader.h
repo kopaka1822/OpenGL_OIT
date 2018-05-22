@@ -124,6 +124,7 @@ struct HotReloadShader
 					if (shader->getType() == type)
 						return shader->getConverter()(id);
 				}
+				return std::string("");
 			};
 		}
 	private:

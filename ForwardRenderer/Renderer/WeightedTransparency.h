@@ -1,11 +1,11 @@
 #pragma once
-#include "Graphics/IRenderer.h"
-#include "Framework/IWindowReceiver.h"
-#include "FullscreenQuadShader.h"
-#include "Graphics/GpuTimer.h"
-#include "Dependencies/gl/texture.hpp"
+#include "../Graphics/IRenderer.h"
+#include "../Framework/IWindowReceiver.h"
+#include "../Implementations/FullscreenQuadShader.h"
+#include "../Graphics/GpuTimer.h"
+#include "../Dependencies/gl/texture.hpp"
 #include <array>
-#include "Dependencies/gl/framebuffer.hpp"
+#include "../Dependencies/gl/framebuffer.hpp"
 
 class WeightedTransparency : public IRenderer, public IWindowReceiver
 {

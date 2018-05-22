@@ -159,7 +159,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AdaptiveTransparencyRenderer.h" />
     <ClInclude Include="Dependencies\gl\buffer.hpp" />
     <ClInclude Include="Dependencies\gl\constants.h" />
     <ClInclude Include="Dependencies\gl\format.h" />
@@ -174,7 +173,6 @@
     <ClInclude Include="Dependencies\gl\vertexarrayobject.hpp" />
     <ClInclude Include="Dependencies\opengl.h" />
     <ClInclude Include="Dependencies\stbi_helper.h" />
-    <ClInclude Include="DynamicFragmentBuffer.h" />
     <ClInclude Include="Framework\alignment.h" />
     <ClInclude Include="Framework\Application.h" />
     <ClInclude Include="Framework\AsynchInput.h" />
@@ -185,7 +183,8 @@
     <ClInclude Include="Framework\IWindowReceiver.h" />
     <ClInclude Include="Framework\ParamSet.h" />
     <ClInclude Include="Framework\Profiler.h" />
-    <ClInclude Include="FullscreenQuadShader.h" />
+    <ClInclude Include="Framework\Window.h" />
+    <ClInclude Include="Graphics\Buffer.h" />
     <ClInclude Include="Graphics\GpuTimer.h" />
     <ClInclude Include="Graphics\HotReloadShader.h" />
     <ClInclude Include="Graphics\ICamera.h" />
@@ -195,41 +194,45 @@
     <ClInclude Include="Graphics\IRenderer.h" />
     <ClInclude Include="Graphics\IShader.h" />
     <ClInclude Include="Graphics\IShape.h" />
+    <ClInclude Include="Graphics\ITransforms.h" />
     <ClInclude Include="Graphics\SamplerCache.h" />
     <ClInclude Include="Graphics\CachedTexture2D.h" />
-    <ClInclude Include="LinkedVisibility.h" />
-    <ClInclude Include="MultiLayerAlphaRenderer.h" />
-    <ClInclude Include="ObjModel.h" />
-    <ClInclude Include="ObjShape.h" />
-    <ClInclude Include="ProjectionCamera.h" />
+    <ClInclude Include="Implementations\FullscreenQuadShader.h" />
+    <ClInclude Include="Implementations\ObjModel.h" />
+    <ClInclude Include="Implementations\ObjShape.h" />
+    <ClInclude Include="Implementations\ProjectionCamera.h" />
+    <ClInclude Include="Implementations\SimpleLights.h" />
+    <ClInclude Include="Implementations\SimpleMaterial.h" />
+    <ClInclude Include="Implementations\SimpleShader.h" />
+    <ClInclude Include="Implementations\SimpleTransforms.h" />
+    <ClInclude Include="Renderer\AdaptiveTransparencyRenderer.h" />
+    <ClInclude Include="Renderer\DynamicFragmentBuffer.h" />
+    <ClInclude Include="Renderer\LinkedVisibility.h" />
+    <ClInclude Include="Renderer\MultiLayerAlphaRenderer.h" />
+    <ClInclude Include="Renderer\SimpleForwardRenderer.h" />
+    <ClInclude Include="Renderer\WeightedTransparency.h" />
     <ClInclude Include="ScriptEngine\ScriptEngine.h" />
     <ClInclude Include="ScriptEngine\Token.h" />
-    <ClInclude Include="SimpleForwardRenderer.h" />
-    <ClInclude Include="SimpleLights.h" />
-    <ClInclude Include="SimpleMaterial.h" />
-    <ClInclude Include="SimpleShader.h" />
-    <ClInclude Include="WeightedTransparency.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AdaptiveTransparencyRenderer.cpp" />
     <ClCompile Include="Dependencies\glad\src\glad.c" />
-    <ClCompile Include="DynamicFragmentBuffer.cpp" />
     <ClCompile Include="ForwardRenderer.cpp" />
     <ClCompile Include="Framework\Application.cpp" />
     <ClCompile Include="Framework\AsynchInput.cpp" />
     <ClCompile Include="Framework\DebugContext.cpp" />
     <ClCompile Include="Framework\Profiler.cpp" />
+    <ClCompile Include="Framework\Window.cpp" />
     <ClCompile Include="Graphics\HotReloadShader.cpp" />
     <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\CachedTexture2D.cpp" />
-    <ClCompile Include="LinkedVisibility.cpp" />
-    <ClCompile Include="MultiLayerAlphaRenderer.cpp" />
-    <ClCompile Include="ObjModel.cpp" />
+    <ClCompile Include="Implementations\ObjModel.cpp" />
+    <ClCompile Include="Renderer\AdaptiveTransparencyRenderer.cpp" />
+    <ClCompile Include="Renderer\DynamicFragmentBuffer.cpp" />
+    <ClCompile Include="Renderer\LinkedVisibility.cpp" />
+    <ClCompile Include="Renderer\MultiLayerAlphaRenderer.cpp" />
+    <ClCompile Include="Renderer\SimpleForwardRenderer.cpp" />
+    <ClCompile Include="Renderer\WeightedTransparency.cpp" />
     <ClCompile Include="ScriptEngine\ScriptEngine.cpp" />
-    <ClCompile Include="SimpleForwardRenderer.cpp" />
-    <ClCompile Include="WeightedTransparency.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DefaultShader.fs">

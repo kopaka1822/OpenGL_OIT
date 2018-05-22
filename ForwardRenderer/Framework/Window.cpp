@@ -1,14 +1,13 @@
 #include "Window.h"
 #include <glad/glad.h>
-#include "Framework/DebugContext.h"
+#include "DebugContext.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include "Framework/IKeyReceiver.h"
-#include "Framework/IMouseReceiver.h"
-#include "Framework/IWindowReceiver.h"
-#include "Dependencies/gl/constants.h"
+#include "IKeyReceiver.h"
+#include "IMouseReceiver.h"
+#include "IWindowReceiver.h"
 #include <cassert>
 
 static std::vector<IKeyReceiver*> s_keyReceiver;
