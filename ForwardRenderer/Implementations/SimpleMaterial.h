@@ -27,29 +27,6 @@ class SimpleMaterial : public IMaterials
 	};
 
 public:
-	class Instance : public IMaterials::Instance
-	{
-	public:
-
-		Instance(const SimpleMaterial* materials, int id)
-			: m_parent(materials),
-			  materialId(id)
-		{
-		}
-		void bind() const override
-		{
-			m_parent->bind(materialId);
-		}
-		const ParamSet& getMaterial() const override
-		{
-			return m_parent->getMaterial(materialId);
-		}
-	private:
-		const SimpleMaterial* m_parent;
-		int materialId;
-	};
-
-public:
 	SimpleMaterial()
 		:
 	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR)),
@@ -112,15 +89,9 @@ public:
 		m_uniform.bind(1, materialId, 1);
 	}
 
-	const ParamSet& getMaterial(int materialId) const
+	const ParamSet& getMaterial(int materialId) const override
 	{
 		return m_materials.at(materialId);
-	}
-
-
-	std::unique_ptr<IMaterials::Instance> getInstance(int materialId) const override
-	{
-		return std::make_unique<Instance>(this, materialId);
 	}
 private:
 	std::vector<ParamSet> m_materials;

@@ -7,12 +7,13 @@
 class ObjShape : public IShape
 {
 public:
-	ObjShape(gl::StaticArrayBuffer& buffer, std::unique_ptr<IMaterials::Instance> material)
+	ObjShape(gl::StaticArrayBuffer& buffer, ObjModel& model, int materialId)
 		:
-	m_material(move(material)),
+	m_model(model),
+	m_materialIndex(materialId),
 	m_elements(std::move(buffer))
 	{
-		const auto& mat = m_material->getMaterial();
+		const auto& mat = m_model.getMaterial().getMaterial(materialId);
 		// transparent
 		auto dissolve = mat.get<float>("dissolve");
 		if (dissolve && *dissolve < 1.0f)
@@ -28,7 +29,7 @@ public:
 	{
 		if (shader)
 		{
-			m_material->bind();
+			m_model.getMaterial().bind(m_materialIndex);
 			shader->bind();
 		}
 
@@ -41,7 +42,8 @@ public:
 		return m_isTransparent;
 	}
 private:
-	std::unique_ptr<IMaterials::Instance> m_material;
+	ObjModel& m_model;
+	const int m_materialIndex;
 	gl::StaticArrayBuffer m_elements;
 	bool m_isTransparent = false;
 };

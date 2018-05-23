@@ -39,9 +39,6 @@ ObjModel::ObjModel(const std::string& filename)
 	printf("# of materials = %d\n", (int)materials.size());
 	printf("# of shapes    = %d\n", (int)shapes.size());
 
-	// Append `default` material
-	materials.push_back(tinyobj::material_t());
-
 	// make attribute buffer
 	if (!attrib.vertices.size())
 		throw std::runtime_error("no vertices found");
@@ -65,6 +62,9 @@ ObjModel::ObjModel(const std::string& filename)
 	}
 	
 	std::cerr << "INF: creating material" << std::endl;
+	
+	// Append `default` material
+	materials.push_back(tinyobj::material_t());
 	// load material
 	m_materials.reserve(materials.size());
 	for(const auto& m : materials)
@@ -92,7 +92,6 @@ ObjModel::ObjModel(const std::string& filename)
 
 		m_materials.addMaterial(std::move(mat));
 	}
-
 	m_materials.upload();
 
 	std::cerr << "INF: creating shapes" << std::endl;
@@ -110,8 +109,7 @@ ObjModel::ObjModel(const std::string& filename)
 
 
 		m_shapes.push_back(std::make_unique<ObjShape>(
-			gl::StaticArrayBuffer(s.mesh.indices), 
-			m_materials.getInstance(materialId)));
+			gl::StaticArrayBuffer(s.mesh.indices), *this, materialId));
 	}
 }
 
@@ -140,6 +138,11 @@ void ObjModel::prepareDrawing(IShader& shader) const
 const std::vector<std::unique_ptr<IShape>>& ObjModel::getShapes() const
 {
 	return m_shapes;
+}
+
+const IMaterials& ObjModel::getMaterial() const
+{
+	return m_materials;
 }
 
 void ObjModel::tryAddingTexture(ParamSet& material, const std::string& attrName, const std::string& textureName)

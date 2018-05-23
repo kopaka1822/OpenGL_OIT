@@ -7,14 +7,6 @@
 class IMaterials
 {
 public:
-	class Instance
-	{
-	public:
-		virtual ~Instance() = default;
-		virtual void bind() const = 0;
-		virtual const ParamSet& getMaterial() const = 0;
-	};
-
 	virtual ~IMaterials() = default;
 	// reserve an amount of materials
 	virtual void reserve(size_t count) = 0;
@@ -25,5 +17,5 @@ public:
 	// bind the material block
 	virtual void bind(int materialId) const = 0;
 
-	virtual std::unique_ptr<Instance> getInstance(int materialId) const = 0;
+	virtual const ParamSet& getMaterial(int materialId) const = 0;
 };

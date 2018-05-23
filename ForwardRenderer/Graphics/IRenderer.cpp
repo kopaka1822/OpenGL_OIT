@@ -5,7 +5,7 @@ glm::vec4 IRenderer::s_clearColor = glm::vec4(0.4666f, 0.709f, 0.87f, 0.99f);
 
 void IRenderer::setClearColor()
 {
-	glClearColor(IRenderer::s_clearColor.r, IRenderer::s_clearColor.g, IRenderer::s_clearColor.b, IRenderer::s_clearColor.a);
+	glClearColor(s_clearColor.r, s_clearColor.g, s_clearColor.b, s_clearColor.a);
 }
 
 void IRenderer::initScripts()
