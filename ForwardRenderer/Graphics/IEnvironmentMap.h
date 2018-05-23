@@ -7,6 +7,6 @@ class IEnvironmentMap
 {
 public:
 	virtual ~IEnvironmentMap() = default;
-	virtual void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms) = 0;
+	virtual void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms, const glm::vec3& center) = 0;
 	virtual void bind() const = 0;
 };

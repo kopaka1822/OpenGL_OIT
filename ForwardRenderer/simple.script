@@ -11,6 +11,7 @@ camDir =   0.254568, 0.0399896, -0.96623
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
 loadObj("Scene/miguel/san-miguel.obj")
 camSpeed = 0.005
+refreshEnvironment(16.513611, 1.877083, 6.597618)
 
 //loadObj("Scene/powerplant/powerplant.obj")
 //camSpeed = 40

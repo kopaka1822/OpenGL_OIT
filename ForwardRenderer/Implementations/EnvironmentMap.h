@@ -7,6 +7,7 @@
 #include "../Graphics/ITransforms.h"
 #include "../Graphics/SamplerCache.h"
 #include "../Graphics/IEnvironmentMap.h"
+#include <glad/glad.h>
 
 
 class EnvironmentMap : public IEnvironmentMap
@@ -32,9 +33,9 @@ public:
 		gl::Framebuffer::unbind();
 	}
 
-	void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms) override
+	void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms, const glm::vec3& center) override
 	{
-		EnvmapCamera envcam = EnvmapCamera(cam.getPosition());
+		EnvmapCamera envcam = EnvmapCamera(center);
 
 		m_cubeMap.unbind(8);
 
@@ -45,7 +46,8 @@ public:
 			m_fbos[i].bind();
 			// clear buffer
 			glEnable(GL_DEPTH_TEST);
-			IRenderer::setClearColor();
+			//IRenderer::setClearColor();
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			envcam.rotateForFace(i);

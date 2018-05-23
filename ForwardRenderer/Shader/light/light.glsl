@@ -90,21 +90,15 @@ vec3 calcMaterialColor()
 			
 			// angle for specular color
 			float hDotN = dot(normalize(-viewDir - direction), normal);
+			//float phongExponent = pow(max(0.0, hDotN), 8.0);
+			float phongExponent = pow(max(0.0, hDotN), m_specular.a);
 			
-			if(m_illum == 2)
+			if(m_illum == 2 || m_illum == 3)
 			{
 				// phong specular
-				color += max(vec3(0.0), specular_col * lightColor * pow(max(0.0, hDotN), m_specular.a));
+				
+				color += max(vec3(0.0), specular_col * lightColor * phongExponent);
 			}
-			else if(m_illum == 3)
-			{
-#ifndef DISABLE_ENVIRONMENT
-				// calculate reflected for specular
-				vec3 reflected = reflect(viewDir, normal);
-				color += max(vec3(0.0), texture(tex_environment, reflected).rgb) * 3.0;
-#endif
-			}
-
 		}
 	}
 	else
@@ -122,9 +116,23 @@ vec3 calcMaterialColor()
 	}
 	
 #ifndef DISABLE_ENVIRONMENT
-	return toGamma(color);
+	if(m_illum == 3)
+	{
+		// calculate reflected for specular
+		vec3 reflected = reflect(viewDir, normal);
+		//color += vec3(phongExponent);
+		vec3 refColor = max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col;
+		float lum = clamp(dot(refColor, vec3(1, 1, 1)), 0.0, 1.0);
+		color += refColor * pow(lum, 2) * 20.0;
+		//color += max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col * 3.0;
+		//color += pow(max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col, vec3(2.0)) * 30.0;
+	}
+#endif
+	
+#ifndef DISABLE_ENVIRONMENT
+	return clamp(toGamma(color), vec3(0.0), vec3(1.0));
 #else
-	return color;
+	return clamp(color, vec3(0.0), vec3(1.0));
 #endif
 }
 

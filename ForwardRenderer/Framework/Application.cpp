@@ -104,6 +104,8 @@ Application::Application()
 	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs", 430, "#define DISABLE_ENVIRONMENT");
 	m_envmapShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
+
+	m_envmap = std::make_unique<EnvironmentMap>(512);
 }
 
 void Application::tick()
@@ -127,17 +129,6 @@ void Application::tick()
 
 	if (m_transforms)
 		m_transforms->upload();
-
-	if((!m_envmap || m_recalcEnvironment) && (m_model && m_envmapShader && m_camera && m_transforms))
-	{
-		// create envmap
-		std::cerr << "rendering environment map\n";
-		if(!m_envmap)
-			m_envmap = std::make_unique<EnvironmentMap>(512);
-
-		m_envmap->render(*m_model, *m_envmapShader, *m_camera, *m_transforms);
-		m_recalcEnvironment = false;
-	}
 
 	RenderArgs args;
 	args.model = m_model.get();
@@ -310,8 +301,31 @@ void Application::initScripts()
 
 	ScriptEngine::addFunction("refreshEnvironment", [this](const std::vector<Token>& args)
 	{
-		//m_envmap.reset();
-		m_recalcEnvironment = true;
+		if (!(m_model && m_envmapShader && m_camera && m_transforms && m_lights))
+			throw std::runtime_error("model, camera, lights and transforms must be loaded for envmaps");
+
+		glm::vec3 pos;
+		if(args.size() == 0)
+		{
+			pos = m_camera->getPosition();
+		}
+		else if(args.size() == 3)
+		{
+			pos.x = args.at(0).getFloat();
+			pos.y = args.at(1).getFloat();
+			pos.z = args.at(2).getFloat();
+		}
+		else throw std::runtime_error("either 0 or 3 arguments expected for environment map");
+		
+		m_lights->upload();
+		m_transforms->update(*m_camera);
+		m_transforms->upload();
+
+		m_lights->bind();
+
+		std::cerr << "rendering environment map\n";
+		m_envmap->render(*m_model, *m_envmapShader, *m_camera, *m_transforms, pos);
+
 		return "";
 	});
 
