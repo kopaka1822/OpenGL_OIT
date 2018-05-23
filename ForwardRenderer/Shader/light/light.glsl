@@ -8,7 +8,10 @@ layout(binding = 2) uniform sampler2D tex_diffuse;
 
 layout(binding = 0) uniform sampler2D tex_ambient;
 layout(binding = 3) uniform sampler2D tex_specular;
+
+#ifndef DISABLE_ENVIRONMENT
 layout(binding = 8) uniform samplerCube tex_environment;
+#endif
 
 #include "../uniforms/lights.glsl"
 
@@ -16,10 +19,10 @@ layout(binding = 8) uniform samplerCube tex_environment;
 
 float calcMaterialAlpha()
 {
+	//return 0.9;
 	float dissolve = m_dissolve * texture(tex_dissolve, in_texcoord).r;
 	// take the diffuse texture alpha since its sometimes meant to be the alpha
 	return dissolve * texture(tex_diffuse, in_texcoord).a;
-	
 }
 
 #ifndef LIGHT_ONLY_TRANSPARENT
@@ -81,15 +84,27 @@ vec3 calcMaterialColor()
 				//cosTheta *= cosTheta;
 			}
 			
-			// diffuse angle
-			
+			// diffuse
+			if(m_illum != 3)
+				color += max(vec3(0.0), diffuse_col * lightColor * cosTheta);
 			
 			// angle for specular color
 			float hDotN = dot(normalize(-viewDir - direction), normal);
 			
-			color += 
-				max(vec3(0.0), diffuse_col * lightColor * cosTheta) +
-				max(vec3(0.0), specular_col * lightColor * pow(max(0.0, hDotN), m_specular.a));
+			if(m_illum == 2)
+			{
+				// phong specular
+				color += max(vec3(0.0), specular_col * lightColor * pow(max(0.0, hDotN), m_specular.a));
+			}
+			else if(m_illum == 3)
+			{
+#ifndef DISABLE_ENVIRONMENT
+				// calculate reflected for specular
+				vec3 reflected = reflect(viewDir, normal);
+				color += max(vec3(0.0), texture(tex_environment, reflected).rgb) * 3.0;
+#endif
+			}
+
 		}
 	}
 	else
@@ -106,7 +121,11 @@ vec3 calcMaterialColor()
 			diffuse_col * 0.01;
 	}
 	
+#ifndef DISABLE_ENVIRONMENT
 	return toGamma(color);
+#else
+	return color;
+#endif
 }
 
 #endif

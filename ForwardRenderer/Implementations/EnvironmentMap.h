@@ -28,6 +28,7 @@ public:
 			m_fbos[i].validate();
 		}
 
+		m_cubeMap.unbind(8);
 		gl::Framebuffer::unbind();
 	}
 
@@ -35,16 +36,22 @@ public:
 	{
 		EnvmapCamera envcam = EnvmapCamera(cam.getPosition());
 
+		m_cubeMap.unbind(8);
+
 		// draw from all directions
 		model.prepareDrawing(shader);
 		for(auto i = 0; i < m_fbos.size(); ++i)
 		{
+			m_fbos[i].bind();
+			// clear buffer
+			glEnable(GL_DEPTH_TEST);
+			IRenderer::setClearColor();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			envcam.rotateForFace(i);
 			transforms.update(envcam);
 			transforms.upload();
 			transforms.bind();
-
-			m_fbos[i].bind();
 
 			for(auto& shape : model.getShapes())
 			{

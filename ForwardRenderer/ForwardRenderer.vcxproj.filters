@@ -271,6 +271,9 @@
     <ClCompile Include="Renderer\WeightedTransparency.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\IRenderer.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\DefaultShader.fs">

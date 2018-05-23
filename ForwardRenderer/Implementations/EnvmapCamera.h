@@ -63,7 +63,7 @@ private:
 		case 1:
 		case 4:
 		case 5:
-			return glm::vec3(0.0f, 1.0f, 0.0f);
+			return glm::vec3(0.0f, -1.0f, 0.0f);
 		case 2:
 			// up
 			return glm::vec3(0.0f, 0.0f, -1.0f);

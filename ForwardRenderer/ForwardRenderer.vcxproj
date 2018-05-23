@@ -229,6 +229,7 @@
     <ClCompile Include="Graphics\HotReloadShader.cpp" />
     <ClCompile Include="Graphics\ICamera.cpp" />
     <ClCompile Include="Graphics\CachedTexture2D.cpp" />
+    <ClCompile Include="Graphics\IRenderer.cpp" />
     <ClCompile Include="Implementations\ObjModel.cpp" />
     <ClCompile Include="Renderer\AdaptiveTransparencyRenderer.cpp" />
     <ClCompile Include="Renderer\DynamicFragmentBuffer.cpp" />

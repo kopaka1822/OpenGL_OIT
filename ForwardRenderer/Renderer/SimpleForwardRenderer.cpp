@@ -31,12 +31,13 @@ void SimpleForwardRenderer::render(const RenderArgs& args)
 
 	args.lights->bind();
 	args.transforms->bind();
+	args.environment->bind();
 
 	auto hasAlpha = false;
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		setClearColor();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		args.model->prepareDrawing(*m_defaultShader);

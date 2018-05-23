@@ -203,13 +203,14 @@ void AdaptiveTransparencyRenderer::render(const RenderArgs& args)
 	
 	args.transforms->bind();
 	args.lights->bind();
-	
+	args.environment->bind();
+
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 		// opaque render pass
 		glEnable(GL_DEPTH_TEST);
 		//glDisable(GL_POLYGON_SMOOTH);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		setClearColor();
 		GLbitfield clrFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 		if (s_useStencilMask)
 			clrFlags |= GL_STENCIL_BUFFER_BIT;

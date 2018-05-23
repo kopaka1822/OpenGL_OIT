@@ -75,6 +75,7 @@ ObjModel::ObjModel(const std::string& filename)
 		//mat->addAttribute("ambient", glm::vec4(m.ambient[0], m.ambient[1], m.ambient[2], 1.0f));
 		mat.add("specular", glm::vec4(m.specular[0], m.specular[1], m.specular[2], m.shininess));
 		mat.add("dissolve", m.dissolve);
+		mat.add("illum", float(m.illum));
 
 		// add available attributes
 		if (m.diffuse_texname.length())

@@ -40,7 +40,8 @@ void LinkedVisibility::render(const RenderArgs& args)
 	
 	args.transforms->bind();
 	args.lights->bind();
-	
+	args.environment->bind();
+
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
 		m_mutexTexture.clear(uint32_t(0), gl::SetDataFormat::R_INTEGER, gl::SetDataType::UINT32);
@@ -51,7 +52,7 @@ void LinkedVisibility::render(const RenderArgs& args)
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 
 		glEnable(GL_DEPTH_TEST);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		setClearColor();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		args.model->prepareDrawing(*m_defaultShader);

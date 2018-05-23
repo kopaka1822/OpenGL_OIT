@@ -31,13 +31,14 @@ void WeightedTransparency::render(const RenderArgs& args)
 
 	args.lights->bind();
 	args.transforms->bind();
+	args.environment->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 
 		m_opaqueFramebuffer.bind();
 		//glClearColor(0.7f, 0.9f, 1.0f, 0.0f);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		setClearColor();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		args.model->prepareDrawing(*m_defaultShader);

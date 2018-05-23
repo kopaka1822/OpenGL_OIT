@@ -101,7 +101,7 @@ Application::Application()
 	// load default shader
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
 	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
-	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs", 430, "#define DISABLE_ENVIRONMENT");
 	m_envmapShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 }
@@ -128,12 +128,15 @@ void Application::tick()
 	if (m_transforms)
 		m_transforms->upload();
 
-	if(!m_envmap && (m_model && m_envmapShader && m_camera && m_transforms))
+	if((!m_envmap || m_recalcEnvironment) && (m_model && m_envmapShader && m_camera && m_transforms))
 	{
 		// create envmap
 		std::cerr << "rendering environment map\n";
-		m_envmap = std::make_unique<EnvironmentMap>(512);
+		if(!m_envmap)
+			m_envmap = std::make_unique<EnvironmentMap>(512);
+
 		m_envmap->render(*m_model, *m_envmapShader, *m_camera, *m_transforms);
+		m_recalcEnvironment = false;
 	}
 
 	RenderArgs args;
@@ -305,6 +308,13 @@ void Application::initScripts()
 		return "";
 	});
 
+	ScriptEngine::addFunction("refreshEnvironment", [this](const std::vector<Token>& args)
+	{
+		//m_envmap.reset();
+		m_recalcEnvironment = true;
+		return "";
+	});
+
 	ScriptEngine::addKeyword("forward");
 	ScriptEngine::addKeyword("weighted_oit");
 	ScriptEngine::addKeyword("linked");
@@ -314,6 +324,7 @@ void Application::initScripts()
 	ScriptEngine::addKeyword("projection");
 
 	ICamera::initScripts();
+	IRenderer::initScripts();
 }
 
 void Application::makeScreenshot(const std::string& filename)

@@ -33,5 +33,6 @@ private:
 	std::unique_ptr<ITransforms> m_transforms;
 	std::unique_ptr<IShader> m_envmapShader;
 	std::unique_ptr<IEnvironmentMap> m_envmap;
+	bool m_recalcEnvironment = true;
 	std::string m_screenshotDestination;
 };

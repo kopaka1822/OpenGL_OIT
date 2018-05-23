@@ -68,13 +68,14 @@ void DynamicFragmentBufferRenderer::render(const RenderArgs& args)
 
 	args.transforms->bind();
 	args.lights->bind();
+	args.environment->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
 		// opaque render pass
 		glEnable(GL_DEPTH_TEST);
 		//glDisable(GL_POLYGON_SMOOTH);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		setClearColor();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		args.model->prepareDrawing(*m_defaultShader);

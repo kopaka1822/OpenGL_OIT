@@ -70,6 +70,12 @@ namespace gl
 			bind();
 		}
 
+		static void unbind(GLuint slot)
+		{
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(TType, 0);
+		}
+
 		void bindAsImage(GLuint slot, ImageAccess access, GLuint mipLevel = 0) const
 		{
 			glBindImageTexture(slot, m_id, mipLevel, GL_TRUE, 0, static_cast<GLenum>(access), static_cast<GLenum>(m_internalFormat.value));

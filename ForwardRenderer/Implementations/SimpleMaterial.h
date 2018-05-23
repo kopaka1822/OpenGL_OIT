@@ -12,7 +12,7 @@ class SimpleMaterial : public IMaterials
 		float dissolve;
 
 		glm::vec3 diffuse;
-		float padding1;
+		int illum;
 		
 		// specular + shininess
 		glm::vec4 specular;
@@ -85,6 +85,7 @@ public:
 			d->diffuse = i->get("diffuse", glm::vec4(0.5f));
 			d->specular = i->get("specular", glm::vec4(0.0f));
 			d->dissolve = i->get("dissolve", 1.0f);
+			d->illum = int(i->get("illum", 1.0f));
 
 			cur += paddedLength;
 		}
