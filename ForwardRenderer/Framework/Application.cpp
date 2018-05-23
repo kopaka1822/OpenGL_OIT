@@ -23,6 +23,7 @@
 #include "../Implementations/ProjectionCamera.h"
 #include "../Implementations/SimpleLights.h"
 #include "../Implementations/SimpleTransforms.h"
+#include "../Implementations/SimpleShader.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -93,15 +94,102 @@ Application::Application()
 	:
 	m_window(800, 800, "ForwardRenderer")
 {
+	initScripts();
 
+	m_transforms = std::make_unique<SimpleTransforms>();
+
+	// load default shader
+	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
+	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
+	auto fragment = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/DefaultShader.fs");
+	m_envmapShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
+}
+
+void Application::tick()
+{
+	static auto time_start = std::chrono::high_resolution_clock::now();
+
+	m_window.handleEvents();
+	
+	auto time_end = std::chrono::high_resolution_clock::now();
+	float dt = float(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start).count()) / 1000.0f;
+	time_start = time_end;
+
+	for (const auto& r : s_tickReceiver)
+		r->tick(dt);
+
+	if (m_lights)
+		m_lights->upload();
+
+	if (m_transforms && m_camera)
+		m_transforms->update(*m_camera);
+
+	if (m_transforms)
+		m_transforms->upload();
+
+	if(!m_envmap && (m_model && m_envmapShader && m_camera && m_transforms))
+	{
+		// create envmap
+		std::cerr << "rendering environment map\n";
+		m_envmap = std::make_unique<EnvironmentMap>(512);
+		m_envmap->render(*m_model, *m_envmapShader, *m_camera, *m_transforms);
+	}
+
+	RenderArgs args;
+	args.model = m_model.get();
+	args.camera = m_camera.get();
+	args.lights = m_lights.get();
+	args.transforms = m_transforms.get();
+	args.environment = m_envmap.get();
+		
+	if (m_renderer)
+		m_renderer->render(args);
+	
+	if(!m_screenshotDestination.empty())
+	{
+		makeScreenshot(m_screenshotDestination);
+		m_screenshotDestination.clear();
+	}
+
+	m_window.swapBuffer();
+
+	// adjust window title
+	auto profile = Profiler::getActive();
+	m_window.setTitle(s_rendererName + " " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile))
+		+ " iterations: " + std::to_string(ScriptEngine::getIteration())
+	);
+}
+
+bool Application::isRunning() const
+{
+	return m_window.isOpen();
+}
+
+void Application::registerTickReceiver(ITickReceiver* recv)
+{
+	s_tickReceiver.push_back(recv);
+}
+
+void Application::unregisterTickReceiver(ITickReceiver* recv)
+{
+	auto end = std::remove_if(s_tickReceiver.begin(), s_tickReceiver.end(), [recv](const ITickReceiver* i)
+	{
+		return (i == recv);
+	});
+	s_tickReceiver.erase(end, s_tickReceiver.end());
+}
+
+void Application::initScripts()
+{
 	ScriptEngine::addProperty("renderer", []()
 	{
 		return s_rendererName;
 	}, [this](std::vector<Token>& args)
 	{
 		this->m_renderer = makeRenderer(args);
-		
-		if(this->m_renderer)
+
+		if (this->m_renderer)
 			this->m_renderer->init();
 
 		s_rendererName = args[0].getString();
@@ -136,7 +224,7 @@ Application::Application()
 		return "";
 	});
 
-	ScriptEngine::addFunction("makeScreenshot",[this](const std::vector<Token>& args)
+	ScriptEngine::addFunction("makeScreenshot", [this](const std::vector<Token>& args)
 	{
 		if (args.empty())
 			throw std::runtime_error("filename missing");
@@ -226,67 +314,6 @@ Application::Application()
 	ScriptEngine::addKeyword("projection");
 
 	ICamera::initScripts();
-
-	m_transforms = std::make_unique<SimpleTransforms>();
-}
-
-void Application::tick()
-{
-	static auto time_start = std::chrono::high_resolution_clock::now();
-
-	m_window.handleEvents();
-	
-	auto time_end = std::chrono::high_resolution_clock::now();
-	float dt = float(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start).count()) / 1000.0f;
-	time_start = time_end;
-
-	for (const auto& r : s_tickReceiver)
-		r->tick(dt);
-
-	if (m_lights)
-		m_lights->upload();
-
-	if (m_transforms && m_camera)
-		m_transforms->update(*m_camera);
-
-	if (m_transforms)
-		m_transforms->upload();
-
-	if (m_renderer)
-		m_renderer->render(m_model.get(), m_camera.get(), m_lights.get(), m_transforms.get());
-	
-	if(!m_screenshotDestination.empty())
-	{
-		makeScreenshot(m_screenshotDestination);
-		m_screenshotDestination.clear();
-	}
-
-	m_window.swapBuffer();
-
-	// adjust window title
-	auto profile = Profiler::getActive();
-	m_window.setTitle(s_rendererName + " " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile))
-		+ " iterations: " + std::to_string(ScriptEngine::getIteration())
-	);
-}
-
-bool Application::isRunning() const
-{
-	return m_window.isOpen();
-}
-
-void Application::registerTickReceiver(ITickReceiver* recv)
-{
-	s_tickReceiver.push_back(recv);
-}
-
-void Application::unregisterTickReceiver(ITickReceiver* recv)
-{
-	auto end = std::remove_if(s_tickReceiver.begin(), s_tickReceiver.end(), [recv](const ITickReceiver* i)
-	{
-		return (i == recv);
-	});
-	s_tickReceiver.erase(end, s_tickReceiver.end());
 }
 
 void Application::makeScreenshot(const std::string& filename)

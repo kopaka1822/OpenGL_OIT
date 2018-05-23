@@ -209,6 +209,12 @@
     <ClInclude Include="Implementations\EnvmapCamera.h">
       <Filter>Source Files\Implementations</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\IEnvironmentMap.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderArgs.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">

@@ -5,8 +5,11 @@
 #include <mutex>
 #include "../Graphics/HotReloadShader.h"
 #include "../Implementations/SimpleShader.h"
+#include "../Dependencies/gl/constants.h"
 
 SimpleForwardRenderer::SimpleForwardRenderer()
+	:
+m_envmap(512)
 {
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
 	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
@@ -21,13 +24,13 @@ SimpleForwardRenderer::~SimpleForwardRenderer()
 {
 }
 
-void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
+void SimpleForwardRenderer::render(const RenderArgs& args)
 {
-	if (!model || !camera || !lights)
+	if (args.hasNull())
 		return;
 
-	lights->bind();
-	transforms->bind();
+	args.lights->bind();
+	args.transforms->bind();
 
 	auto hasAlpha = false;
 	{
@@ -36,12 +39,13 @@ void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, I
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		model->prepareDrawing(*m_defaultShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_defaultShader);
+		for (const auto& s : args.model->getShapes())
 			if (!s->isTransparent())
 				s->draw(m_defaultShader.get());
 			else hasAlpha = true;
 	}
+
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_TRANSPARENT]);
 		if (hasAlpha)
@@ -50,8 +54,8 @@ void SimpleForwardRenderer::render(const IModel* model, const ICamera* camera, I
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDepthMask(GL_FALSE);
-			model->prepareDrawing(*m_defaultShader);
-			for (const auto& s : model->getShapes())
+			args.model->prepareDrawing(*m_defaultShader);
+			for (const auto& s : args.model->getShapes())
 				if (s->isTransparent())
 					s->draw(m_defaultShader.get());
 

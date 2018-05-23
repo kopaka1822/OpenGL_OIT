@@ -8,6 +8,7 @@ layout(binding = 2) uniform sampler2D tex_diffuse;
 
 layout(binding = 0) uniform sampler2D tex_ambient;
 layout(binding = 3) uniform sampler2D tex_specular;
+layout(binding = 8) uniform samplerCube tex_environment;
 
 #include "../uniforms/lights.glsl"
 

@@ -1,6 +1,8 @@
 #pragma once
 #include "../Graphics/ICamera.h"
-#include <glm/gtc/matrix_transform.inl>
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class EnvmapCamera : public ICamera
 {

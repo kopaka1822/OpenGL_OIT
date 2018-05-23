@@ -5,12 +5,16 @@
 #include "../Graphics/IModel.h"
 #include "EnvmapCamera.h"
 #include "../Graphics/ITransforms.h"
+#include "../Graphics/SamplerCache.h"
+#include "../Graphics/IEnvironmentMap.h"
 
 
-class EnvironmentMap
+class EnvironmentMap : public IEnvironmentMap
 {
 public:
 	EnvironmentMap(int resolution)
+		:
+	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR))
 	{
 		m_cubeMap = gl::TextureCubeMap(gl::InternalFormat::RGBA8, gl::computeMaxMipMapLevels(resolution));
 		m_cubeMap.resize(resolution, resolution);
@@ -27,7 +31,7 @@ public:
 		gl::Framebuffer::unbind();
 	}
 
-	void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms)
+	void render(const IModel& model, IShader& shader, const ICamera& cam, ITransforms& transforms) override
 	{
 		EnvmapCamera envcam = EnvmapCamera(cam.getPosition());
 
@@ -49,17 +53,20 @@ public:
 		}
 
 		gl::Framebuffer::unbind();
+		m_cubeMap.generateMipmaps();
+
 		transforms.update(cam);
 		transforms.upload();
 	}
 
-	void bind(int slot) const
+	void bind() const override
 	{
-		m_cubeMap.bind(slot);
+		m_sampler.bind(8);
+		m_cubeMap.bind(8);
 	}
 
 private:
-
+	gl::Sampler& m_sampler;
 	gl::TextureCubeMap m_cubeMap;
 	gl::Renderbuffer m_depth;
 	std::array<gl::Framebuffer, 6> m_fbos;

@@ -1,6 +1,7 @@
 #pragma once
 #include "../Graphics/IRenderer.h"
 #include "../Graphics/GpuTimer.h"
+#include "../Implementations/EnvironmentMap.h"
 
 class SimpleForwardRenderer :
 	public IRenderer
@@ -9,7 +10,7 @@ public:
 	SimpleForwardRenderer();
 	~SimpleForwardRenderer();
 
-	void render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms) override;
+	void render(const RenderArgs& args) override;
 
 private:
 	std::unique_ptr<IShader> m_defaultShader;
@@ -21,5 +22,7 @@ private:
 		SIZE
 	};
 	std::array<GpuTimer, SIZE> m_timer;
+
+	EnvironmentMap m_envmap;
 };
 

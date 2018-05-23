@@ -60,7 +60,7 @@ namespace gl
 		void attachColor(GLuint index, const Texture<TType, TComponents>& target, GLuint mipLevel, GLuint layer)
 		{
 			bind();
-			glFramebufferTextureLayrt(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target.getId(), mipLevel, layer);
+			glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target.getId(), mipLevel, layer);
 
 			m_attachments.push_back(GL_COLOR_ATTACHMENT0 + index);
 		}

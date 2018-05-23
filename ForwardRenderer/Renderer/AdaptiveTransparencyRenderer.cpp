@@ -196,13 +196,13 @@ void AdaptiveTransparencyRenderer::init()
 	ScriptEngine::addKeyword("unsorted_heights");
 }
 
-void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
+void AdaptiveTransparencyRenderer::render(const RenderArgs& args)
 {
-	if (!model || !camera || !lights || !transforms)
+	if (args.hasNull())
 		return;
 	
-	transforms->bind();
-	lights->bind();
+	args.transforms->bind();
+	args.lights->bind();
 	
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
@@ -215,8 +215,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			clrFlags |= GL_STENCIL_BUFFER_BIT;
 		glClear( clrFlags );
 
-		model->prepareDrawing(*m_defaultShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_defaultShader);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (!s->isTransparent())
 				s->draw(m_defaultShader.get());
@@ -291,8 +291,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		}	
 
-		model->prepareDrawing(*m_shaderBuildVisz);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_shaderBuildVisz);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{
@@ -357,8 +357,8 @@ void AdaptiveTransparencyRenderer::render(const IModel* model, const ICamera* ca
 		std::lock_guard<GpuTimer> g(m_timer[T_USE_VIS]);
 		// add all values
 		glBlendFunc(GL_ONE, GL_ONE);
-		model->prepareDrawing(*m_shaderApplyVisz);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_shaderApplyVisz);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{

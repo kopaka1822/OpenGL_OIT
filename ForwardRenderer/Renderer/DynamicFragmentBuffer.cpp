@@ -60,14 +60,14 @@ void DynamicFragmentBufferRenderer::init()
 	});
 }
 
-void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
+void DynamicFragmentBufferRenderer::render(const RenderArgs& args)
 {
 	// uniform updates etc.
-	if (!model || !camera || !lights)
+	if (args.hasNull())
 		return;
 
-	transforms->bind();
-	lights->bind();
+	args.transforms->bind();
+	args.lights->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
@@ -77,8 +77,8 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* c
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		model->prepareDrawing(*m_defaultShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_defaultShader);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (!s->isTransparent())
 				s->draw(m_defaultShader.get());
@@ -102,8 +102,8 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* c
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
-		model->prepareDrawing(*m_shaderCountFragments);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_shaderCountFragments);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{
@@ -132,7 +132,7 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* c
 	{
 		// store fragments
 		std::lock_guard<GpuTimer> g(m_timer[T_STORE_FRAGMENTS]);
-		lights->bind();
+		args.lights->bind();
 
 		// counter (will be counted down to 0's)
 		m_countingBuffer.bind(5);
@@ -142,8 +142,8 @@ void DynamicFragmentBufferRenderer::render(const IModel* model, const ICamera* c
 		m_fragmentStorage.bind(7);
 
 		// colors are still diabled
-		model->prepareDrawing(*m_shaderStoreFragments);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_shaderStoreFragments);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{

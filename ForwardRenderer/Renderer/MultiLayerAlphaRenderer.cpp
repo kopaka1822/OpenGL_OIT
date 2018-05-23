@@ -78,13 +78,13 @@ void MultiLayerAlphaRenderer::init()
 	});
 }
 
-void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
+void MultiLayerAlphaRenderer::render(const RenderArgs& args)
 {
-	if (!model || !camera || !lights)
+	if (args.hasNull())
 		return;
 
-	transforms->bind();
-	lights->bind();
+	args.transforms->bind();
+	args.lights->bind();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
@@ -94,8 +94,8 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera,
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		model->prepareDrawing(*m_opaqueShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_opaqueShader);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (!s->isTransparent())
 				s->draw(m_opaqueShader.get());
@@ -147,8 +147,8 @@ void MultiLayerAlphaRenderer::render(const IModel* model, const ICamera* camera,
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		model->prepareDrawing(*m_transparentShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_transparentShader);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{

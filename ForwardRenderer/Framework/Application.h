@@ -23,7 +23,7 @@ public:
 private:
 	static void makeScreenshot(const std::string& filename);
 	static void makeDiff(const std::string& src1, const std::string& src2, const std::string& dst, float factor);
-
+	void initScripts();
 private:
 	Window m_window;
 	std::unique_ptr<IRenderer> m_renderer;
@@ -31,5 +31,7 @@ private:
 	std::unique_ptr<ICamera> m_camera;
 	std::unique_ptr<ILights> m_lights;
 	std::unique_ptr<ITransforms> m_transforms;
+	std::unique_ptr<IShader> m_envmapShader;
+	std::unique_ptr<IEnvironmentMap> m_envmap;
 	std::string m_screenshotDestination;
 };

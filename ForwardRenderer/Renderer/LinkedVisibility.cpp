@@ -33,13 +33,13 @@ LinkedVisibility::LinkedVisibility()
 	LinkedVisibility::onSizeChange(Window::getWidth(), Window::getHeight());
 }
 
-void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILights* lights, ITransforms* transforms)
+void LinkedVisibility::render(const RenderArgs& args)
 {
-	if (!model || !camera || !lights)
+	if (args.hasNull())
 		return;
 	
-	transforms->bind();
-	lights->bind();
+	args.transforms->bind();
+	args.lights->bind();
 	
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_CLEAR]);
@@ -54,8 +54,8 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILight
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		model->prepareDrawing(*m_defaultShader);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_defaultShader);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (!s->isTransparent())
 				s->draw(m_defaultShader.get());
@@ -69,13 +69,13 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILight
 		// disable depth write
 		glDepthMask(GL_FALSE);
 
-		model->prepareDrawing(*m_shaderBuildVisz);
+		args.model->prepareDrawing(*m_shaderBuildVisz);
 
 		m_counter.bind(4);
 		m_mutexTexture.bindAsImage(0, gl::ImageAccess::READ_WRITE);
 		m_buffer.bind(3);
 
-		for (const auto& s : model->getShapes())
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{
@@ -100,8 +100,8 @@ void LinkedVisibility::render(const IModel* model, const ICamera* camera, ILight
 		// add all values
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
-		model->prepareDrawing(*m_shaderApplyVisz);
-		for (const auto& s : model->getShapes())
+		args.model->prepareDrawing(*m_shaderApplyVisz);
+		for (const auto& s : args.model->getShapes())
 		{
 			if (s->isTransparent())
 			{

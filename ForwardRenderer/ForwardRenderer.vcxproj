@@ -188,6 +188,7 @@
     <ClInclude Include="Graphics\GpuTimer.h" />
     <ClInclude Include="Graphics\HotReloadShader.h" />
     <ClInclude Include="Graphics\ICamera.h" />
+    <ClInclude Include="Graphics\IEnvironmentMap.h" />
     <ClInclude Include="Graphics\ILights.h" />
     <ClInclude Include="Graphics\IMaterials.h" />
     <ClInclude Include="Graphics\IModel.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Graphics\IShader.h" />
     <ClInclude Include="Graphics\IShape.h" />
     <ClInclude Include="Graphics\ITransforms.h" />
+    <ClInclude Include="Graphics\RenderArgs.h" />
     <ClInclude Include="Graphics\SamplerCache.h" />
     <ClInclude Include="Graphics\CachedTexture2D.h" />
     <ClInclude Include="Implementations\EnvironmentMap.h" />
