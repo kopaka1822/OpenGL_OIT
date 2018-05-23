@@ -329,6 +329,12 @@ void Application::initScripts()
 		return "";
 	});
 
+	ScriptEngine::addFunction("getMaterialName", [this](const std::vector<Token>& args)
+	{
+		if (!m_model) throw std::runtime_error("no model active");
+		return m_model->getMaterial().getMaterial(args.at(0).getInt()).get("name", std::string("<no name>"));
+	});
+
 	ScriptEngine::addKeyword("forward");
 	ScriptEngine::addKeyword("weighted_oit");
 	ScriptEngine::addKeyword("linked");

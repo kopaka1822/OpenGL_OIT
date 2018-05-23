@@ -71,11 +71,15 @@ ObjModel::ObjModel(const std::string& filename)
 	{
 		auto mat = ParamSet();
 
+		mat.add("name", m.name);
+
 		mat.add("diffuse", glm::vec3(m.diffuse[0], m.diffuse[1], m.diffuse[2]));
 		//mat->addAttribute("ambient", glm::vec4(m.ambient[0], m.ambient[1], m.ambient[2], 1.0f));
 		mat.add("specular", glm::vec4(m.specular[0], m.specular[1], m.specular[2], m.shininess));
 		mat.add("dissolve", m.dissolve);
 		mat.add("illum", float(m.illum));
+		mat.add("transmittance", glm::vec3(m.transmittance[0], m.transmittance[1], m.transmittance[2]));
+		mat.get("refraction", m.ior);
 
 		// add available attributes
 		if (m.diffuse_texname.length())
@@ -119,8 +123,6 @@ ObjModel::~ObjModel()
 
 void ObjModel::prepareDrawing(IShader& shader) const
 {
-	
-
 	// bind the vertex format
 	m_vao.bind();
 	m_verticesTextureView.bind(4);

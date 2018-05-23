@@ -90,7 +90,6 @@ vec3 calcMaterialColor()
 			
 			// angle for specular color
 			float hDotN = dot(normalize(-viewDir - direction), normal);
-			//float phongExponent = pow(max(0.0, hDotN), 8.0);
 			float phongExponent = pow(max(0.0, hDotN), m_specular.a);
 			
 			if(m_illum == 2 || m_illum == 3)
@@ -116,7 +115,7 @@ vec3 calcMaterialColor()
 	}
 	
 #ifndef DISABLE_ENVIRONMENT
-	if(m_illum == 3)
+	if(m_illum == 3 || m_illum == 4)
 	{
 		// calculate reflected for specular
 		vec3 reflected = reflect(viewDir, normal);

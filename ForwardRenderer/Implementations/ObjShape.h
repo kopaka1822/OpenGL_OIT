@@ -3,6 +3,7 @@
 #include <vector>
 #include "ObjModel.h"
 #include "../Graphics/IShader.h"
+#include "../Graphics/IRenderer.h"
 
 class ObjShape : public IShape
 {
@@ -27,6 +28,8 @@ public:
 
 	void draw(IShader* shader) override
 	{
+		if (IRenderer::s_filterMaterial != -1 && IRenderer::s_filterMaterial > m_materialIndex) return;
+
 		if (shader)
 		{
 			m_model.getMaterial().bind(m_materialIndex);

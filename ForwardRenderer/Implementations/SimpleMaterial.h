@@ -16,6 +16,10 @@ class SimpleMaterial : public IMaterials
 		
 		// specular + shininess
 		glm::vec4 specular;
+
+		// transmission rgb + optical density
+		glm::vec3 transmittance;
+		float refraction;
 	};
 
 	enum MaterialTextureBinding
@@ -63,6 +67,8 @@ public:
 			d->specular = i->get("specular", glm::vec4(0.0f));
 			d->dissolve = i->get("dissolve", 1.0f);
 			d->illum = int(i->get("illum", 1.0f));
+			d->transmittance = i->get("transmittance", glm::vec3(1.0f));
+			d->refraction = i->get("refraction", 0.0f);
 
 			cur += paddedLength;
 		}

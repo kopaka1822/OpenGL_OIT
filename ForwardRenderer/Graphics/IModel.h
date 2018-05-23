@@ -3,6 +3,7 @@
 #include "IShape.h"
 #include <memory>
 #include <vector>
+#include "IMaterials.h"
 
 class IModel
 {
@@ -12,4 +13,5 @@ public:
 	// (this may for example set the vertex format that is only required once for all objects)
 	virtual void prepareDrawing(IShader& shader) const = 0;
 	virtual const std::vector<std::unique_ptr<IShape>>& getShapes() const = 0;
+	virtual const IMaterials& getMaterial() const = 0;
 };

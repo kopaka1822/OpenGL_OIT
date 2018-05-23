@@ -2,6 +2,7 @@
 #include "../ScriptEngine/ScriptEngine.h"
 
 glm::vec4 IRenderer::s_clearColor = glm::vec4(0.4666f, 0.709f, 0.87f, 0.99f);
+int IRenderer::s_filterMaterial = -1;
 
 void IRenderer::setClearColor()
 {
@@ -29,5 +30,13 @@ void IRenderer::initScripts()
 		{
 			s_clearColor.a = args.at(3).getFloat();
 		}
+	});
+
+	ScriptEngine::addProperty("filterMaterial", []()
+	{
+		return std::to_string(s_filterMaterial);
+	}, [](const std::vector<Token>& args)
+	{
+		s_filterMaterial = args.at(0).getInt();
 	});
 }

@@ -18,7 +18,7 @@ public:
 	void prepareDrawing(IShader& shader) const override;
 	const std::vector<std::unique_ptr<IShape>>& getShapes() const override;
 
-	const IMaterials& getMaterial() const;
+	const IMaterials& getMaterial() const override;
 private:
 	static void tryAddingTexture(ParamSet& material, const std::string& attrName, const std::string& textureName);
 private:

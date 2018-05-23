@@ -10,6 +10,9 @@ public:
 	virtual void render(const RenderArgs& args) = 0;
 
 	static glm::vec4 s_clearColor;
+	// only draw material with this id (draw all if id == -1)
+	static int s_filterMaterial;
+
 	static void setClearColor();
 	static void initScripts();
 };

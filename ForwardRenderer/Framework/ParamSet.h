@@ -9,6 +9,7 @@ class ParamSet
 {
 	std::unordered_map<std::string, std::shared_ptr<CachedTexture2D>> m_cachedTex;
 	std::unordered_map<std::string, glm::vec4> m_params;
+	std::unordered_map<std::string, std::string> m_stringParams;
 public:
 	ParamSet() = default;
 	ParamSet(ParamSet&&) = default;
@@ -36,6 +37,11 @@ public:
 		add(name, glm::vec4(value, 0.0f, 0.0f, 0.0f));
 	}
 
+	void add(const std::string& name, std::string value)
+	{
+		m_stringParams[name] = move(value);
+	}
+
 	void addTexture(const std::string& name, std::shared_ptr<CachedTexture2D > tex)
 	{
 		m_cachedTex[name] = move(tex);
@@ -50,6 +56,14 @@ public:
 	*/
 	template<class T>
 	const T* get(const std::string& name) const = delete;
+
+	template<>
+	const std::string* get(const std::string& name) const
+	{
+		const auto it = m_stringParams.find(name);
+		if (it == m_stringParams.end()) return nullptr;
+		return &(it->second);
+	}
 
 	template<>
 	const glm::vec4* get(const std::string& name) const
@@ -89,6 +103,12 @@ public:
 	 * \param defaultValue value that should be returned if parameter was not found
 	 * \return 
 	 */
+	std::string get(const std::string& name, const std::string& defaultValue) const
+	{
+		auto val = get<std::string>(name);
+		return val ? *val : defaultValue;
+	}
+
 	glm::vec4 get(const std::string& name, const glm::vec4& defaultValue) const
 	{
 		auto val = get<glm::vec4>(name);
@@ -129,6 +149,10 @@ public:
 	std::string toString() const
 	{
 		std::string res;
+		for(const auto& val : m_stringParams)
+		{
+			res += val.first + ": " + val.second + "\n";
+		}
 		for(const auto& val : m_params)
 		{
 			res += val.first + ": " + std::to_string(val.second.x) + ", " + std::to_string(val.second.y) + ", " + std::to_string(val.second.z) + ", " + std::to_string(val.second.w) + "\n";
