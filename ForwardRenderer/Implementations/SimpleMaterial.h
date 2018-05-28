@@ -20,6 +20,9 @@ class SimpleMaterial : public IMaterials
 		// transmission rgb + optical density
 		glm::vec3 transmittance;
 		float refraction;
+
+		float roughness;
+		float metallic;
 	};
 
 	enum MaterialTextureBinding
@@ -69,6 +72,8 @@ public:
 			d->illum = int(i->get("illum", 1.0f));
 			d->transmittance = i->get("transmittance", glm::vec3(1.0f));
 			d->refraction = i->get("refraction", 0.0f);
+			d->roughness = i->get("roughness", 0.0f);
+			d->metallic = i->get("metallic", 0.0f);
 
 			cur += paddedLength;
 		}

@@ -10,4 +10,7 @@ layout(binding = 1) uniform ubo_material
 	
 	vec3 m_transmittance;
 	float m_refraction;
+	
+	float m_roughness;
+	float m_metallic;
 };

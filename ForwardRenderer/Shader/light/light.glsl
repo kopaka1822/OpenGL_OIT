@@ -92,7 +92,7 @@ vec3 calcMaterialColor()
 			float hDotN = dot(normalize(-viewDir - direction), normal);
 			float phongExponent = pow(max(0.0, hDotN), m_specular.a);
 			
-			if(m_illum == 2 || m_illum == 3)
+			if(m_illum != 0 && m_illum != 1)
 			{
 				// phong specular
 				
@@ -119,12 +119,11 @@ vec3 calcMaterialColor()
 	{
 		// calculate reflected for specular
 		vec3 reflected = reflect(viewDir, normal);
-		//color += vec3(phongExponent);
-		vec3 refColor = max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col;
+		//vec3 refColor = max(vec3(0.0), texture(tex_environment, reflected, m_roughness * 8.0).rgb) * specular_col;
+		vec3 refColor = max(vec3(0.0), texture(tex_environment, reflected, m_roughness * 8.0).rgb);
 		float lum = clamp(dot(refColor, vec3(1, 1, 1)), 0.0, 1.0);
-		color += refColor * pow(lum, 2) * 20.0;
-		//color += max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col * 3.0;
-		//color += pow(max(vec3(0.0), texture(tex_environment, reflected).rgb) * specular_col, vec3(2.0)) * 30.0;
+		color += refColor * pow(lum, 2) * 20.0 * specular_col;
+		//color += refColor * pow(lum, 2) * 20.0;
 	}
 #endif
 	

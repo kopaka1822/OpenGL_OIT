@@ -79,7 +79,9 @@ ObjModel::ObjModel(const std::string& filename)
 		mat.add("dissolve", m.dissolve);
 		mat.add("illum", float(m.illum));
 		mat.add("transmittance", glm::vec3(m.transmittance[0], m.transmittance[1], m.transmittance[2]));
-		mat.get("refraction", m.ior);
+		mat.add("refraction", m.ior);
+		mat.add("roughness", m.roughness);
+		mat.add("metallic", m.metallic);
 
 		// add available attributes
 		if (m.diffuse_texname.length())
