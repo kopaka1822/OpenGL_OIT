@@ -24,6 +24,7 @@
 #include "../Implementations/SimpleLights.h"
 #include "../Implementations/SimpleTransforms.h"
 #include "../Implementations/SimpleShader.h"
+#include "../Renderer/EnvironmentRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -44,6 +45,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<WeightedTransparency>();
 	if (name == "linked")
 		return std::make_unique<LinkedVisibility>();
+	if (name == "environment")
+		return std::make_unique<EnvironmentRenderer>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
 	{
@@ -137,6 +140,7 @@ void Application::tick()
 	args.transforms = m_transforms.get();
 	args.environment = m_envmap.get();
 		
+	glViewport(0, 0, Window::getWidth(), Window::getHeight());
 	if (m_renderer)
 		m_renderer->render(args);
 	
@@ -342,6 +346,7 @@ void Application::initScripts()
 	ScriptEngine::addKeyword("adaptive");
 	ScriptEngine::addKeyword("multilayer_alpha");
 	ScriptEngine::addKeyword("projection");
+	ScriptEngine::addKeyword("environment");
 
 	ICamera::initScripts();
 	IRenderer::initScripts();

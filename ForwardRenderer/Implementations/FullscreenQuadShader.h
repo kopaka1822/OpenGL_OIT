@@ -2,6 +2,7 @@
 #include "../Graphics/IShader.h"
 #include "../Dependencies/gl/vertexarrayobject.hpp"
 #include "../Graphics/HotReloadShader.h"
+#include <iostream>
 
 /**
  * \brief helper class to draw a fullscreen quad
@@ -14,6 +15,10 @@ public:
 		const auto vert = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/FullscreenQuad.vs");
 		m_program = HotReloadShader::loadProgram({vert, fragment});
 	}
+	FullscreenQuadShader(std::shared_ptr<HotReloadShader::WatchedProgram> program)
+		:
+	m_program(move(program))
+	{}
 	
 	void bind() const override
 	{

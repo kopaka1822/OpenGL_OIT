@@ -14,7 +14,7 @@ public:
 
 	void rotateForFace(int faceId)
 	{
-		m_projection = glm::perspective(1.57079632679f, 1.0f, s_nearPlane, s_farPlane)
+		m_projection = glm::perspective(glm::half_pi<float>(), 1.0f, s_nearPlane, s_farPlane)
 			* glm::lookAt(m_position, m_position + getFaceDirection(faceId), getFaceUpVector(faceId));
 	}
 	
@@ -57,7 +57,7 @@ private:
 
 	static glm::vec3 getFaceUpVector(int faceId)
 	{
-		switch (faceId)
+		/*switch (faceId)
 		{
 		case 0:
 		case 1:
@@ -69,7 +69,23 @@ private:
 			return glm::vec3(0.0f, 0.0f, -1.0f);
 		case 3:
 			return glm::vec3(0.0f, 0.0f, 1.0f);
+		}*/
+		
+		switch (faceId)
+		{
+		case 0:
+		case 1:
+			return glm::vec3(0.0f, -1.0f, 0.0f);
+			//return glm::vec3(0.0f, 1.0f, 0.0f);
+		case 2:
+			return glm::vec3(0.0f, 0.0f, 1.0f);
+		case 3:
+			return glm::vec3(0.0f, 0.0f, -1.0f);
+		case 4:
+		case 5:
+			return glm::vec3(0.0f, -1.0f, 0.0f);
 		}
+
 		return glm::vec3(0.0f);
 	}
 

@@ -204,13 +204,16 @@
     <ClInclude Include="Implementations\FullscreenQuadShader.h" />
     <ClInclude Include="Implementations\ObjModel.h" />
     <ClInclude Include="Implementations\ObjShape.h" />
+    <ClInclude Include="Implementations\OrthographicCamera.h" />
     <ClInclude Include="Implementations\ProjectionCamera.h" />
+    <ClInclude Include="Implementations\ShadowMap.h" />
     <ClInclude Include="Implementations\SimpleLights.h" />
     <ClInclude Include="Implementations\SimpleMaterial.h" />
     <ClInclude Include="Implementations\SimpleShader.h" />
     <ClInclude Include="Implementations\SimpleTransforms.h" />
     <ClInclude Include="Renderer\AdaptiveTransparencyRenderer.h" />
     <ClInclude Include="Renderer\DynamicFragmentBuffer.h" />
+    <ClInclude Include="Renderer\EnvironmentRenderer.h" />
     <ClInclude Include="Renderer\LinkedVisibility.h" />
     <ClInclude Include="Renderer\MultiLayerAlphaRenderer.h" />
     <ClInclude Include="Renderer\SimpleForwardRenderer.h" />
@@ -233,6 +236,7 @@
     <ClCompile Include="Implementations\ObjModel.cpp" />
     <ClCompile Include="Renderer\AdaptiveTransparencyRenderer.cpp" />
     <ClCompile Include="Renderer\DynamicFragmentBuffer.cpp" />
+    <ClCompile Include="Renderer\EnvironmentRenderer.cpp" />
     <ClCompile Include="Renderer\LinkedVisibility.cpp" />
     <ClCompile Include="Renderer\MultiLayerAlphaRenderer.cpp" />
     <ClCompile Include="Renderer\SimpleForwardRenderer.cpp" />

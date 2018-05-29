@@ -215,6 +215,15 @@
     <ClInclude Include="Graphics\RenderArgs.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Implementations\ShadowMap.h">
+      <Filter>Source Files\Implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="Implementations\OrthographicCamera.h">
+      <Filter>Source Files\Implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\EnvironmentRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">
@@ -273,6 +282,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\IRenderer.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\EnvironmentRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

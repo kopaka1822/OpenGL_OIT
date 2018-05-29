@@ -163,4 +163,29 @@ public:
 		}
 		return res;
 	}
+
+	/**
+	 * \brief searches for the corresponding float vector
+	 * \param name parameter
+	 * \return 
+	 */
+	bool has(const std::string& name) const
+	{
+		return m_params.find(name) != m_params.end();
+	}
+
+	bool hasTexture(const std::string& name) const
+	{
+		return m_cachedTex.find(name) != m_cachedTex.end();
+	}
+
+	/**
+	 * \brief searches for the corresponding string parameter
+	 * \param name parameter
+	 * \return 
+	 */
+	bool hasString(const std::string& name) const
+	{
+		return m_stringParams.find(name) != m_stringParams.end();
+	}
 };

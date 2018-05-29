@@ -11,4 +11,6 @@ public:
 	virtual void bind() const = 0;
 	virtual std::string displayLights() = 0;
 
+	virtual size_t numLights() const = 0;
+	virtual const ParamSet& getLight(size_t index) const = 0;
 };

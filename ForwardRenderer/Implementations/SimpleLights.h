@@ -90,6 +90,17 @@ public:
 			m_uniform.bind(2);
 	}
 
+
+	size_t numLights() const override
+	{
+		return m_lights.size();
+	}
+
+	const ParamSet& getLight(size_t index) const override
+	{
+		return m_lights.at(index);
+	}
+
 private:
 	std::vector<ParamSet> m_lights;
 	gl::StaticUniformBuffer m_uniform;

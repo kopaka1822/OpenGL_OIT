@@ -15,7 +15,8 @@ class EnvironmentMap : public IEnvironmentMap
 public:
 	EnvironmentMap(int resolution)
 		:
-	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR))
+	m_sampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::LINEAR)),
+	m_resolution(resolution)
 	{
 		m_cubeMap = gl::TextureCubeMap(gl::InternalFormat::RGBA8, gl::computeMaxMipMapLevels(resolution));
 		m_cubeMap.resize(resolution, resolution);
@@ -39,11 +40,13 @@ public:
 
 		m_cubeMap.unbind(8);
 
+		transforms.setModelTransform(glm::mat4(1.0f));
 		// draw from all directions
 		model.prepareDrawing(shader);
 		for(auto i = 0; i < m_fbos.size(); ++i)
 		{
 			m_fbos[i].bind();
+			glViewport(0, 0, m_resolution, m_resolution);
 			// clear buffer
 			glEnable(GL_DEPTH_TEST);
 			//IRenderer::setClearColor();
@@ -79,4 +82,5 @@ private:
 	gl::TextureCubeMap m_cubeMap;
 	gl::Renderbuffer m_depth;
 	std::array<gl::Framebuffer, 6> m_fbos;
+	const int m_resolution;
 };
