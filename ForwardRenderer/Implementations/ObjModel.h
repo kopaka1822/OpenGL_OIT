@@ -19,6 +19,16 @@ public:
 	const std::vector<std::unique_ptr<IShape>>& getShapes() const override;
 
 	const IMaterials& getMaterial() const override;
+
+
+	const glm::vec3& getBoundingMin() const override
+	{
+		return m_bboxMin;
+	}
+	const glm::vec3& getBoundingMax() const override
+	{
+		return m_bboxMax;
+	}
 private:
 	static void tryAddingTexture(ParamSet& material, const std::string& attrName, const std::string& textureName);
 private:
@@ -38,5 +48,8 @@ private:
 	std::vector<std::unique_ptr<IShape>> m_shapes;
 
 	SimpleMaterial m_materials;
+
+	glm::vec3 m_bboxMin;
+	glm::vec3 m_bboxMax;
 };
 

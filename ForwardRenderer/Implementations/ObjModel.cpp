@@ -5,6 +5,7 @@
 #include <chrono>
 #include "ObjShape.h"
 #include "../Graphics/SamplerCache.h"
+#include <future>
 
 // attempts to retrieve the file directory
 static std::string GetDirectory(const std::string &filepath) {
@@ -38,6 +39,24 @@ ObjModel::ObjModel(const std::string& filename)
 	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
 	printf("# of materials = %d\n", (int)materials.size());
 	printf("# of shapes    = %d\n", (int)shapes.size());
+
+	// determine bbox on seperate thread
+	auto bbox = std::async(std::launch::async, [this](const std::vector<tinyobj::real_t>& vertices)
+	{
+		m_bboxMin = glm::vec3(std::numeric_limits<float>::max());
+		m_bboxMax = glm::vec3(std::numeric_limits<float>::min());
+
+		for(auto i = 0; i + 2 < vertices.size(); i += 3)
+		{
+			m_bboxMin.x = std::min(m_bboxMin.x, vertices[i]);
+			m_bboxMin.y = std::min(m_bboxMin.y, vertices[i + 1]);
+			m_bboxMin.z = std::min(m_bboxMin.z, vertices[i + 2]);
+
+			m_bboxMax.x = std::max(m_bboxMax.x, vertices[i]);
+			m_bboxMax.y = std::max(m_bboxMax.y, vertices[i + 1]);
+			m_bboxMax.z = std::max(m_bboxMax.z, vertices[i + 2]);
+		}
+	}, attrib.vertices);
 
 	// make attribute buffer
 	if (!attrib.vertices.size())
@@ -117,6 +136,9 @@ ObjModel::ObjModel(const std::string& filename)
 		m_shapes.push_back(std::make_unique<ObjShape>(
 			gl::StaticArrayBuffer(s.mesh.indices), *this, materialId));
 	}
+
+	// wait for bbox computation to finish
+	bbox.get();
 }
 
 ObjModel::~ObjModel()

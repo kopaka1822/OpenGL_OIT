@@ -3,6 +3,7 @@
 #include "texture.hpp"
 #include "renderbuffer.hpp"
 #include <vector>
+#include <unordered_set>
 
 namespace gl
 {
@@ -47,22 +48,45 @@ namespace gl
 			glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, isStencilFormat(target.format()) ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target.getId());
 		}
 		
+		/**
+		 * \brief attaches a texture to the framebuffer. Existing attachments may be overwritten
+		 * \param index color attachement index
+		 * \param target texture (must be valid)
+		 * \param mipLevel texture level
+		 */
 		template<GLenum TType, GLsizei TComponents>
 		void attachColor(GLuint index, const Texture<TType, TComponents>& target, GLuint mipLevel = 0)
 		{
 			bind();
+			assert(target.getId());
 			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target.getId(), mipLevel);
 
-			m_attachments.push_back(GL_COLOR_ATTACHMENT0 + index);
+			m_attachments.insert(GL_COLOR_ATTACHMENT0 + index);
 		}
 
+		/**
+		* \brief attaches a texture to the framebuffer. Existing attachments may be overwritten
+		* \param index color attachement index
+		* \param target texture (must be valid)
+		* \param mipLevel texture level
+		* \param layer texture layer
+		*/
 		template<GLenum TType, GLsizei TComponents>
 		void attachColor(GLuint index, const Texture<TType, TComponents>& target, GLuint mipLevel, GLuint layer)
 		{
 			bind();
+			assert(target.getId());
 			glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target.getId(), mipLevel, layer);
 
-			m_attachments.push_back(GL_COLOR_ATTACHMENT0 + index);
+			m_attachments.insert(GL_COLOR_ATTACHMENT0 + index);
+		}
+
+		void detachColor(GLuint index)
+		{
+			bind();
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, 0, 0);
+
+			m_attachments.erase(GL_COLOR_ATTACHMENT0 + index);
 		}
 
 		void validate()
@@ -72,20 +96,22 @@ namespace gl
 			if(status != GL_FRAMEBUFFER_COMPLETE)
 				throw std::runtime_error("invalid framebuffer");
 
-			// enable buffers
-			glDrawBuffers(GLsizei(m_attachments.size()), m_attachments.data());
+			// enable buffers (put set into an array)
+			auto vec = std::vector<GLenum>(m_attachments.begin(), m_attachments.end());
+			glDrawBuffers(GLsizei(vec.size()), vec.data());
 		}
 
 		void bind() const
 		{
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
 		}
+
 		static void unbind()
 		{
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
 	private:
 		unique<GLuint> m_id;
-		std::vector<GLenum> m_attachments;
+		std::unordered_set<GLenum> m_attachments;
 	};
 }

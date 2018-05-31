@@ -5,11 +5,11 @@
 class OrthographicCamera : public ICamera
 {
 public:
-	OrthographicCamera(float width, float height, float near, float far, const glm::vec3& position, const glm::vec3& direction, const glm::vec3& up)
+	OrthographicCamera(float width, float height, float nearPlane, float farPlane, const glm::vec3& position, const glm::vec3& direction, const glm::vec3& up)
 		: m_width(width),
 		  m_height(height),
-		  m_near(near),
-		  m_far(far),
+		  m_near(nearPlane),
+		  m_far(farPlane),
 		  m_pos(position),
 		  m_direction(direction),
 		  m_up(up)

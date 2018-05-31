@@ -224,6 +224,12 @@
     <ClInclude Include="Renderer\EnvironmentRenderer.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\IShadows.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Implementations\ShadowMaps.h">
+      <Filter>Source Files\Implementations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glad\src\glad.c">
