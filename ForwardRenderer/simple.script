@@ -3,7 +3,7 @@ camera = projection
 //debugOutput = false
 profileType = latest
 
-addDirectionalLight(0.1, -1, 0.1)
+addDirectionalLight(0.5, -1, 0.5)
 
 //camPos = 8.64316, 0.967475, 11.4518
 //camDir =   0.254568, 0.0399896, -0.96623
@@ -24,18 +24,19 @@ addDirectionalLight(0.1, -1, 0.1)
 //camDir =  -0.93403, -0.29552, 0.200637
 //loadObj("Scene/sponza/sponza.obj")
 
-camSpeed = 0.01
-loadObj("Scene/test.obj")
-refreshEnvironment(0, 0, 0)
+//camSpeed = 0.01
+//loadObj("Scene/test.obj")
+//refreshEnvironment(0, 0, 0)
 
 //camPos = 1708.72, 1501.76, -831.255
 //camDir = -0.83374, -0.352274, 0.425183
 //loadObj("Scene/lowpolydeer/deer.obj")
 //camSpeed = 1
 
-//loadObj("Scene/medival_village_colored.obj")
-//camPos = 45.3821, 11.8453, -69.1258
-//camDir = 0.770862, -0.276354, 0.573937
+loadObj("Scene/medival_village_colored.obj")
+camPos = 45.3821, 11.8453, -69.1258
+camDir = 0.770862, -0.276354, 0.573937
+refreshEnvironment();
 
 //loadObj("Scene/KingsTreasure.obj")
 //camPos = 0.178053, 0.066108, 0.389488

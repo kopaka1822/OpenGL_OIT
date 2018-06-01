@@ -14,7 +14,7 @@ public:
 	ShadowMaps(int resolution)
 		:
 	m_resolution(resolution),
-	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP))
+	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::REPEAT))
 	{
 		// unbind the framebuffer
 		gl::Framebuffer::unbind();
@@ -116,6 +116,7 @@ public:
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
+		model.prepareDrawing(*m_shader);
 		for (const auto& shape : model.getShapes())
 		{
 			if (!shape->isTransparent())

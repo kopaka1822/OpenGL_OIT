@@ -17,7 +17,11 @@ class SimpleLights : public ILights
 		// x = linear, y = quadratic
 		glm::vec4 attenuation;
 
-		glm::vec4 padding0;
+		int lightIndex;
+		int pad1;
+		int pad2;
+		int pad3;
+		//glm::vec4 padding0;
 
 		// light space matrix for directional lights
 		glm::mat4 lightSpaceMatrix;
@@ -84,12 +88,14 @@ public:
 			{
 				d->position = *i->get<glm::vec4>("position");
 				d->position.w = 1.0f;
+				d->lightIndex = pointLights.size();
 				pointLights.emplace_back(d->position);
 			}
 			else if (i->get<glm::vec4>("direction"))
 			{
 				d->position = *i->get<glm::vec4>("direction");
 				d->position.w = 0.0f;
+				d->lightIndex = dirLights.size();
 
 				auto cam = calculateDirectionalMatrix(*d);
 				d->lightSpaceMatrix = cam.getProjection();
@@ -191,7 +197,7 @@ private:
 			halfHeight = glm::max(halfHeight, glm::dot(up, edge - origin));
 		}
 
-		auto lightCam = OrthographicCamera(halfWidth * 2, halfHeight * 2, 0.0f, farPlane, origin, m_bboxCenter, up);
+		auto lightCam = OrthographicCamera(halfWidth * 2, halfHeight * 2, 0.0f, farPlane, origin, direction, up);
 
 		return lightCam;
 	}

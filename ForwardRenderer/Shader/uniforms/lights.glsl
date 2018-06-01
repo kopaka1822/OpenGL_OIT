@@ -10,7 +10,11 @@ struct LightData
 	// x = linear, y = quadratic
 	vec4 attenuation;
 	
-	vec4 padding0;
+	// light index for cube map array and sampler 2d array
+	int lightIndex;
+	int pad1;
+	int pad2;
+	int pad3;
 	
 	mat4 lightSpaceMatrix;
 };

@@ -122,9 +122,9 @@ void DynamicFragmentBufferRenderer::render(const RenderArgs& args)
 
 		m_lastFragmentCount = m_scanStageBuffer.getElement<uint32_t>(0);
 
-		if (m_lastFragmentCount > m_fragmentStorage.getNumElements())
+		if (m_lastFragmentCount > m_fragmentStorage.getNumElements() || m_fragmentStorage.getNumElements() == 0)
 		{
-			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, GLsizei(m_lastFragmentCount));
+			m_fragmentStorage = gl::DynamicShaderStorageBuffer(8, GLsizei(std::max(m_lastFragmentCount, size_t(1))));
 		}
 	}
 

@@ -61,6 +61,7 @@ vec3 calcMaterialColor()
 	{
 		for(int i = 0; i < numLights; ++i)
 		{
+			float shadow = 0.0;
 			vec3 direction;
 			vec3 lightColor = lights[i].color.rgb;
 			// calculate lightning
@@ -84,12 +85,26 @@ vec3 calcMaterialColor()
 				direction = normalize(lights[i].position.xyz);
 				
 				cosTheta = dot(-direction, normal) * 0.5 + 0.5;
+				
+				vec4 lightSpacePos = lights[i].lightSpaceMatrix * vec4(in_position, 1.0);
+				lightSpacePos.xyz /= lightSpacePos.w;
+				lightSpacePos.xyz *= vec3(0.5);
+				lightSpacePos.xyz += vec3(0.5);
+				
+				float closestDepth = texture(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex))).r;
+				
+				//return toGamma(vec3(lightSpacePos.z * 0.5 + 0.5));
+				float bias = 0.05;
+				shadow = lightSpacePos.z - bias > closestDepth ? 1.0 : 0.0;
+				//return vec3(lightSpacePos.z);
+				//return vec3(closestDepth);
+				//return vec3(lightSpacePos.xy, 0.0);
 				//cosTheta *= cosTheta;
 			}
 			
 			// diffuse
 			if(m_illum != 3)
-				color += max(vec3(0.0), diffuse_col * lightColor * cosTheta);
+				color += max(vec3(0.0), diffuse_col * lightColor * cosTheta * (1.0 - shadow));
 			
 			// angle for specular color
 			float hDotN = dot(normalize(-viewDir - direction), normal);
@@ -99,7 +114,7 @@ vec3 calcMaterialColor()
 			{
 				// phong specular
 				
-				color += max(vec3(0.0), specular_col * lightColor * phongExponent);
+				color += max(vec3(0.0), specular_col * lightColor * phongExponent * (1.0 - shadow));
 			}
 		}
 	}

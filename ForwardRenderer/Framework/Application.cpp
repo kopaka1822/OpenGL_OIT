@@ -26,6 +26,7 @@
 #include "../Implementations/SimpleShader.h"
 #include "../Renderer/EnvironmentRenderer.h"
 #include "../Implementations/ShadowMaps.h"
+#include "../Renderer/ShadowDebugRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -48,6 +49,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<LinkedVisibility>();
 	if (name == "environment")
 		return std::make_unique<EnvironmentRenderer>();
+	if (name == "shadow_map")
+		return std::make_unique<ShadowDebugRenderer>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
 	{
@@ -352,6 +355,7 @@ void Application::initScripts()
 	ScriptEngine::addKeyword("multilayer_alpha");
 	ScriptEngine::addKeyword("projection");
 	ScriptEngine::addKeyword("environment");
+	ScriptEngine::addKeyword("shadow_map");
 
 	ICamera::initScripts();
 	IRenderer::initScripts();
