@@ -92,14 +92,9 @@ vec3 calcMaterialColor()
 				lightSpacePos.xyz += vec3(0.5);
 				
 				float closestDepth = texture(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex))).r;
-				
-				//return toGamma(vec3(lightSpacePos.z * 0.5 + 0.5));
-				float bias = 0.05;
+				//float bias = 0.005;
+				float bias = max(0.001 * (1.0 - dot(normal, -direction)), 0.0005);
 				shadow = lightSpacePos.z - bias > closestDepth ? 1.0 : 0.0;
-				//return vec3(lightSpacePos.z);
-				//return vec3(closestDepth);
-				//return vec3(lightSpacePos.xy, 0.0);
-				//cosTheta *= cosTheta;
 			}
 			
 			// diffuse

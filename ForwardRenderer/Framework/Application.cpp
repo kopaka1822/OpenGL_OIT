@@ -113,7 +113,7 @@ Application::Application()
 	m_envmap = std::make_unique<EnvironmentMap>(512);
 	m_lights = std::make_unique<SimpleLights>();
 	m_transforms = std::make_unique<SimpleTransforms>();
-	m_shadows = std::make_unique<ShadowMaps>(1024);
+	m_shadows = std::make_unique<ShadowMaps>(1024 * 4);
 }
 
 void Application::tick()
