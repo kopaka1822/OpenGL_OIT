@@ -9,6 +9,10 @@ struct LightData
 	
 	// x = linear, y = quadratic
 	vec4 attenuation;
+	
+	vec4 padding0;
+	
+	mat4 lightSpaceMatrix;
 };
 
 layout(binding = 2, std140) uniform ubo_lights

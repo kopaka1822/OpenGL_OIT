@@ -3,8 +3,6 @@
 #include "../Dependencies/gl/framebuffer.hpp"
 #include "../Graphics/SamplerCache.h"
 #include "../Graphics/IModel.h"
-#include <glm/gtc/matrix_transform.inl>
-#include "OrthographicCamera.h"
 #include "../Graphics/ITransforms.h"
 #include "../Graphics/HotReloadShader.h"
 #include "SimpleShader.h"
@@ -16,7 +14,7 @@ public:
 	ShadowMaps(int resolution)
 		:
 	m_resolution(resolution),
-	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::NEAREST, gl::MagFilter::NEAREST, gl::MipFilter::NONE, gl::BorderHandling::CLAMP))
+	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP))
 	{
 		// unbind the framebuffer
 		gl::Framebuffer::unbind();
@@ -30,15 +28,12 @@ public:
 	void update(
 		const std::vector<PointLight>& pointLights, 
 		const std::vector<DirectionalLight>& dirLights,
-		const IModel& model, ITransforms& transforms, 
-		const ICamera& cam) override
+		const IModel& model, ITransforms& transforms) override
 	{
-		computeBBox(model);
-
-		m_numPointLights = pointLights.size();
+		m_numPointLights = int(pointLights.size());
 		if(pointLights.size())
 		{
-			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_resolution, m_resolution, int(pointLights.size()), 1);
+			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_resolution, m_resolution, int(pointLights.size()) * 6, 1);
 
 			for(auto i = 0; i < pointLights.size(); ++i)
 			{
@@ -48,7 +43,7 @@ public:
 		else
 		{
 			// make dummy texture
-			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, 1, 1, 1, 1);
+			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::R8, 1, 1, 6, 1);
 		}
 
 		if(dirLights.size())
@@ -63,14 +58,11 @@ public:
 		else
 		{
 			// make dummy texture
-			m_textures = gl::Texture2DArray(gl::InternalFormat::DEPTH_COMPONENT32F, 1, 1, 1, 1);
+			m_textures = gl::Texture2DArray(gl::InternalFormat::DEPTH_COMPONENT32F, 16, 16, 1, 1);
 		}
 
 		// restore framebuffer
 		gl::Framebuffer::unbind();
-		// restore camera
-		transforms.update(cam);
-		transforms.upload();
 	}
 
 	void bind() const override
@@ -82,71 +74,10 @@ public:
 		m_textures.bind(10);		
 	}
 
-private:
-	void computeBBox(const IModel& model)
-	{
-		m_bboxCenter = (model.getBoundingMin() + model.getBoundingMax()) / 2.0f;
-
-		auto min = model.getBoundingMin();
-		auto max = model.getBoundingMax();
-
-		m_bboxEdges[0] = min;
-
-		m_bboxEdges[1] = min;
-		m_bboxEdges[1].x = max.x;
-
-		m_bboxEdges[2] = min;
-		m_bboxEdges[2].y = max.y;
-
-		m_bboxEdges[3] = min;
-		m_bboxEdges[3].z = max.z;
-
-		m_bboxEdges[4] = min;
-		m_bboxEdges[4].x = max.x;
-		m_bboxEdges[4].y = max.y;
-	
-		m_bboxEdges[5] = min;
-		m_bboxEdges[5].x = max.x;
-		m_bboxEdges[5].z = max.z;
-
-		m_bboxEdges[6] = min;
-		m_bboxEdges[6].y = max.y;
-		m_bboxEdges[6].z = max.z;
-
-		m_bboxEdges[7] = max;
-	}
-
 	void renderDirLight(const DirectionalLight& light, int index, ITransforms& transforms, const IModel& model)
-	{
-		auto direction = glm::normalize(light.direction);
-		
-		float nearPlaneDistance = 0.0f;
-		// determine look at
-		for (const auto& edge : m_bboxEdges)
-		{
-			nearPlaneDistance = glm::max(nearPlaneDistance, glm::dot(-direction, edge - m_bboxCenter));
-		}
-
-		auto origin = nearPlaneDistance * -direction + m_bboxCenter;
-
-		// TODO better up vector?
-		auto up = glm::vec3(0.0, 1.0f, 0.0f);
-		auto right = glm::normalize(glm::cross(up, direction));
-
-		float farPlane = 0.0f;
-		float halfWidth = 0.0f;
-		float halfHeight = 0.0f;
-		for(const auto& edge : m_bboxEdges)
-		{
-			farPlane = glm::max(farPlane, glm::dot(direction, edge - origin));
-			halfWidth = glm::max(halfWidth, glm::dot(right, edge - origin));
-			halfHeight = glm::max(halfHeight, glm::dot(up, edge - origin));
-		}
-
-		auto lightCam = OrthographicCamera(halfWidth * 2, halfHeight * 2, 0.0f, farPlane, origin, m_bboxCenter, up);
-		
+	{		
 		// set and upload light transforms
-		transforms.update(lightCam);
+		transforms.update(light.camera);
 		transforms.setModelTransform(glm::mat4(1.0f));
 		transforms.upload();
 

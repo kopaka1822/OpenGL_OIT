@@ -29,9 +29,7 @@ void SimpleForwardRenderer::render(const RenderArgs& args)
 	if (args.hasNull())
 		return;
 
-	args.lights->bind();
-	args.transforms->bind();
-	args.environment->bind();
+	args.bindLightData();
 
 	auto hasAlpha = false;
 	{

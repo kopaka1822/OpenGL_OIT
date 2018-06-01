@@ -4,6 +4,7 @@
 #include "ILights.h"
 #include "ITransforms.h"
 #include "IEnvironmentMap.h"
+#include "IShadows.h"
 
 struct RenderArgs
 {
@@ -12,6 +13,7 @@ struct RenderArgs
 	ILights* lights = nullptr;
 	ITransforms* transforms = nullptr;
 	const IEnvironmentMap* environment = nullptr;
+	const IShadows* shadows = nullptr;
 
 	/**
 	 * \brief 
@@ -24,11 +26,25 @@ struct RenderArgs
 			camera != nullptr &&
 			lights != nullptr &&
 			transforms != nullptr &&
-			environment != nullptr;
+			environment != nullptr &&
+			shadows != nullptr;
 	}
 
 	bool hasNull() const
 	{
 		return !isNotNull();
+	}
+
+	// binds lights shadows and envmap (relevant light information)
+	void bindLightData() const
+	{
+		if (lights)
+			lights->bind();
+		if (shadows)
+			shadows->bind();
+		if (environment)
+			environment->bind();
+		if (transforms)
+			transforms->bind();
 	}
 };

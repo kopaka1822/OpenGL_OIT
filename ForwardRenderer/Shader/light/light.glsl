@@ -13,6 +13,9 @@ layout(binding = 3) uniform sampler2D tex_specular;
 layout(binding = 8) uniform samplerCube tex_environment;
 #endif
 
+layout(binding = 9) uniform samplerCubeArray tex_pointLights;
+layout(binding = 10) uniform sampler2DArray tex_dirLights;
+
 #include "../uniforms/lights.glsl"
 
 #endif

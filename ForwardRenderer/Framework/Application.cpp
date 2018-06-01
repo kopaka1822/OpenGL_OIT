@@ -25,6 +25,7 @@
 #include "../Implementations/SimpleTransforms.h"
 #include "../Implementations/SimpleShader.h"
 #include "../Renderer/EnvironmentRenderer.h"
+#include "../Implementations/ShadowMaps.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -99,8 +100,6 @@ Application::Application()
 {
 	initScripts();
 
-	m_transforms = std::make_unique<SimpleTransforms>();
-
 	// load default shader
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
 	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
@@ -109,6 +108,9 @@ Application::Application()
 		HotReloadShader::loadProgram({ vertex, geometry, fragment }));
 
 	m_envmap = std::make_unique<EnvironmentMap>(512);
+	m_lights = std::make_unique<SimpleLights>();
+	m_transforms = std::make_unique<SimpleTransforms>();
+	m_shadows = std::make_unique<ShadowMaps>(1024);
 }
 
 void Application::tick()
@@ -124,8 +126,10 @@ void Application::tick()
 	for (const auto& r : s_tickReceiver)
 		r->tick(dt);
 
-	if (m_lights)
-		m_lights->upload();
+	if (m_lights && m_shadows && m_model && m_transforms)
+	{
+		m_lights->upload(*m_shadows, *m_model, *m_transforms);
+	}
 
 	if (m_transforms && m_camera)
 		m_transforms->update(*m_camera);
@@ -139,7 +143,8 @@ void Application::tick()
 	args.lights = m_lights.get();
 	args.transforms = m_transforms.get();
 	args.environment = m_envmap.get();
-		
+	args.shadows = m_shadows.get();
+
 	glViewport(0, 0, Window::getWidth(), Window::getHeight());
 	if (m_renderer)
 		m_renderer->render(args);
@@ -305,8 +310,8 @@ void Application::initScripts()
 
 	ScriptEngine::addFunction("refreshEnvironment", [this](const std::vector<Token>& args)
 	{
-		if (!(m_model && m_envmapShader && m_camera && m_transforms && m_lights))
-			throw std::runtime_error("model, camera, lights and transforms must be loaded for envmaps");
+		if (!(m_model && m_envmapShader && m_camera && m_transforms && m_lights && m_shadows))
+			throw std::runtime_error("model, camera, lights, shadows and transforms must be loaded for envmaps");
 
 		glm::vec3 pos;
 		if(args.size() == 0)
@@ -321,7 +326,7 @@ void Application::initScripts()
 		}
 		else throw std::runtime_error("either 0 or 3 arguments expected for environment map");
 		
-		m_lights->upload();
+		m_lights->upload(*m_shadows, *m_model, *m_transforms);
 		m_transforms->update(*m_camera);
 		m_transforms->upload();
 

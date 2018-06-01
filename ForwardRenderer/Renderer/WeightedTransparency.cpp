@@ -29,9 +29,7 @@ void WeightedTransparency::render(const RenderArgs& args)
 	if (args.hasNull())
 		return;
 
-	args.lights->bind();
-	args.transforms->bind();
-	args.environment->bind();
+	args.bindLightData();
 
 	{
 		std::lock_guard<GpuTimer> g(m_timer[T_OPAQUE]);
