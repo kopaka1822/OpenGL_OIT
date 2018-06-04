@@ -14,7 +14,8 @@ public:
 	ShadowMaps(int resolution)
 		:
 	m_resolution(resolution),
-	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::REPEAT))
+	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP, gl::DepthCompareFunc::GREATER_EQUAL)),
+	m_debugSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP))
 	{
 		// unbind the framebuffer
 		gl::Framebuffer::unbind();
@@ -43,7 +44,7 @@ public:
 		else
 		{
 			// make dummy texture
-			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::R8, 1, 1, 6, 1);
+			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, 1, 1, 6, 1);
 		}
 
 		if(dirLights.size())
@@ -72,6 +73,15 @@ public:
 
 		m_shadowSampler.bind(10);
 		m_textures.bind(10);		
+	}
+
+	void bindDebug() const
+	{
+		m_debugSampler.bind(9);
+		m_cubeMaps.bind(9);
+
+		m_debugSampler.bind(10);
+		m_textures.bind(10);
 	}
 
 	void renderDirLight(const DirectionalLight& light, int index, ITransforms& transforms, const IModel& model)
@@ -134,6 +144,7 @@ private:
 	gl::Texture2DArray m_textures;
 
 	gl::Sampler& m_shadowSampler;
+	gl::Sampler& m_debugSampler;
 
 	glm::vec3 m_bboxCenter;
 	std::array<glm::vec3, 8> m_bboxEdges;

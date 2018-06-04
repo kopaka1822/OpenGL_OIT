@@ -8,5 +8,5 @@ out vec4 fragColor;
 
 void main()
 {
-	fragColor = vec4(texture(tex_dirLights, vec3(texCoords, float(lightIndex))).r);
+	fragColor = vec4(pow(texture(tex_dirLights, vec3(texCoords, float(lightIndex))).r, 1.0));
 }

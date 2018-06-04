@@ -113,7 +113,7 @@ Application::Application()
 	m_envmap = std::make_unique<EnvironmentMap>(512);
 	m_lights = std::make_unique<SimpleLights>();
 	m_transforms = std::make_unique<SimpleTransforms>();
-	m_shadows = std::make_unique<ShadowMaps>(1024 * 4);
+	m_shadows = std::make_unique<ShadowMaps>(1024 * 8);
 }
 
 void Application::tick()
@@ -334,6 +334,7 @@ void Application::initScripts()
 		m_transforms->upload();
 
 		m_lights->bind();
+		m_shadows->bind();
 
 		std::cerr << "rendering environment map\n";
 		m_envmap->render(*m_model, *m_envmapShader, *m_camera, *m_transforms, pos);

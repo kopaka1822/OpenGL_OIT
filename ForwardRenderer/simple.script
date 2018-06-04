@@ -3,14 +3,13 @@ camera = projection
 //debugOutput = false
 profileType = latest
 
-addDirectionalLight(0.5, -1, 0.5)
-
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
-//loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//loadObj("Scene/miguel/san-miguel.obj")
-//camSpeed = 0.005
-//refreshEnvironment(16.513611, 1.877083, 6.597618)
+addDirectionalLight(0.1, -1, 0.1)
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
+loadObj("Scene/miguel/san-miguel-low-poly.obj")
+loadObj("Scene/miguel/san-miguel.obj")
+camSpeed = 0.005
+refreshEnvironment(16.513611, 1.877083, 6.597618)
 
 //loadObj("Scene/powerplant/powerplant.obj")
 //camSpeed = 40
@@ -33,10 +32,11 @@ addDirectionalLight(0.5, -1, 0.5)
 //loadObj("Scene/lowpolydeer/deer.obj")
 //camSpeed = 1
 
-loadObj("Scene/medival_village_colored.obj")
-camPos = 45.3821, 11.8453, -69.1258
-camDir = 0.770862, -0.276354, 0.573937
-refreshEnvironment();
+//loadObj("Scene/medival_village_colored.obj")
+//camPos = 45.3821, 11.8453, -69.1258
+//camDir = 0.770862, -0.276354, 0.573937
+//camSpeed = 0.01
+//refreshEnvironment();
 
 //loadObj("Scene/KingsTreasure.obj")
 //camPos = 0.178053, 0.066108, 0.389488

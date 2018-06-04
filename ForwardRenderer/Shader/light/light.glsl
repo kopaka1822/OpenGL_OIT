@@ -13,8 +13,8 @@ layout(binding = 3) uniform sampler2D tex_specular;
 layout(binding = 8) uniform samplerCube tex_environment;
 #endif
 
-layout(binding = 9) uniform samplerCubeArray tex_pointLights;
-layout(binding = 10) uniform sampler2DArray tex_dirLights;
+layout(binding = 9) uniform samplerCubeArrayShadow tex_pointLights;
+layout(binding = 10) uniform sampler2DArrayShadow tex_dirLights;
 
 #include "../uniforms/lights.glsl"
 
@@ -86,15 +86,28 @@ vec3 calcMaterialColor()
 				
 				cosTheta = dot(-direction, normal) * 0.5 + 0.5;
 				
-				vec4 lightSpacePos = lights[i].lightSpaceMatrix * vec4(in_position, 1.0);
+				vec4 lightSpacePos = lights[i].lightSpaceMatrix * vec4(in_position + normal * 0.05, 1.0);
 				lightSpacePos.xyz /= lightSpacePos.w;
 				lightSpacePos.xyz *= vec3(0.5);
 				lightSpacePos.xyz += vec3(0.5);
 				
-				float closestDepth = texture(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex))).r;
-				//float bias = 0.005;
-				float bias = max(0.001 * (1.0 - dot(normal, -direction)), 0.0005);
-				shadow = lightSpacePos.z - bias > closestDepth ? 1.0 : 0.0;
+				//float closestDepth = texture(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex))).r;
+				//float bias = 0.001;
+				//float bias = max(0.002 * (1.0 - dot(normal, -direction)), 0.0005);
+				float bias = 0.0;
+				//shadow = lightSpacePos.z - bias > closestDepth ? 1.0 : 0.0;
+				vec4 gathered = textureGather(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex)), lightSpacePos.z - bias);
+				float bias2 = 0.1;
+				
+				vec2 offset = fract(lightSpacePos.xy * (vec2(textureSize(tex_dirLights, 0)).xy) + vec2(0.5));
+				
+				//return vec3(offset, 0.0);
+				
+				//shadow = mix( mix(gathered.w, gathered.z, 1.0 - offset.x), mix(gathered.x, gathered.y, 1.0 - offset.x), 1.0 - offset.y);
+				shadow = mix( mix(gathered.w, gathered.z, offset.x), mix(gathered.x, gathered.y, offset.x), offset.y) * 0.5;
+				//shadow = dot(gathered, vec4(0.25));
+				//shadow = max(max(gathered.x, gathered.y), max(gathered.z, gathered.w));
+				//shadow = texture(tex_dirLights, vec4(lightSpacePos.xy, float(lights[i].lightIndex), lightSpacePos.z - bias)) + 0.5;
 			}
 			
 			// diffuse
