@@ -7,6 +7,7 @@ public:
 	virtual ~ICamera(){}
 	virtual const glm::mat4& getProjection() const = 0;
 	virtual const glm::vec3& getPosition() const = 0;
+	virtual float getFarPlane() const { return s_farPlane; }
 
 	static void initScripts();
 protected:

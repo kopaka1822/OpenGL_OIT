@@ -11,19 +11,24 @@
 class ShadowMaps : public IShadows
 {
 public:
-	ShadowMaps(int resolution)
+	ShadowMaps(int dirResolution, int pointResolution)
 		:
-	m_resolution(resolution),
+	m_dirResolution(dirResolution),
+	m_pointResolution(pointResolution),
 	m_shadowSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP, gl::DepthCompareFunc::GREATER_EQUAL)),
 	m_debugSampler(SamplerCache::getSampler(gl::MinFilter::LINEAR, gl::MagFilter::LINEAR, gl::MipFilter::NONE, gl::BorderHandling::CLAMP))
 	{
 		// unbind the framebuffer
 		gl::Framebuffer::unbind();
 
-		auto vert = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/ShadowMap.vs");
-		auto frag = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/ShadowMap.fs");
+		auto vertDir = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/ShadowMap.vs");
+		auto fragDir = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/ShadowMap.fs");
 
-		m_shader = std::make_unique<SimpleShader>(HotReloadShader::loadProgram({ vert, frag }));
+		auto vertPoint = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/ShadowMapPoint.vs");
+		auto fragPoint = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/ShadowMapPoint.fs");
+
+		m_dirShader = std::make_unique<SimpleShader>(HotReloadShader::loadProgram({ vertDir, fragDir }));
+		m_pointShader = std::make_unique<SimpleShader>(HotReloadShader::loadProgram({ vertPoint, fragPoint }));
 	}
 
 	void update(
@@ -34,7 +39,7 @@ public:
 		m_numPointLights = int(pointLights.size());
 		if(pointLights.size())
 		{
-			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_resolution, m_resolution, int(pointLights.size()) * 6, 1);
+			m_cubeMaps = gl::TextureCubeMapArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_pointResolution, m_pointResolution, int(pointLights.size()) * 6, 1);
 
 			for(auto i = 0; i < pointLights.size(); ++i)
 			{
@@ -49,7 +54,7 @@ public:
 
 		if(dirLights.size())
 		{
-			m_textures = gl::Texture2DArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_resolution, m_resolution, int(dirLights.size()), 1);
+			m_textures = gl::Texture2DArray(gl::InternalFormat::DEPTH_COMPONENT32F, m_dirResolution, m_dirResolution, int(dirLights.size()), 1);
 
 			for (auto i = 0; i < dirLights.size(); ++i)
 			{
@@ -96,7 +101,7 @@ public:
 		m_framebuffer.validate();
 		
 		transforms.bind();
-		render(model);
+		render(model, m_dirResolution, m_dirShader.get());
 	}
 
 	void renderPointLight(const PointLight& light, int index, ITransforms& transforms, const IModel& model)
@@ -104,6 +109,9 @@ public:
 		auto cam = EnvmapCamera(light.position);
 
 		transforms.setModelTransform(glm::mat4(1.0));
+		m_pointShader->bind();
+		// light position
+		glUniform3f(0, light.position.x, light.position.y, light.position.z);
 
 		for(int face = 0; face < 6; ++face)
 		{
@@ -116,26 +124,27 @@ public:
 			transforms.upload();
 			transforms.bind();
 			
-			render(model);
+			render(model, m_pointResolution, m_pointShader.get());
 		}
 	}
 
-	void render(const IModel& model) const
+	static void render(const IModel& model, int resolution, IShader* shader)
 	{
-		glViewport(0, 0, m_resolution, m_resolution);
+		glViewport(0, 0, resolution, resolution);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		model.prepareDrawing(*m_shader);
+		model.prepareDrawing(*shader);
 		for (const auto& shape : model.getShapes())
 		{
 			if (!shape->isTransparent())
-				shape->draw(m_shader.get());
+				shape->draw(shader);
 		}
 	}
 
 private:
-	const int m_resolution;
+	const int m_dirResolution;
+	const int m_pointResolution;
 	gl::Framebuffer m_framebuffer;
 
 	int m_numPointLights = 0;
@@ -149,5 +158,6 @@ private:
 	glm::vec3 m_bboxCenter;
 	std::array<glm::vec3, 8> m_bboxEdges;
 
-	std::unique_ptr<IShader> m_shader;
+	std::unique_ptr<IShader> m_dirShader;
+	std::unique_ptr<IShader> m_pointShader;
 };

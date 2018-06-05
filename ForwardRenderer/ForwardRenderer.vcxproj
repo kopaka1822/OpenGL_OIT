@@ -207,7 +207,6 @@
     <ClInclude Include="Implementations\ObjShape.h" />
     <ClInclude Include="Implementations\OrthographicCamera.h" />
     <ClInclude Include="Implementations\ProjectionCamera.h" />
-    <ClInclude Include="Implementations\ShadowMap.h" />
     <ClInclude Include="Implementations\ShadowMaps.h" />
     <ClInclude Include="Implementations\SimpleLights.h" />
     <ClInclude Include="Implementations\SimpleMaterial.h" />

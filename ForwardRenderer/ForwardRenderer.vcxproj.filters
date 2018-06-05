@@ -215,9 +215,6 @@
     <ClInclude Include="Graphics\RenderArgs.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Implementations\ShadowMap.h">
-      <Filter>Source Files\Implementations</Filter>
-    </ClInclude>
     <ClInclude Include="Implementations\OrthographicCamera.h">
       <Filter>Source Files\Implementations</Filter>
     </ClInclude>

@@ -78,6 +78,11 @@ vec3 calcMaterialColor()
 				lightColor *= 1.0 / (1.0 + lights[i].attenuation.x * dist + lights[i].attenuation.y * dist * dist);
 				
 				cosTheta = dot(-direction, normal);
+				
+				//vec4 gathered = textureGather(tex_pointLights, vec4(-direction, float(lights[i].lightIndex)), dist);
+				float bias = 0.09;
+				shadow = texture(tex_pointLights, vec4(direction, float(lights[i].lightIndex)), (dist - bias) / u_farPlane);
+				
 			}
 			else
 			{
@@ -91,23 +96,13 @@ vec3 calcMaterialColor()
 				lightSpacePos.xyz *= vec3(0.5);
 				lightSpacePos.xyz += vec3(0.5);
 				
-				//float closestDepth = texture(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex))).r;
-				//float bias = 0.001;
-				//float bias = max(0.002 * (1.0 - dot(normal, -direction)), 0.0005);
 				float bias = 0.0;
-				//shadow = lightSpacePos.z - bias > closestDepth ? 1.0 : 0.0;
+				
 				vec4 gathered = textureGather(tex_dirLights, vec3(lightSpacePos.xy, float(lights[i].lightIndex)), lightSpacePos.z - bias);
 				float bias2 = 0.1;
 				
 				vec2 offset = fract(lightSpacePos.xy * (vec2(textureSize(tex_dirLights, 0)).xy) + vec2(0.5));
-				
-				//return vec3(offset, 0.0);
-				
-				//shadow = mix( mix(gathered.w, gathered.z, 1.0 - offset.x), mix(gathered.x, gathered.y, 1.0 - offset.x), 1.0 - offset.y);
 				shadow = mix( mix(gathered.w, gathered.z, offset.x), mix(gathered.x, gathered.y, offset.x), offset.y) * 0.5;
-				//shadow = dot(gathered, vec4(0.25));
-				//shadow = max(max(gathered.x, gathered.y), max(gathered.z, gathered.w));
-				//shadow = texture(tex_dirLights, vec4(lightSpacePos.xy, float(lights[i].lightIndex), lightSpacePos.z - bias)) + 0.5;
 			}
 			
 			// diffuse

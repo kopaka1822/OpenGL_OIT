@@ -10,6 +10,7 @@ class SimpleTransforms : public ITransforms
 		glm::mat4 viewProjection;
 		glm::vec3 cameraPosition;
 		glm::uint32_t screenWidth = 0;
+		float farPlane = 0.0f;
 	};
 public:
 	SimpleTransforms()
@@ -38,6 +39,9 @@ public:
 
 		m_changed |= m_data.screenWidth != Window::getWidth();
 		m_data.screenWidth = Window::getWidth();
+
+		m_changed |= m_data.farPlane != camera.getFarPlane();
+		m_data.farPlane = camera.getFarPlane();
 	}
 	
 	void setModelTransform(const glm::mat4& model) override

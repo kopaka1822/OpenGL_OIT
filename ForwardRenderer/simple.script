@@ -3,10 +3,18 @@ camera = projection
 //debugOutput = false
 profileType = latest
 
-addDirectionalLight(0.1, -1, 0.1)
+//addDirectionalLight(0.1, -1, -0.1)
+
+addPointLight(  7.732253, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
+addPointLight( 11.171399, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
+addPointLight(  14.626467, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
+addPointLight(  18.156408, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
+addPointLight(  21.720926, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
+addPointLight(  25.144896, 3.191803, 1.922793, 1, 1, 1, 0.032, 0.09)
+
 camPos = 8.64316, 0.967475, 11.4518
 camDir =   0.254568, 0.0399896, -0.96623
-loadObj("Scene/miguel/san-miguel-low-poly.obj")
+//loadObj("Scene/miguel/san-miguel-low-poly.obj")
 loadObj("Scene/miguel/san-miguel.obj")
 camSpeed = 0.005
 refreshEnvironment(16.513611, 1.877083, 6.597618)
