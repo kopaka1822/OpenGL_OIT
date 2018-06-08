@@ -3,29 +3,24 @@ camera = projection
 //debugOutput = false
 profileType = latest
 
-//addDirectionalLight(0.1, -1, -0.1)
-
-addPointLight(  7.732253, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
-addPointLight( 11.171399, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
-addPointLight(  14.626467, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
-addPointLight(  18.156408, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
-addPointLight(  21.720926, 3.191803, -1.711080, 1, 1, 1, 0.032, 0.09)
-addPointLight(  25.144896, 3.191803, 1.922793, 1, 1, 1, 0.032, 0.09)
-
-camPos = 8.64316, 0.967475, 11.4518
-camDir =   0.254568, 0.0399896, -0.96623
+//execute("Scene/miguel/day.lights")
+//execute("Scene/miguel/night.lights")
+//camPos = 8.64316, 0.967475, 11.4518
+//camDir =   0.254568, 0.0399896, -0.96623
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
-loadObj("Scene/miguel/san-miguel.obj")
-camSpeed = 0.005
-refreshEnvironment(16.513611, 1.877083, 6.597618)
+//loadObj("Scene/miguel/san-miguel.obj")
+//camSpeed = 0.005
+//refreshEnvironment(16.513611, 1.877083, 6.597618)
 
-//loadObj("Scene/powerplant/powerplant.obj")
-//camSpeed = 40
-//camPos = 107055, 86794.4, 116970
-//camDir = -0.747132, -0.179029, -0.640115
-//camNear = 10
+loadObj("Scene/powerplant/powerplant.obj")
+clearColor = 0
+camSpeed = 40
+camPos = 107055, 86794.4, 116970
+camDir = -0.747132, -0.179029, -0.640115
+camNear = 10
 //camPos = 353.751, 57420.4, 39287.2
 //camDir = -0.0120038, -0.247403, -0.968841
+refreshEnvironment()
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637

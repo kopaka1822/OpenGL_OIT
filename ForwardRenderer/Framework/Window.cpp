@@ -103,6 +103,7 @@ Window::Window(size_t width, size_t height, const std::string& title)
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 Window::~Window()

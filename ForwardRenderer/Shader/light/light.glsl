@@ -56,7 +56,7 @@ vec3 calcMaterialColor()
 	
 	vec3 color = vec3(0.0);
 	
-	int numLights = min(NUM_LIGHTS.x, 8);
+	int numLights = min(NUM_LIGHTS.x, 64);
 	if(numLights > 0)
 	{
 		for(int i = 0; i < numLights; ++i)

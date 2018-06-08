@@ -49,8 +49,8 @@ public:
 			glViewport(0, 0, m_resolution, m_resolution);
 			// clear buffer
 			glEnable(GL_DEPTH_TEST);
-			//IRenderer::setClearColor();
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			IRenderer::setClearColor();
+			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			envcam.rotateForFace(i);

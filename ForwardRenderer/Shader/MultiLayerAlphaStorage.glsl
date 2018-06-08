@@ -10,6 +10,7 @@
 #define SSBO_GROUP_Y 4
 #endif
 
+#ifdef SSBO_GROUP_X
 // helper function for image atomic lock
 ivec2 getLockIndex()
 {
@@ -18,6 +19,7 @@ ivec2 getLockIndex()
 			int(gl_FragCoord.y) / SSBO_GROUP_Y
 		);
 }
+#endif
 
 #ifdef SSBO_STORAGE
 
@@ -39,7 +41,7 @@ const uint ssbo_stride = SSBO_GROUP_X * SSBO_GROUP_Y;
 uint getIndexFromVec(int c)
 {
 	// alignment elements are packed together to avoid lost update
-	const uint alignment = 1u;
+	const uint alignment = 4u;
 	uint mc = uint(c) % alignment;
 	uint dc = uint(c) / alignment;
 	return ssbo_wg_offset + ssbo_local_id * alignment + dc * ssbo_stride * alignment + mc;
