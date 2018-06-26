@@ -9,6 +9,7 @@
 #include "IMouseReceiver.h"
 #include "IWindowReceiver.h"
 #include <cassert>
+#include "../ScriptEngine/ScriptEngine.h"
 
 static std::vector<IKeyReceiver*> s_keyReceiver;
 static std::vector<IMouseReceiver*> s_mouseReceiver;
@@ -104,6 +105,18 @@ Window::Window(size_t width, size_t height, const std::string& title)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	ScriptEngine::addProperty("windowSize", [this]()
+	{
+		int w, h;
+		glfwGetWindowSize(m_handle, &w, &h);
+		return std::to_string(w) + ", " + std::to_string(h);
+	}, [this](const std::vector<Token>& args)
+	{
+		auto w = std::max(1, args.at(0).getInt());
+		auto h = std::max(1, args.at(1).getInt());
+		glfwSetWindowSize(m_handle, w, h);
+	});
 }
 
 Window::~Window()

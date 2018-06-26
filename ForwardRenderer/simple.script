@@ -4,23 +4,27 @@ camera = projection
 profileType = latest
 
 //execute("Scene/miguel/day.lights")
-//execute("Scene/miguel/night.lights")
-//camPos = 8.64316, 0.967475, 11.4518
-//camDir =   0.254568, 0.0399896, -0.96623
+execute("Scene/miguel/night.lights")
+camPos = 8.64316, 0.967475, 11.4518
+camDir =   0.254568, 0.0399896, -0.96623
 //loadObj("Scene/miguel/san-miguel-low-poly.obj")
-//loadObj("Scene/miguel/san-miguel.obj")
-//camSpeed = 0.005
-//refreshEnvironment(16.513611, 1.877083, 6.597618)
+loadObj("Scene/miguel/san-miguel.obj")
+camSpeed = 0.005
+refreshEnvironment(16.513611, 1.877083, 6.597618)
 
-loadObj("Scene/powerplant/powerplant.obj")
-clearColor = 0
-camSpeed = 40
-camPos = 107055, 86794.4, 116970
-camDir = -0.747132, -0.179029, -0.640115
-camNear = 10
+
+camPos =  16.743963, 1.036636, 7.357118
+camDir = -0.552882, -0.139543, -0.821493
+
+//loadObj("Scene/powerplant/powerplant.obj")
+//clearColor = 0
+//camSpeed = 40
+//camPos = 107055, 86794.4, 116970
+//camDir = -0.747132, -0.179029, -0.640115
+//camNear = 10
 //camPos = 353.751, 57420.4, 39287.2
 //camDir = -0.0120038, -0.247403, -0.968841
-refreshEnvironment()
+//refreshEnvironment()
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637
@@ -33,7 +37,9 @@ refreshEnvironment()
 //camPos = 1708.72, 1501.76, -831.255
 //camDir = -0.83374, -0.352274, 0.425183
 //loadObj("Scene/lowpolydeer/deer.obj")
+//clearColor = 0.5
 //camSpeed = 1
+//refreshEnvironment()
 
 //loadObj("Scene/medival_village_colored.obj")
 //camPos = 45.3821, 11.8453, -69.1258
