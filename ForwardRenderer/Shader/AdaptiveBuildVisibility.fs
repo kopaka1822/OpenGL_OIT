@@ -400,7 +400,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 #else
 
  // Default
-
 void insertAlphaReference(float one_minus_alpha, float depth)
 { 
 	vec2 fragments[MAX_SAMPLES + 1];
@@ -518,11 +517,16 @@ void insertAlpha(float one_minus_alpha, float depth)
 		}
 	}
 	
+//#define OVERESTIMATE
+#define UNDERESTIMATE
+
 	// find smallest rectangle
 	// find smallest rectangle to insert
 	int smallestRectPos = 0;
 	float minRectArea = 1.0 / 0.0;
 	
+#ifdef UNDERESTIMATE
+	// underestimation
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
 #ifdef USE_HEIGHT_METRIC
@@ -538,7 +542,51 @@ void insertAlpha(float one_minus_alpha, float depth)
 			smallestRectPos = i;
 		}
 	}
+#endif
+
+#ifdef OVERESTIMATE	
+	// overestimation
+	float prevHeight = 1.0;
+	bool overestimated = false;
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		// upper rectangle
+		float area = abs((prevHeight - fragments[i].y) * (fragments[i+1].x - fragments[i].x));
+		prevHeight = fragments[i].y;
+		
+		if(area < minRectArea)
+		{
+			minRectArea = area;
+			smallestRectPos = i;
+			overestimated = true;
+		}
+	}
+#endif
 	
+#ifdef UNDERESTIMATE	
+#ifdef OVERESTIMATE	
+#define BOTH_ESTIMATES
+#endif
+#endif
+
+#ifdef BOTH_ESTIMATES
+	// both, over and understimate
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestRectPos <= i)
+		{
+			fragments[i].y = fragments[i + 1].y;
+		}
+		if(smallestRectPos < i || (overestimated && smallestRectPos == i))
+		{
+			fragments[i] = fragments[i + 1];
+		}
+	}
+#else
+
+
+#ifdef UNDERESTIMATE
+	// understimation adjustment
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
 		if(smallestRectPos <= i)
@@ -550,7 +598,20 @@ void insertAlpha(float one_minus_alpha, float depth)
 			fragments[i] = fragments[i + 1];
 		}
 	}
-	
+#endif
+
+#ifdef OVERESTIMATE	
+	// overestimation adjustment
+	for(int i = 0; i < MAX_SAMPLES; ++i)
+	{
+		if(smallestRectPos <= i)
+		{
+			fragments[i] = fragments[i+1];
+		}
+	}
+#endif	
+#endif
+
 	// pack aoit data
 	for(int i = 0; i < MAX_SAMPLES; ++i)
 	{
