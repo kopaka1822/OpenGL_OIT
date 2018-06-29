@@ -29,7 +29,8 @@ vec2 merge(vec2 front, vec2 back)
 	float mergedDepth = front.x;
 	vec4 colorFront = unpackColor(front.y);
 	vec4 colorBack  = unpackColor(back.y);
-	vec3 mergedRgb = colorFront.rgb + colorBack.rgb * colorBack.a;
+	vec3 mergedRgb = colorFront.rgb + colorBack.rgb * colorFront.a;
+	//vec3 mergedRgb = colorFront.rgb + colorBack.rgb * colorBack.a;
 	float mergedAlpha = colorFront.a * colorBack.a;
 	
 	return vec2(mergedDepth, packColor(vec4(mergedRgb, mergedAlpha)));
