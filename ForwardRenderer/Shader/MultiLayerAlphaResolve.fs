@@ -4,6 +4,18 @@
 
 out vec4 out_fragColor;
 
+// shell sort data
+const int shell_gaps[] = {23, 10, 4, 1};
+const int startGap = MAX_SAMPLES > 23 ? 0 : 
+					(MAX_SAMPLES > 10 ? 1 : 
+					(MAX_SAMPLES > 4 ? 2 : 3));
+
+//const int shell_gaps[] = {20, 9, 4, 1};
+//const int startGap = MAX_SAMPLES > 20 ? 0 : 
+//					(MAX_SAMPLES > 9 ? 1 : 
+//					(MAX_SAMPLES > 4 ? 2 : 3));
+const int shell_maxGaps = shell_gaps.length();
+					
 void main()
 {
 	// merge all colors
@@ -17,47 +29,24 @@ void main()
 	// load function
 	for(int i = 0; i < size; ++i)
 		fragments[i] = LOAD(i);
-	
-	// insertion sort (faster)
-	/*for(int i = 1; i < size; ++i)
-	{
-		vec2 cur = fragments[i];
-#pragma optionNV (unroll all)
-		int j = i;
-		for(; j > 0 && fragments[j - 1].x > cur.x; --j)
-		{
-			fragments[j] = fragments[j - 1];
-		}
-		
 
-		for(int k = 0; k < size; ++k)
-			if( k == j)
-				fragments[k] = cur;
-#pragma optionNV (unroll)
-	}*/
-	
-	/*for(int i = 1; i < size; ++i)
-	{
-		vec2 cur = fragments[i];
+	// shell sort
+	/*
 #pragma optionNV (unroll all)
-		int j = i;
-		int m = j;
-		for(; j > 0; --j)
+	for(int gapIdx = startGap; gapIdx < shell_maxGaps; ++gapIdx)
+	{
+		const int gap = shell_gaps[gapIdx];
+		for(int i = gap; i < size; ++i)
 		{
-			if(fragments[j - 1].x > cur.x)
+			for(int j = i; j >= gap && fragments[j - gap].x > fragments[j].x; j -= gap)
 			{
-				fragments[j] = fragments[j - 1];
-				--m;
+				vec2 tmp = fragments[j];
+				fragments[j] = fragments[j - gap];
+				fragments[j - gap] = tmp;
 			}
 		}
-		
-
-		for(int k = 0; k < size; ++k)
-			if( k == m)
-				fragments[k] = cur;
-#pragma optionNV (unroll)
 	}*/
-
+	
 	// modified insertion sort
 	for(int i = 1; i < size; ++i)
 	{
@@ -72,7 +61,24 @@ void main()
 #pragma optionNV (unroll)
 	}
 	
-	
+	// default insertion sort
+/*#pragma optionNV (unroll all)
+	for(int j = 1; j < size; ++j)
+	{
+		vec2 key = fragments[j];
+		int i = j - 1;
+		while(i >= 0 && fragments[i].x > key.x)
+		{
+			fragments[i+1] = fragments[i];
+			--i;
+		}
+		for(int z = 0; z < j; ++z)
+		{
+			if(z == i + 1) fragments[z] = key;
+		}
+		//fragments[i+1] = key;
+	}
+*/
 	
 	// bubble sort
 /*#pragma optionNV (unroll all)
@@ -91,7 +97,6 @@ void main()
 		}
 		if(swapped) break;
 	}
-#pragma optionNV (unroll)
 */	
 	// now blend together
 	for(int i = 0; i < size; ++i)
