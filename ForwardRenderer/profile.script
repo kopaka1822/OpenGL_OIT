@@ -5,6 +5,7 @@
 >waitCount = 2000
 >profiler = resolve
 
+clearRecordedTimes()
 profileType = average
 
 //renderer=adaptive4
@@ -63,36 +64,45 @@ profileType = average
 
 renderer=multilayer_alpha4
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha8
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha12
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha16
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha20
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha24
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha28
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
 renderer=multilayer_alpha32
 waitIterations(>waitCount)
-getProfileTime(>profiler)
+//getProfileTime(>profiler)
+recordTime(>profiler)
 
+printRecordedTimes()
 //
 //renderer=multilayer_alpha8
 //profileType = latest
