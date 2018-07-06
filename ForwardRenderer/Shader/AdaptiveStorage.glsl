@@ -1,11 +1,49 @@
 
+#define SSBO_GROUP_X 2
+#define SSBO_GROUP_Y 4
+
 #ifdef SSBO_STORAGE
 #include "uniforms/transform.glsl"
+
+#ifndef SSBO_GROUP_X
+// use normal indexing
+const int ssbo_offset = int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES);
 int getIndexFromVec(int c)
 {
-	return int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES) + c;
+	return ssbo_offset + c;
 }
-#endif
+#else // use iterleaved ssbo
+
+// screen is aligned by 4 bytes
+const uint alignedWidth = (u_screenWidth + 3u) & ~(3u);
+
+// determine work group
+const uvec2 ssbo_wg = uvec2(gl_FragCoord.xy) / uvec2(SSBO_GROUP_X, SSBO_GROUP_Y);
+const uint ssbo_wg_id = ssbo_wg.y * (alignedWidth / uint(SSBO_GROUP_X)) + ssbo_wg.x;
+const uint ssbo_wg_offset = ssbo_wg_id * MAX_SAMPLES * SSBO_GROUP_X * SSBO_GROUP_Y;
+
+const uvec2 ssbo_local = uvec2(gl_FragCoord.xy) % uvec2(SSBO_GROUP_X, SSBO_GROUP_Y);
+const uint ssbo_local_id = ssbo_local.y * SSBO_GROUP_X + ssbo_local.x;
+const uint ssbo_stride = SSBO_GROUP_X * SSBO_GROUP_Y;
+
+#ifdef USE_DEFAULT
+// fully interleaved
+uint getIndexFromVec(int c)
+{
+	return ssbo_wg_offset + ssbo_local_id + uint(c) * ssbo_stride;
+}
+#else // aligned interleaved
+uint getIndexFromVec(int c)
+{
+	// alignment elements are packed together to avoid lost update
+	const uint alignment = 4u;
+	uint mc = uint(c) % alignment;
+	uint dc = uint(c) / alignment;
+	return ssbo_wg_offset + ssbo_local_id * alignment + dc * ssbo_stride * alignment + mc;
+}
+#endif // use default
+#endif // ssbo goup x
+#endif // ssbo storage
 
 #ifdef STORAGE_READ_ONLY
 
