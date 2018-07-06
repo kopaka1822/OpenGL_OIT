@@ -37,7 +37,7 @@ const uvec2 ssbo_local = uvec2(gl_FragCoord.xy) % uvec2(SSBO_GROUP_X, SSBO_GROUP
 const uint ssbo_local_id = ssbo_local.y * SSBO_GROUP_X + ssbo_local.x;
 const uint ssbo_stride = SSBO_GROUP_X * SSBO_GROUP_Y;
 
-//#ifdef STORE_UNSORTED
+#ifdef STORE_UNSORTED
 uint getIndexFromVec(int c)
 {
 	// alignment elements are packed together to avoid lost update
@@ -46,12 +46,12 @@ uint getIndexFromVec(int c)
 	uint dc = uint(c) / alignment;
 	return ssbo_wg_offset + ssbo_local_id * alignment + dc * ssbo_stride * alignment + mc;
 }
-/*#else
+#else
 uint getIndexFromVec(int c)
 {
 	return ssbo_wg_offset + ssbo_local_id + uint(c) * ssbo_stride;
 }
-#endif*/
+#endif
 #else
 const int ssbo_offset = int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES);
 int getIndexFromVec(int c)

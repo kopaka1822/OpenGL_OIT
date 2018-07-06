@@ -92,6 +92,7 @@ void MultiLayerAlphaRenderer::render(const RenderArgs& args)
 		
 		setClearColor();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		args.model->prepareDrawing(*m_opaqueShader);
 		for (const auto& s : args.model->getShapes())

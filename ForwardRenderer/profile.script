@@ -3,7 +3,7 @@
 //getProfileTimes()
 
 >waitCount = 2000
->profiler = resolve
+>profiler = time
 
 clearRecordedTimes()
 profileType = median
@@ -74,25 +74,25 @@ renderer=multilayer_alpha12
 waitIterations(>waitCount)
 recordTime(>profiler)
 
-renderer=multilayer_alpha16
-waitIterations(>waitCount)
-recordTime(>profiler)
-
-renderer=multilayer_alpha20
-waitIterations(>waitCount)
-recordTime(>profiler)
-
-renderer=multilayer_alpha24
-waitIterations(>waitCount)
-recordTime(>profiler)
-
-renderer=multilayer_alpha28
-waitIterations(>waitCount)
-recordTime(>profiler)
-
-renderer=multilayer_alpha32
-waitIterations(>waitCount)
-recordTime(>profiler)
+//renderer=multilayer_alpha16
+//waitIterations(>waitCount)
+//recordTime(>profiler)
+//
+//renderer=multilayer_alpha20
+//waitIterations(>waitCount)
+//recordTime(>profiler)
+//
+//renderer=multilayer_alpha24
+//waitIterations(>waitCount)
+//recordTime(>profiler)
+//
+//renderer=multilayer_alpha28
+//waitIterations(>waitCount)
+//recordTime(>profiler)
+//
+//renderer=multilayer_alpha32
+//waitIterations(>waitCount)
+//recordTime(>profiler)
 
 printRecordedTimes()
 //

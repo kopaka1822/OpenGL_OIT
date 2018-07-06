@@ -141,20 +141,20 @@ void insertFragment(vec4 color, float depth)
 	vec2 fragments[MAX_SAMPLES_C + 1];
 	
 	// 1 pass insertion sort
-	vec2 fragment = vec2(depth, packColor(color));
+	fragments[0] = vec2(depth, packColor(color));
 	
 	for(int i = 0; i < size; ++i){
 		fragments[i + 1] = LOAD(i);
 	}
 	
-	fragments[0] = fragment;
 	for(int j = 0; j < size; ++j)
 	{
-		//if(fragments[j + 1].x >= fragment.x) break;
-		if(fragments[j + 1].x < fragment.x)
+		//if(fragments[j + 1].x >= fragments[j].x) break;
+		if(fragments[j + 1].x < fragments[j].x)
 		{
+			vec2 temp = fragments[j];
 			fragments[j] = fragments[j+1];
-			fragments[j + 1] = fragment;
+			fragments[j + 1] = temp;
 		}
 	}
 	

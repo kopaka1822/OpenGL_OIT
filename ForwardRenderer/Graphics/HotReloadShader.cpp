@@ -322,9 +322,6 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 
 	const auto& path = dest.m_path;
 
-	// update last modified
-	auto lastModified = getLastModified(path.string());
-
 	WatchedShader::PathMap usedFiles;
 	usedFiles["<preamble>"] = 0;
 
@@ -379,9 +376,13 @@ void HotReloadShader::loadShader(WatchedShader& dest)
 		if (it != s_usedFiles.end())
 		{
 			dest.m_usedFiles.push_back(*it);
+
 		}
 		else
 		{
+			// update last modified
+			auto lastModified = getLastModified(file.first.string());
+
 			const auto ptr = std::make_shared<WatchedPath>(file.first, lastModified);
 			dest.m_usedFiles.push_back(ptr);
 			s_usedFiles.push_back(ptr);
