@@ -41,4 +41,5 @@ public:
 	static void iteration();
 
 	static size_t getIteration();
+	static size_t getWaitIteration();
 };

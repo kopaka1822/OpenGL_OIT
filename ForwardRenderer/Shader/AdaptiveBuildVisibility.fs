@@ -311,7 +311,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 	
 	// sort values depending on depth
 	// modified insertion sort
-	/*for(int i = 1; i <= MAX_SAMPLES; ++i)
+	for(int i = 1; i <= MAX_SAMPLES; ++i)
 	{
 		// i - 1 elements are sorted
 #pragma optionNV (unroll all)	
@@ -322,24 +322,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 			fragments[j - 1] = tmp;
 		}
 #pragma optionNV (unroll)
-	}*/
-	
-	// early out bubble sort
-#pragma optionNV (unroll all)
-	for(int n = MAX_SAMPLES + 1; n > 1; --n)
-	{
-		bool swapped = false;
-		for(int i = 0; i < n - 1; ++i)
-		{
-			if(fragments[i].depth > fragments[i + 1].depth)
-			{
-				Fragment tmp = fragments[i];
-				fragments[i] = fragments[i + 1];
-				fragments[i + 1] = tmp;
-				swapped = true;
-			}
-		}
-		if(!swapped) break;
 	}
 
 	

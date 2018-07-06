@@ -24,7 +24,7 @@ enum class Technique
 	ArrayLinkedList,
 	UnsortedHeights
 };
-static Technique s_technique = Technique::UnsortedHeights;
+static Technique s_technique = Technique::Default;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
