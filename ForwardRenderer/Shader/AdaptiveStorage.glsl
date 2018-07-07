@@ -17,10 +17,13 @@ int getIndexFromVec(int c)
 // screen is aligned by 4 bytes
 const uint alignedWidth = (u_screenWidth + 3u) & ~(3u);
 
+// NOTE: resize ssbo in adaptive.cpp by the offset multiplier as well
+const uint offset_multiplier = 1;
+
 // determine work group
 const uvec2 ssbo_wg = uvec2(gl_FragCoord.xy) / uvec2(SSBO_GROUP_X, SSBO_GROUP_Y);
 const uint ssbo_wg_id = ssbo_wg.y * (alignedWidth / uint(SSBO_GROUP_X)) + ssbo_wg.x;
-const uint ssbo_wg_offset = ssbo_wg_id * MAX_SAMPLES * SSBO_GROUP_X * SSBO_GROUP_Y;
+const uint ssbo_wg_offset = ssbo_wg_id * MAX_SAMPLES * offset_multiplier * SSBO_GROUP_X * SSBO_GROUP_Y;
 
 const uvec2 ssbo_local = uvec2(gl_FragCoord.xy) % uvec2(SSBO_GROUP_X, SSBO_GROUP_Y);
 const uint ssbo_local_id = ssbo_local.y * SSBO_GROUP_X + ssbo_local.x;
@@ -35,6 +38,7 @@ uint getIndexFromVec(int c)
 #else // aligned interleaved
 uint getIndexFromVec(int c)
 {
+	c *= int(offset_multiplier);
 	// alignment elements are packed together to avoid lost update
 	const uint alignment = 4u;
 	uint mc = uint(c) % alignment;

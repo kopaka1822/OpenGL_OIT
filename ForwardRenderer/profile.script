@@ -17,9 +17,9 @@ renderer=adaptive8
 waitIterations(>waitCount)
 recordTime(>profiler)
 
-renderer=adaptive10
-waitIterations(>waitCount)
-recordTime(>profiler)
+//renderer=adaptive10
+//waitIterations(>waitCount)
+//recordTime(>profiler)
 
 renderer=adaptive12
 waitIterations(>waitCount)

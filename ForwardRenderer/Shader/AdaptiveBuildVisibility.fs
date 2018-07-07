@@ -285,8 +285,6 @@ void insertAlpha(float one_minus_alpha, float depth)
 			STORE(val.oldPosition % MAX_SAMPLES, packLink(Link( val.depth, val.alpha, val.next )));
 		}
 	}
-	
-#pragma optionNV (unroll)
 }
 
 #else // NO ARRAY LINKED LIST

@@ -136,7 +136,6 @@ void main()
 			fragments[j] = fragments[j - 1];
 			fragments[j - 1] = tmp;
 		}
-#pragma optionNV (unroll)
 	}
 	
 	float prevAlpha = 1.0;
