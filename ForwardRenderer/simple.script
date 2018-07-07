@@ -15,15 +15,15 @@ profileType = latest
 //camPos =  16.743963, 1.036636, 7.357118
 //camDir = -0.552882, -0.139543, -0.821493
 
-loadObj("Scene/powerplant/powerplant.obj")
-clearColor = 0
-camSpeed = 40
-camPos = 107055, 86794.4, 116970
-camDir = -0.747132, -0.179029, -0.640115
-camNear = 10
-//camPos = 353.751, 57420.4, 39287.2
-//camDir = -0.0120038, -0.247403, -0.968841
-refreshEnvironment()
+//loadObj("Scene/powerplant/powerplant.obj")
+//clearColor = 0
+//camSpeed = 40
+//camPos = 107055, 86794.4, 116970
+//camDir = -0.747132, -0.179029, -0.640115
+//camNear = 10
+////camPos = 353.751, 57420.4, 39287.2
+////camDir = -0.0120038, -0.247403, -0.968841
+//refreshEnvironment()
 
 //camPos = 761.506, 656.085, -143.716
 //camDir =  -0.93403, -0.29552, 0.200637
@@ -40,11 +40,11 @@ refreshEnvironment()
 //camSpeed = 1
 //refreshEnvironment()
 
-//loadObj("Scene/medival_village_colored.obj")
-//camPos = 45.3821, 11.8453, -69.1258
-//camDir = 0.770862, -0.276354, 0.573937
-//camSpeed = 0.01
-//refreshEnvironment();
+loadObj("Scene/medival_village_colored.obj")
+camPos = 45.3821, 11.8453, -69.1258
+camDir = 0.770862, -0.276354, 0.573937
+camSpeed = 0.01
+refreshEnvironment();
 
 //loadObj("Scene/KingsTreasure.obj")
 //camPos = 0.178053, 0.066108, 0.389488

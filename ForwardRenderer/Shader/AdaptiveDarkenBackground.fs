@@ -60,17 +60,16 @@ void main()
 		
 	// sort values depending on depth
 	// modified insertion sort
+#pragma optionNV (unroll all)	
 	for(int i = 1; i < MAX_SAMPLES; ++i)
 	{
 		// i - 1 elements are sorted
-#pragma optionNV (unroll all)	
 		for(int j = i; j > 0 && fragments[j - 1].x > fragments[j].x; --j)
 		{
 			vec2 tmp = fragments[j];
 			fragments[j] = fragments[j - 1];
 			fragments[j - 1] = tmp;
 		}
-#pragma optionNV (unroll)
 	}
 	
 	float prevAlpha = 1.0;

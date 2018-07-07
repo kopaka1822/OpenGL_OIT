@@ -5,20 +5,20 @@
 #ifdef SSBO_STORAGE
 #include "uniforms/transform.glsl"
 
+// NOTE: resize ssbo in adaptive.cpp by the offset multiplier as well
+const uint offset_multiplier = 1;
+
 #ifndef SSBO_GROUP_X
 // use normal indexing
-const int ssbo_offset = int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) + int(gl_FragCoord.x) * int(MAX_SAMPLES);
+const int ssbo_offset = int(gl_FragCoord.y) * int(u_screenWidth) * int(MAX_SAMPLES) * int(offset_multiplier) + int(gl_FragCoord.x) * int(MAX_SAMPLES) * int(offset_multiplier);
 int getIndexFromVec(int c)
 {
-	return ssbo_offset + c;
+	return ssbo_offset + c * int(offset_multiplier);
 }
 #else // use iterleaved ssbo
 
 // screen is aligned by 4 bytes
 const uint alignedWidth = (u_screenWidth + 3u) & ~(3u);
-
-// NOTE: resize ssbo in adaptive.cpp by the offset multiplier as well
-const uint offset_multiplier = 1;
 
 // determine work group
 const uvec2 ssbo_wg = uvec2(gl_FragCoord.xy) / uvec2(SSBO_GROUP_X, SSBO_GROUP_Y);
