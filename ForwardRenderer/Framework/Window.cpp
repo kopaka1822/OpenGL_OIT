@@ -87,6 +87,10 @@ Window::Window(size_t width, size_t height, const std::string& title)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_DEPTH_BITS, 32);
 	glfwWindowHint(GLFW_STENCIL_BITS, 8);
+#ifndef _NO_GL_DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+	 
 	m_handle = glfwCreateWindow(static_cast<int>(width), static_cast<int>(height), title.c_str(), nullptr, nullptr);
 	s_windowWidth = int(width);
 	s_windowHeight = int(height);
@@ -100,7 +104,13 @@ Window::Window(size_t width, size_t height, const std::string& title)
 	glfwSetScrollCallback(m_handle, mouseScrollFunc);
 	glfwSetWindowSizeCallback(m_handle, windowSizeFunc);
 
+	if (!gladLoadGL())
+		throw std::exception("Cannot initialize Glad/load gl-function pointers!\n");
+	std::cerr << "INF: Loaded GL-context is version " << GLVersion.major << '.' << GLVersion.minor << '\n';
+
+#ifndef _NO_GL_DEBUG
 	DebugContext::Init();
+#endif
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);

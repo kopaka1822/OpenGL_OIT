@@ -75,8 +75,8 @@ void insertAlpha(float one_minus_alpha, float depth)
 	else
 	{
 		// avoid dividing by zero
-		//g_visExponent = log(productAlpha / max(lastAlpha, 0.00000001)) / max(maxDepth - minDepth, 0.00000001);
-		g_visExponent = log(productAlpha) / max(maxDepth - minDepth, 0.00000001);
+		const float e = 0.00000001;
+		g_visExponent = log(max(productAlpha / max(lastAlpha, e), e)) / max(maxDepth - minDepth, e);
 		g_visOffset = -minDepth;
 
 		float minHeight = FLOAT_MAX;
