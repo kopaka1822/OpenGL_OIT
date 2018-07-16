@@ -27,6 +27,7 @@
 #include "../Renderer/EnvironmentRenderer.h"
 #include "../Implementations/ShadowMaps.h"
 #include "../Renderer/ShadowDebugRenderer.h"
+#include <sstream>
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -162,9 +163,12 @@ void Application::tick()
 
 	// adjust window title
 	auto profile = Profiler::getActive();
-	m_window.setTitle(s_rendererName + " " + std::get<0>(profile) + ": " + std::to_string(std::get<1>(profile))
-		+ " iterations: " + std::to_string(ScriptEngine::getIteration())
-	);
+	std::ostringstream ss;
+	ss << s_rendererName << " " << std::get<0>(profile) << ": " << std::to_string(std::get<1>(profile)) <<
+		" iterations: " << ScriptEngine::getIteration();
+	if (ScriptEngine::getWaitIteration())
+		ss << " wait: " << ScriptEngine::getWaitIteration();
+	m_window.setTitle(ss.str());
 }
 
 bool Application::isRunning() const

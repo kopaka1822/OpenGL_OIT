@@ -7,6 +7,8 @@
 static std::unordered_map<std::string, Profiler::Profile> m_profiles;
 static std::string s_activeProfile = "time";
 static std::string s_activeType = "latest";
+// helper to create a list
+static std::string s_profileList;
 
 void Profiler::init()
 {
@@ -55,9 +57,33 @@ void Profiler::init()
 		if (args.empty())
 			throw std::runtime_error("profile type missing. Use min, max, average or latest");
 		auto val = args[0].getString();
-		if (val == "min" || val == "max" || val == "latest" || val == "average")
+		if (val == "min" || val == "max" || val == "latest" || val == "average" || val == "median")
 			s_activeType = val;
-		else std::cerr << "type must be min, max, average or latest\n";
+		else std::cerr << "type must be min, max, average, median or latest\n";
+	});
+
+	ScriptEngine::addFunction("recordTime", [](const std::vector<Token>& args)
+	{
+		double val = 0.0;
+		if (args.empty())
+		{
+			val = get(s_activeProfile);
+		}
+		else
+		{
+			val = get(args.at(0).getString());
+		}
+		s_profileList += std::to_string(val) + "\n";
+		return std::to_string(val);
+	});
+	ScriptEngine::addFunction("clearRecordedTimes", [](const std::vector<Token>& args)
+	{
+		s_profileList.clear();
+		return "";
+	});
+	ScriptEngine::addFunction("printRecordedTimes", [](const std::vector<Token>& args)
+	{
+		return s_profileList;
 	});
 }
 

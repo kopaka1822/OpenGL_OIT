@@ -11,6 +11,7 @@ public:
 		double max = 0.0;
 		double latest = 0.0;
 		double average = 0.0;
+		double median = 0.0;
 
 		Profile& operator+=(const Profile& rhs)
 		{
@@ -18,6 +19,7 @@ public:
 			max += rhs.max;
 			latest += rhs.latest;
 			average += rhs.average;
+			median += rhs.median;
 			return *this;
 		}
 		Profile operator+(const Profile& rhs) const
@@ -33,6 +35,8 @@ public:
 				return max;
 			if (name == "average")
 				return average;
+			if (name == "median")
+				return median;
 			return latest;
 		}
 	};

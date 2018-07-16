@@ -24,7 +24,7 @@ enum class Technique
 	ArrayLinkedList,
 	UnsortedHeights
 };
-static Technique s_technique = Technique::UnsortedHeights;
+static Technique s_technique = Technique::Default;
 
 AdaptiveTransparencyRenderer::AdaptiveTransparencyRenderer(size_t samplesPerPixel)
 	:
@@ -60,6 +60,9 @@ void AdaptiveTransparencyRenderer::init()
 			shaderParams += "\n#define USE_ARRAY_LINKED_LIST";
 		if (s_technique == Technique::UnsortedHeights)
 			shaderParams += "\n#define USE_UNSORTED_HEIGHTS";
+		if (s_technique == Technique::Default)
+			shaderParams += "\n#define USE_DEFAULT";
+
 		if (s_unsortedSortInResolve)
 			shaderParams += "\n#define UNSORTED_SORT_RESOLVE";
 		if (s_defaultUseHeights)

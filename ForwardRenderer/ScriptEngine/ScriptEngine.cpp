@@ -390,6 +390,11 @@ size_t ScriptEngine::getIteration()
 	return s_curIteration;
 }
 
+size_t ScriptEngine::getWaitIteration()
+{
+	return s_waitIterations;
+}
+
 static void openScriptFile(const std::string& filename)
 {
 	std::ifstream file;

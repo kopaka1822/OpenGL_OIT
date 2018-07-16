@@ -43,7 +43,7 @@ public:
 	Profiler::Profile get() const
 	{
 		return {
-			min(), max(), latest(), average()
+			min(), max(), latest(), average(), median()
 		};
 	}
 	double average() const
@@ -62,6 +62,13 @@ public:
 	{
 		return m_minTime / TIME_DIVIDE;
 	}
+	double median() const
+	{
+		//return m_weighted;
+		if (m_lastValues.empty()) return 0.0;
+		return m_lastValues[m_lastValues.size() / 2] / TIME_DIVIDE;
+		//return std::accumulate(m_lastValues.begin(), m_lastValues.end(), size_t(0)) / m_lastValues.size() / TIME_DIVIDE;
+	}
 	void receive()
 	{
 		while(!m_runningQueries.empty())
@@ -76,6 +83,11 @@ public:
 			++m_sumCount;
 			m_minTime = (std::min)(m_latestTime, m_minTime);
 			m_maxTime = (std::max)(m_latestTime, m_maxTime);
+			updateMedian(size_t(res));
+			if (m_weighted == 0.0)
+				m_weighted = res / TIME_DIVIDE;
+			else
+				m_weighted = m_weighted * 0.99 + res / TIME_DIVIDE * 0.01;
 
 			auto q = std::move(m_runningQueries.front());
 			m_runningQueries.pop();
@@ -90,7 +102,16 @@ private:
 		static GpuTimer* ptr = nullptr;
 		return ptr;
 	}
-
+	void updateMedian(size_t time)
+	{
+		// sortedinsert
+		m_lastValues.insert(
+			std::upper_bound(m_lastValues.begin(), m_lastValues.end(), time),
+			time
+		);
+		if (m_lastValues.size() > MAX_LAST_VALUES)
+			m_lastValues.pop_back();
+	}
 private:
 	std::queue<gl::TimeElapsedQuery> m_runningQueries;
 	std::vector<gl::TimeElapsedQuery> m_freeQueries;
@@ -100,5 +121,10 @@ private:
 	size_t m_latestTime = 0;
 	size_t m_minTime = size_t(-1);
 	size_t m_maxTime = 0;
+	double m_weighted = 0.0;
+
+	// this is used for the median
+	std::vector<size_t> m_lastValues;
+	inline static size_t MAX_LAST_VALUES = 4096;
 	static constexpr double TIME_DIVIDE = 1000000.0;
 };
