@@ -619,13 +619,8 @@ void main()
 			// acquire lock
 			if(imageAtomicCompSwap(tex_atomics, ivec2(gl_FragCoord.xy), 0u, 1u) == 0)
 			{
-				
 				insertAlpha(1.0 - dissolve, dist); 
-#ifdef SSBO_STORAGE
-				memoryBarrierBuffer();
-#else				
-				memoryBarrierImage();
-#endif
+				memoryBarrier();
 				
 				imageAtomicExchange(tex_atomics, ivec2(gl_FragCoord.xy), 0u);
 				keepWaiting = false;
