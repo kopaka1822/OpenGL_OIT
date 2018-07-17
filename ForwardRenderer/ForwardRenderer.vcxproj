@@ -293,6 +293,7 @@
     <ClInclude Include="Renderer\EnvironmentRenderer.h" />
     <ClInclude Include="Renderer\LinkedVisibility.h" />
     <ClInclude Include="Renderer\MultiLayerAlphaRenderer.h" />
+    <ClInclude Include="Renderer\DebugRenderer.h" />
     <ClInclude Include="Renderer\ShadowDebugRenderer.h" />
     <ClInclude Include="Renderer\SimpleForwardRenderer.h" />
     <ClInclude Include="Renderer\WeightedTransparency.h" />
@@ -317,6 +318,7 @@
     <ClCompile Include="Renderer\EnvironmentRenderer.cpp" />
     <ClCompile Include="Renderer\LinkedVisibility.cpp" />
     <ClCompile Include="Renderer\MultiLayerAlphaRenderer.cpp" />
+    <ClCompile Include="Renderer\DebugRenderer.cpp" />
     <ClCompile Include="Renderer\ShadowDebugRenderer.cpp" />
     <ClCompile Include="Renderer\SimpleForwardRenderer.cpp" />
     <ClCompile Include="Renderer\WeightedTransparency.cpp" />

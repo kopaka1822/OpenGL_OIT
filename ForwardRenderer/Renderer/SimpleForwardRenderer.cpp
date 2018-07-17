@@ -8,8 +8,6 @@
 #include "../Dependencies/gl/constants.h"
 
 SimpleForwardRenderer::SimpleForwardRenderer()
-	:
-m_envmap(512)
 {
 	auto vertex = HotReloadShader::loadShader(gl::Shader::Type::VERTEX, "Shader/DefaultShader.vs");
 	auto geometry = HotReloadShader::loadShader(gl::Shader::Type::GEOMETRY, "Shader/DefaultShader.gs");
