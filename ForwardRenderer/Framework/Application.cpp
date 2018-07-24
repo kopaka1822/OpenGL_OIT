@@ -28,6 +28,7 @@
 #include "../Implementations/ShadowMaps.h"
 #include "../Renderer/ShadowDebugRenderer.h"
 #include <sstream>
+#include "../Renderer/DebugRenderer.h"
 
 std::vector<ITickReceiver*> s_tickReceiver;
 
@@ -54,6 +55,8 @@ static std::unique_ptr<IRenderer> makeRenderer(const std::vector<Token>& args)
 		return std::make_unique<ShadowDebugRenderer>();
 	if (name == "dynamic_fragment")
 		return std::make_unique<DynamicFragmentBufferRenderer>();
+	if (name == "debug_renderer")
+		return std::make_unique<DebugRenderer>();
 	{
 		const std::regex rgx("adaptive[1-9][0-9]*");
 		if (std::regex_match(name, rgx))
@@ -361,6 +364,7 @@ void Application::initScripts()
 	ScriptEngine::addKeyword("projection");
 	ScriptEngine::addKeyword("environment");
 	ScriptEngine::addKeyword("shadow_map");
+	ScriptEngine::addKeyword("debug_renderer");
 
 	ICamera::initScripts();
 	IRenderer::initScripts();

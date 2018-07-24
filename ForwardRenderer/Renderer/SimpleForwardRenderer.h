@@ -22,7 +22,5 @@ private:
 		SIZE
 	};
 	std::array<GpuTimer, SIZE> m_timer;
-
-	EnvironmentMap m_envmap;
 };
 
