@@ -512,7 +512,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 #ifdef USE_HEIGHT_METRIC
 		float area = fragments[i].y - fragments[i+1].y;
 		area *= area;
-		area /= max(fragments[i].y, 0.0000001);
+		area /= max(fragments[i].y, 0.01);
 #else // deafult metric (rectangle area)
 		float area = getRectArea(	fragments[i],
 									fragments[i+1] );
