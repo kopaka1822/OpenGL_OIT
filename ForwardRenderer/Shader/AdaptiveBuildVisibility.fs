@@ -86,7 +86,7 @@ void insertAlpha(float one_minus_alpha, float depth)
 		// find the node with the smallest height difference (this node will be removed)
 		for(int i = 0; i <= MAX_SAMPLES; ++i)
 		{
-			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i]));
+			float height = vis(DEPTH(fragments[i])) * (1.0f - ALPHA(fragments[i])) * (1.0f - ALPHA(fragments[i]));
 			if (height < minHeight && minIndex != i)
 			{
 				minHeight = height;
