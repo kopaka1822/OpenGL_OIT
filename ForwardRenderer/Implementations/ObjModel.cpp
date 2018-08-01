@@ -40,6 +40,15 @@ ObjModel::ObjModel(const std::string& filename)
 	printf("# of materials = %d\n", (int)materials.size());
 	printf("# of shapes    = %d\n", (int)shapes.size());
 
+	// count triangels
+	size_t numIndices = 0;
+	for(const auto& s : shapes)
+	{
+		numIndices += s.mesh.indices.size();
+	}
+	printf("# of indices   = %d\n", int(numIndices));
+	printf("# of triangles = %d\n", int(numIndices / 3));
+
 	// determine bbox on seperate thread
 	auto bbox = std::async(std::launch::async, [this](const std::vector<tinyobj::real_t>& vertices)
 	{
