@@ -8,7 +8,9 @@ enum class Type
 {
 	Normal,
 	Texcoord,
-	Mesh
+	Mesh,
+	SolidMesh,
+	Depth
 };
 static Type s_type = Type::Normal;
 
@@ -19,6 +21,7 @@ DebugRenderer::DebugRenderer()
 	auto normal = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/NormalColor.fs", 430, "#define DEBUG_NORMAL");
 	auto texcoord = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/NormalColor.fs");
 	auto mesh = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/NormalColor.fs", 430, "#define DEBUG_MESH");
+	auto depth = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/NormalColor.fs", 430, "#define DEBUG_DEPTH");
 
 	m_normalShader = std::make_unique<SimpleShader>(
 		HotReloadShader::loadProgram({ vertex, geometry, normal }));
@@ -34,6 +37,11 @@ DebugRenderer::DebugRenderer()
 		HotReloadShader::loadProgram({ vertex, geometry, mesh }));
 	if (s_type == Type::Mesh)
 		m_activeShader = m_meshShader.get();
+
+	m_depthShader = std::make_unique<SimpleShader>(
+		HotReloadShader::loadProgram({ vertex, geometry, depth }));
+	if (s_type == Type::Depth)
+		m_activeShader = m_depthShader.get();
 }
 
 DebugRenderer::~DebugRenderer()
@@ -46,29 +54,55 @@ void DebugRenderer::render(const RenderArgs& args)
 	if(!args.camera || !args.transforms || !args.model)
 		return;
 
-	glEnable(GL_DEPTH_TEST);
-	if(s_type == Type::Mesh)
+	// clear color
+	if (s_type == Type::Mesh || s_type == Type::SolidMesh || s_type == Type::Depth)
 	{
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 	else
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	}
+
+	// clear
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	
+	// depth pre pass?
+	if(s_type == Type::SolidMesh)
+	{
+		// fill z buffer
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		args.model->prepareDrawing(*m_activeShader);
+		for (const auto& s : args.model->getShapes())
+			s->draw(m_activeShader);
+
+		glDepthFunc(GL_LEQUAL);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	}
+
+	if (s_type == Type::Mesh || s_type == Type::SolidMesh)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	args.model->prepareDrawing(*m_activeShader);
 	for (const auto& s : args.model->getShapes())
 		s->draw(m_activeShader);
 
-	if (s_type == Type::Mesh)
+	if (s_type == Type::Mesh || s_type == Type::SolidMesh)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDepthFunc(GL_LESS);
 	}
 }
 
 void DebugRenderer::init()
 {
+	ScriptEngine::addKeyword("normal");
+	ScriptEngine::addKeyword("texcoord");
+	ScriptEngine::addKeyword("mesh");
+	ScriptEngine::addKeyword("solid_mesh");
+	ScriptEngine::addKeyword("depth");
+
 	ScriptEngine::addProperty("debugType", [this]()
 	{
 		switch (s_type)
@@ -76,6 +110,8 @@ void DebugRenderer::init()
 		case Type::Normal: return "normal";
 		case Type::Texcoord: return "texcoord";
 		case Type::Mesh: return "mesh";
+		case Type::SolidMesh: return "solid_mesh";
+		case Type::Depth: return "depth";
 		}
 		return "";
 	}, [this](const std::vector<Token>& args) 
@@ -95,9 +131,19 @@ void DebugRenderer::init()
 			s_type = Type::Mesh;
 			m_activeShader = m_meshShader.get();
 		}
+		else if (args.at(0).getString() == "solid_mesh")
+		{
+			s_type = Type::SolidMesh;
+			m_activeShader = m_meshShader.get();
+		}
+		else if (args.at(0).getString() == "depth")
+		{
+			s_type = Type::Depth;
+			m_activeShader = m_depthShader.get();
+		}
 		else
 		{
-			throw std::runtime_error("uknown debug type. try normal, texcoord or mesh");
+			throw std::runtime_error("uknown debug type. try normal, texcoord, mesh, solid_mesh, depth");
 		}
 	});
 }
