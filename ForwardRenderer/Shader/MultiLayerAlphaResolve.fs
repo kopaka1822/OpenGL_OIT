@@ -61,8 +61,8 @@ void main()
 #pragma optionNV (unroll)
 	}
 	
-	// default insertion sort
-/*#pragma optionNV (unroll all)
+	/*// default insertion sort
+#pragma optionNV (unroll all)
 	for(int j = 1; j < size; ++j)
 	{
 		vec2 key = fragments[j];
@@ -76,9 +76,120 @@ void main()
 		{
 			if(z == i + 1) fragments[z] = key;
 		}
-		//fragments[i+1] = key;
-	}
-*/
+		fragments[i+1] = key;
+		switch(i+1){
+			case 0: fragments[0] = key; break;
+			case 1: fragments[1] = key; break;
+			case 2: fragments[2] = key; break;
+			case 3: fragments[3] = key; break;
+			case 4: fragments[4] = key; break;
+			case 5: fragments[5] = key; break;
+			case 6: fragments[6] = key; break;
+			case 7: fragments[7] = key; break;
+			case 8: fragments[8] = key; break;
+			case 9: fragments[9] = key; break;
+			case 10: fragments[10] = key; break;
+			case 11: fragments[11] = key; break;
+			case 12: fragments[12] = key; break;
+			case 13: fragments[13] = key; break;
+			case 14: fragments[14] = key; break;
+			case 15: fragments[15] = key; break;
+			case 16: fragments[16] = key; break;
+			case 17: fragments[17] = key; break;
+			case 18: fragments[18] = key; break;
+			case 19: fragments[19] = key; break;
+			case 20: fragments[20] = key; break;
+			case 21: fragments[21] = key; break;
+			case 22: fragments[22] = key; break;
+			case 23: fragments[23] = key; break;
+			case 24: fragments[24] = key; break;
+			case 25: fragments[25] = key; break;
+			case 26: fragments[26] = key; break;
+			case 27: fragments[27] = key; break;
+			case 28: fragments[28] = key; break;
+			case 29: fragments[29] = key; break;
+			case 30: fragments[30] = key; break;
+			case 31: fragments[31] = key; break;
+		}
+		if(i < 15){
+			if(i < 7){
+				if(i < 3) {
+					if(i < 1){
+						if(i==-1) 	fragments[0] = key;
+						else		fragments[1] = key;
+					} else {
+						if(i==1)	fragments[2] = key;
+						else 		fragments[3] = key;
+					}
+				} else {
+					if(i < 5){
+						if(i==3) 	fragments[4] = key;
+						else		fragments[5] = key;
+					} else {
+						if(i==5)	fragments[6] = key;
+						else 		fragments[7] = key;
+					}
+				}
+			} else {
+				if(i < 11) {
+					if(i < 9){
+						if(i==7) 	fragments[8] = key;
+						else		fragments[9] = key;
+					} else {
+						if(i==9)	fragments[10] = key;
+						else 		fragments[11] = key;
+					}
+				} else {
+					if(i < 13){
+						if(i==11) 	fragments[12] = key;
+						else		fragments[13] = key;
+					} else {
+						if(i==13)	fragments[14] = key;
+						else 		fragments[15] = key;
+					}
+				}
+			}
+		} else {
+			if(i < 23){
+				if(i < 19) {
+					if(i < 17){
+						if(i==15) 	fragments[16] = key;
+						else		fragments[17] = key;
+					} else {
+						if(i==17)	fragments[18] = key;
+						else 		fragments[19] = key;
+					}
+				} else {
+					if(i < 21){
+						if(i==19) 	fragments[20] = key;
+						else		fragments[21] = key;
+					} else {
+						if(i==21)	fragments[22] = key;
+						else 		fragments[23] = key;
+					}
+				}
+			} else {
+				if(i < 27) {
+					if(i < 25){
+						if(i==23) 	fragments[24] = key;
+						else		fragments[25] = key;
+					} else {
+						if(i==25)	fragments[26] = key;
+						else 		fragments[27] = key;
+					}
+				} else {
+					if(i < 29){
+						if(i==27) 	fragments[28] = key;
+						else		fragments[29] = key;
+					} else {
+						if(i==29)	fragments[30] = key;
+						else 		fragments[31] = key;
+					}
+				}
+			}
+		}
+	}*/
+
 	
 	// bubble sort
 /*#pragma optionNV (unroll all)

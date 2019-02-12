@@ -8,7 +8,6 @@
 clearRecordedTimes()
 profileType = median
 
-
 //renderer=adaptive4
 //waitIterations(>waitCount)
 //recordTime(>profiler)
@@ -24,39 +23,39 @@ recordTime(>profiler)
 renderer=adaptive12
 waitIterations(>waitCount)
 recordTime(>profiler)
-
-renderer=adaptive16
-waitIterations(>waitCount)
-recordTime(>profiler)
+//
+//renderer=adaptive16
+//waitIterations(>waitCount)
+//recordTime(>profiler)
 
 //renderer=adaptive20
 //waitIterations(>waitCount)
 //recordTime(>profiler)
 //
-renderer=adaptive24
-waitIterations(>waitCount)
-recordTime(>profiler)
+//renderer=adaptive24
+//waitIterations(>waitCount)
+//recordTime(>profiler)
 //
 //renderer=adaptive28
 //waitIterations(>waitCount)
 //recordTime(>profiler)
 //
-renderer=adaptive32
-waitIterations(>waitCount)
-recordTime(>profiler)
+//renderer=adaptive32
+//waitIterations(>waitCount)
+//recordTime(>profiler)
 
 //renderer=multilayer_alpha4
 //waitIterations(>waitCount)
 //recordTime(>profiler)
-//
+////
 //renderer=multilayer_alpha8
 //waitIterations(>waitCount)
 //recordTime(>profiler)
-//
+////
 //renderer=multilayer_alpha12
 //waitIterations(>waitCount)
 //recordTime(>profiler)
-//
+////
 //renderer=multilayer_alpha16
 //waitIterations(>waitCount)
 //recordTime(>profiler)

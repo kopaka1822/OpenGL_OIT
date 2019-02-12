@@ -33,12 +33,14 @@ void MultiLayerAlphaRenderer::init()
 		std::string additionalShaderParams;
 		if (!s_useTextureBuffer)
 			additionalShaderParams = "\n#define SSBO_STORAGE";
+		additionalShaderParams += "\nlayout(location = 11) uniform float REPEAT = 16;";
 
 		auto build = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaBuild.fs", 450,
 			"#define MAX_SAMPLES_C " + std::to_string(m_samplesPerPixel)
 			+ "\nlayout(location = 10) uniform int MAX_SAMPLES = " + std::to_string(m_samplesPerPixel) + ";"
 			+ additionalShaderParams
 		);
+
 		auto resolve = HotReloadShader::loadShader(gl::Shader::Type::FRAGMENT, "Shader/MultiLayerAlphaResolve.fs", 450,
 			"#define MAX_SAMPLES_C " + std::to_string(m_samplesPerPixel)
 			+ "\nlayout(location = 10) uniform int MAX_SAMPLES = " + std::to_string(m_samplesPerPixel) + ";"
@@ -50,6 +52,7 @@ void MultiLayerAlphaRenderer::init()
 
 		m_transparentShader->bind();
 		glUniform1i(10, GLint(m_samplesPerPixel));
+		//glUniform1f(11, 128);
 
 		m_resolveShader = std::make_unique<FullscreenQuadShader>(resolve);
 

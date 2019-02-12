@@ -1,4 +1,4 @@
-renderer = forward
+renderer = dynamic_fragment
 camera = projection
 //debugOutput = false
 profileType = latest

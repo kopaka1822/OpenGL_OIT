@@ -158,8 +158,9 @@ void insertFragment(vec4 color, float depth)
 		}
 	}
 	
-	fragments[size - 1] = merge(fragments[size - 1], fragments[size]);
 	
+	fragments[size - 1] = merge(fragments[size - 1], fragments[size]);
+
 	// write back function
 	for(int i = 0; i < size; ++i)
 		STORE(i, fragments[i]);
